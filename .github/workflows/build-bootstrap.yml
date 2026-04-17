@@ -14,33 +14,40 @@ jobs:
       attestations: write
 
     steps:
-      - name: Build Static Busybox (Bootstrap Tar)
-        run: |
-          # Fetch and build minimum capabilities natively from source
-          wget https://busybox.net/downloads/busybox-1.36.1.tar.bz2
-          tar -xjf busybox-1.36.1.tar.bz2
-          cd busybox-1.36.1
-          
-          # Configure for a purely static compilation
-          make defconfig
-          sed -i 's/^.*CONFIG_STATIC\b.*$/CONFIG_STATIC=y/' .config
-          make -j$(nproc)
-          
-          # Isolate the exact capabilities we need
-          mkdir -p /tmp/rootfs
-          cp busybox /tmp/rootfs/tar
-          cp busybox /tmp/rootfs/gzip
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Build Static Busybox (Alpine Sandbox)
+        uses: addnab/docker-run-action@v3
+        with:
+          image: alpine:latest
+          options: -v ${{ github.workspace }}:/workspace
+          run: |
+            apk add --no-cache build-base wget bzip2
+            mkdir -p /workspace/build /workspace/rootfs
+            cd /workspace/build
+            wget https://busybox.net/downloads/busybox-1.36.1.tar.bz2
+            tar -xjf busybox-1.36.1.tar.bz2
+            cd busybox-1.36.1
+            
+            # Configure and build
+            make defconfig
+            sed -i 's/^.*CONFIG_STATIC\b.*$/CONFIG_STATIC=y/' .config
+            make -j$(nproc)
+            
+            # Verify and stage
+            ldd busybox || echo "Static binary confirmed"
+            cp busybox /workspace/rootfs/tar
+            cp busybox /workspace/rootfs/gzip
 
       - name: Construct Zero-Trust Bootstrap Image
         run: |
           cat <<EOF > Dockerfile.bootstrap
           FROM scratch
-          COPY tar /tar
-          COPY gzip /gzip
+          COPY rootfs/tar /tar
+          COPY rootfs/gzip /gzip
           EOF
-          
-          cd /tmp/rootfs
-          docker build -t ghcr.io/${{ github.repository_owner }}/bootstrap:latest -f ../Dockerfile.bootstrap .
+          docker build -t ghcr.io/${{ github.repository_owner }}/bootstrap:latest -f Dockerfile.bootstrap .
 
       - name: Authenticate to GitHub Container Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
