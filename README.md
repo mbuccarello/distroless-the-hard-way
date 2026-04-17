@@ -75,6 +75,7 @@ Distroless The Hard Way achieves parity with the traditional Distroless applicat
 
 For a complete chronological overview, see our detailed technical guides:
 - [Architecture Deep-Dive](docs/architecture.md)
+- [Validation & Test Plan](docs/test-plan.md)
 - [Version Selection Strategy](docs/strategy/version-selection.md)
 - [Pipeline Tutorial Guides](docs/pipelines/)
 
