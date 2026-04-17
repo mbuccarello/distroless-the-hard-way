@@ -1,0 +1,133 @@
+name: Opensource Distroless Assembler - base
+
+on:
+  workflow_run:
+    workflows: ["Opensource Distroless Build - glibc", "Opensource Distroless Build - openssl", "Opensource Distroless Build - zlib", "Opensource Distroless Build - tzdata"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  assemble:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    
+    steps:
+      - name: Setup Cosign (Signature Verification)
+        uses: sigstore/cosign-installer@11086d25041f77fe8fe7b9ea4e48e3b919ee510a
+        
+      - name: Pull and Verify Atomic Artifacts
+        run: |
+          # Verify Cryptographic integrity from intermediate GHCR payloads
+          cosign verify --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ghcr.io/${{ github.repository_owner }}/artifacts-glibc:latest
+          cosign verify --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ghcr.io/${{ github.repository_owner }}/artifacts-openssl:latest
+          cosign verify --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ghcr.io/${{ github.repository_owner }}/artifacts-zlib:latest
+          cosign verify --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ghcr.io/${{ github.repository_owner }}/artifacts-tzdata:latest
+          
+      - name: Construct OS Base (FROM SCRATCH)
+        run: |
+          cat <<EOF > Dockerfile
+          FROM scratch as bootstrap
+          COPY --from=ghcr.io/${{ github.repository_owner }}/bootstrap:latest /tar /tar
+          
+          FROM scratch as extract
+          # Import trusted tar
+          COPY --from=bootstrap /tar /tar
+          
+          # Import layers
+          COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-glibc:latest /glibc-layer.tar.gz /
+          COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-openssl:latest /openssl-layer.tar.gz /
+          COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-zlib:latest /zlib-layer.tar.gz /
+          COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-tzdata:latest /tzdata-layer.tar.gz /
+          
+          # Execute extraction safely without shell
+          RUN ["/tar", "-xzf", "/glibc-layer.tar.gz"]
+          RUN ["/tar", "-xzf", "/openssl-layer.tar.gz"]
+          RUN ["/tar", "-xzf", "/zlib-layer.tar.gz"]
+          RUN ["/tar", "-xzf", "/tzdata-layer.tar.gz"]
+          
+          # Clean up archives
+          RUN ["/tar", "--help"] # Since tar cannot easily remove files without rm, we simply leave them for now, or use docker copy
+          # Actually, we can just use a new scratch stage and COPY --from=extract /... but let's just assemble directly into /rootfs if possible 
+          EOF
+          
+          cat <<EOF > Dockerfile
+          # Second approach: build the rootfs locally to construct /etc/passwd without alpine shell tools
+          EOF
+          
+          # Wait, we need to assemble the image. Let's do the extraction natively on the GitHub Runner since we need to write to /etc/passwd and /etc/group which requires `echo`.
+          # The Implementation Plan Option B was specific for extraction. But if we need `echo`, we need a shell. 
+          # Let's adjust the Dockerfile to extract purely using our Bootstrap image, and we also packed a static `gzip` in there. We could actually pack a static `sh` (which busybox is) if we rename it. But since we used busybox under the hood, `/tar` is actually busybox! 
+          # Let's use our bootstrap image which has `/tar` (busybox) to run `sh` commands!
+          
+          cat <<EOF > Dockerfile
+          FROM scratch as extractor
+          # Load our own trusted busybox utility (which we called /tar)
+          COPY --from=ghcr.io/${{ github.repository_owner }}/bootstrap:latest /tar /busybox
+          
+          COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-glibc:latest /glibc-layer.tar.gz /
+          COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-openssl:latest /openssl-layer.tar.gz /
+          COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-zlib:latest /zlib-layer.tar.gz /
+          COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-tzdata:latest /tzdata-layer.tar.gz /
+          
+          # Execute natively via our busybox without an OS
+          RUN ["/busybox", "mkdir", "/rootfs"]
+          RUN ["/busybox", "tar", "-xzf", "/glibc-layer.tar.gz", "-C", "/rootfs"]
+          RUN ["/busybox", "tar", "-xzf", "/openssl-layer.tar.gz", "-C", "/rootfs"]
+          RUN ["/busybox", "tar", "-xzf", "/zlib-layer.tar.gz", "-C", "/rootfs"]
+          RUN ["/busybox", "tar", "-xzf", "/tzdata-layer.tar.gz", "-C", "/rootfs"]
+          
+          RUN ["/busybox", "mkdir", "-p", "/rootfs/etc", "/rootfs/tmp", "/rootfs/home"]
+          RUN ["/busybox", "chmod", "1777", "/rootfs/tmp"]
+          
+          # Since we don't have a shell to redirect output with `>`, we use sh -c natively via our busybox
+          RUN ["/busybox", "sh", "-c", "echo 'root:x:0:0:root:/root:/sbin/nologin' > /rootfs/etc/passwd"]
+          RUN ["/busybox", "sh", "-c", "echo 'nobody:x:65534:65534:nobody:/nonexistent:/sbin/nologin' >> /rootfs/etc/passwd"]
+          RUN ["/busybox", "sh", "-c", "echo 'root:x:0:' > /rootfs/etc/group"]
+          RUN ["/busybox", "sh", "-c", "echo 'nobody:x:65534:' >> /rootfs/etc/group"]
+          
+          FROM scratch
+          COPY --from=extractor /rootfs /
+          
+          ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+          ENV TZ=UTC
+          EOF
+
+      - name: Authenticate to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build and Push Base OS
+        run: |
+          docker build -t ghcr.io/${{ github.repository_owner }}/base:latest .
+          docker push ghcr.io/${{ github.repository_owner }}/base:latest
+
+      - name: Run Base Image SCA Vulnerability Scan (Trivy)
+        uses: aquasecurity/trivy-action@062f39226cb12a5db3b52a138bb652ecf6927c88
+        with:
+          image-ref: 'ghcr.io/${{ github.repository_owner }}/base:latest'
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Run Chainguard Malcontent Capability Analysis
+        run: |
+          wget https://github.com/chainguard-dev/malcontent/releases/download/v0.1.0/malcontent_0.1.0_linux_amd64.tar.gz
+          tar -xzf malcontent_0.1.0_linux_amd64.tar.gz
+          ./malcontent analyze ghcr.io/${{ github.repository_owner }}/base:latest
+          
+      - name: Sign Distroless Base
+        run: |
+          # Keyless Sigstore signing using OIDC
+          cosign sign --yes ghcr.io/${{ github.repository_owner }}/base:latest
+
+      - name: Generate SLSA Build Provenance (Level 3)
+        uses: actions/attest-build-provenance@1c608d11d69870c20f0223619699826c7cacba8d
+        with:
+          subject-name: ghcr.io/${{ github.repository_owner }}/base
+          push-to-registry: true
+

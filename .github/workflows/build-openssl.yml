@@ -1,0 +1,79 @@
+name: Opensource Distroless Build - openssl
+
+on:
+  push:
+    paths:
+      - '.github/workflows/build-openssl.yml'
+  workflow_dispatch:
+
+jobs:
+  build-and-sign:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+
+      - name: Setup Cosign
+        uses: sigstore/cosign-installer@11086d25041f77fe8fe7b9ea4e48e3b919ee510a
+        
+      - name: Fetch and Verify OpenSSL Source
+        run: |
+          mkdir -p workspace/src workspace/out
+          curl -L https://github.com/openssl/openssl/releases/download/openssl-3.2.1/openssl-3.2.1.tar.gz -o workspace/openssl.tar.gz
+          echo "83c7329fe52c850677d75e5d0b0ca245309b97e8ecbcfdc1dfdc4ab9fac35b39 workspace/openssl.tar.gz" | sha256sum -c -
+          tar -xzf workspace/openssl.tar.gz -C workspace/src --strip-components=1
+          
+      - name: SAST Scan via Semgrep
+        uses: returntocorp/semgrep-action@707a0f757f49516625fb18accf3f3388701237e1
+        with:
+          config: "p/c"
+          input: workspace/src/
+
+      - name: Compile OpenSSL (Alpine Sandbox)
+        uses: addnab/docker-run-action@4f65afd065ccd200c6306932104fd66bac0fba5c
+        with:
+          image: alpine:latest
+          options: -v ${{ github.workspace }}/workspace:/workspace
+          run: |
+            apk add --no-cache build-base perl linux-headers base64 make
+            cd /workspace/src
+            export SOURCE_DATE_EPOCH=315532800
+            ./config no-shared --prefix=/usr -O3
+            make -j$(nproc)
+            make install_sw DESTDIR=/workspace/out
+            
+      - name: Package Payload
+        run: tar -czf openssl-layer.tar.gz -C workspace/out .
+        
+      - name: Generate SBOM (Trivy)
+        uses: aquasecurity/trivy-action@062f39226cb12a5db3b52a138bb652ecf6927c88
+        with:
+          scan-type: 'fs'
+          scan-ref: 'workspace/out'
+          format: 'spdx-json'
+          output: 'openssl-sbom.spdx.json'
+
+      - name: Push to GHCR as OCI Scratch Artifact
+        run: |
+          echo "FROM scratch" > Dockerfile
+          echo "ADD openssl-layer.tar.gz /" >> Dockerfile
+          docker build -t ghcr.io/${{ github.repository_owner }}/artifacts-openssl:latest .
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker push ghcr.io/${{ github.repository_owner }}/artifacts-openssl:latest
+          
+      - name: Sign OCI Artifact Keyless (Cosign)
+        run: |
+          cosign sign --yes ghcr.io/${{ github.repository_owner }}/artifacts-openssl:latest
+
+      - name: Generate SLSA Build Provenance (Level 3)
+        uses: actions/attest-build-provenance@1c608d11d69870c20f0223619699826c7cacba8d
+        with:
+          subject-name: ghcr.io/${{ github.repository_owner }}/artifacts-openssl
+          push-to-registry: true
+

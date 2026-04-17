@@ -1,0 +1,43 @@
+sequenceDiagram
+    autonumber
+    actor Dev as Developer (User)
+    participant O as Orchestrator (build.py)
+    participant FS as Local Filesystem (/build_output)
+    participant D as Docker Daemon
+    participant U as Upstream Source (e.g., gnu.org)
+    
+    Dev->>O: `./build.py blueprints/base/base.yaml`
+    activate O
+    
+    O->>O: Parse YAML (Sources, SHA256, Build Steps)
+    O->>FS: Dynamically generate temporary `Dockerfile`
+    
+    O->>D: Trigger `docker build` using generated `Dockerfile`
+    activate D
+    
+    D->>D: Spin up ephemeral Debian compiler sandbox
+    
+    D->>U: `curl` target source `.tar.gz` and signatures
+    activate U
+    U-->>D: Return raw payload
+    deactivate U
+    
+    D->>D: Compute SHA256 checksum locally
+    
+    alt Signature Fails
+        D-->>O: Throw Exit 1 (Abort)
+    else Signature Matches
+        D->>D: Unpack `.tar.gz` payload natively
+        D->>D: Execute `MAKE` & `CONFIGURE` strictly to `/sovereignforge_out`
+    end
+    
+    O->>D: Request second build phase (Extract to scratch)
+    D->>D: Pivot root base `FROM scratch`
+    D->>D: `COPY --from=compiler /sovereignforge_out /`
+    
+    D-->>O: Commit final native OCI image to cache
+    deactivate D
+    
+    O->>FS: Clean up temporary `Dockerfile` / staging directory
+    O-->>Dev: Print "✅ Success! Image compiled natively"
+    deactivate O

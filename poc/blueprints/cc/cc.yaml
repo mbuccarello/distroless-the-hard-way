@@ -1,0 +1,15 @@
+name: "sovereign-distroless/cc"
+version: "gcc-13.2.0-libs"
+depends_on:
+  - "sovereign-distroless/base"
+sources:
+  - url: "https://ftp.gnu.org/gnu/gcc/gcc-13.2.0/gcc-13.2.0.tar.gz"
+    sha256: "e275e76442a6067341a27f04c5c6b83d8613144004c0413528863dc6b5c743da"
+    unpack_dir: "src_gcc"
+build_steps:
+  # Fetch native prerequisites (GMP, MPFR, MPC)
+  - "cd src_gcc && ./contrib/download_prerequisites"
+  # Configure isolated GCC build targeting only dynamic C++ libraries natively
+  - "cd src_gcc && mkdir build && cd build && ../configure --prefix=/usr --enable-languages=c,c++ --disable-multilib --disable-bootstrap"
+  - "cd src_gcc/build && make -j$(nproc)"
+  - "cd src_gcc/build && make install-target-libgcc install-target-libstdc++-v3 DESTDIR=/sovereignforge_out"

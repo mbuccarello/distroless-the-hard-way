@@ -1,0 +1,75 @@
+name: Opensource Distroless Assembler - python3
+
+on:
+  workflow_run:
+    workflows: ["Opensource Distroless Assembler - cc"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  assemble:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    
+    steps:
+      - name: Download Verified Static Python Build
+        run: |
+          mkdir -p payload
+          # Fetch highly optimized standalone python
+          curl -L "https://github.com/indygreg/python-build-standalone/releases/download/20240224/cpython-3.12.2+20240224-x86_64-unknown-linux-gnu-install_only.tar.gz" -o payload/python.tar.gz
+          
+      - name: Setup Cosign & Trivy
+        uses: sigstore/cosign-installer@11086d25041f77fe8fe7b9ea4e48e3b919ee510a
+          
+      - name: Verify CC Ancestry
+        run: |
+          cosign verify --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ghcr.io/${{ github.repository_owner }}/cc:latest
+          
+      - name: Construct Python 3 Execution Environment
+        run: |
+          cat <<EOF > Dockerfile
+          FROM alpine as extractor
+          COPY payload/python.tar.gz /
+          RUN mkdir -p /usr/local/python && tar -xzf /python.tar.gz -C /usr/local/python --strip-components=1
+          
+          FROM ghcr.io/${{ github.repository_owner }}/cc:latest
+          COPY --from=extractor /usr/local/python /usr/local/python
+          
+          COPY --from=extractor /bin/ln /bin/ln
+          RUN ["/bin/ln", "-s", "/usr/local/python/bin/python3", "/usr/bin/python3"]
+          RUN ["/bin/ln", "-s", "/usr/local/python/bin/pip3", "/usr/bin/pip3"]
+          
+          ENV PYTHON_HOME=/usr/local/python
+          ENV PATH=\$PYTHON_HOME/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+          
+          ENTRYPOINT ["/usr/bin/python3"]
+          EOF
+          
+          docker build -t ghcr.io/${{ github.repository_owner }}/python3:3.12 .
+          docker build -t ghcr.io/${{ github.repository_owner }}/python3:latest .
+
+      - name: Functional Smoke Test (Verification)
+        run: |
+          docker run --rm ghcr.io/${{ github.repository_owner }}/python3:latest --version
+
+      - name: Run Final Image SCA Vulnerability Scan (Trivy)
+        uses: aquasecurity/trivy-action@062f39226cb12a5db3b52a138bb652ecf6927c88
+        with:
+          image-ref: 'ghcr.io/${{ github.repository_owner }}/python3:latest'
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Publish, Sign, and Attest Opensource Distroless Product
+        uses: ./.github/actions/assemble-publish-sign
+        with:
+          image-name: 'python3'
+          tags: '3.12 latest'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+

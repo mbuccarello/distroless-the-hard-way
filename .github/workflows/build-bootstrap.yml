@@ -1,0 +1,55 @@
+name: Distroless The Hard Way - Bootstrap Builder
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-bootstrap:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+
+    steps:
+      - name: Build Static Busybox (Bootstrap Tar)
+        run: |
+          # Fetch and build minimum capabilities natively from source
+          wget https://busybox.net/downloads/busybox-1.36.1.tar.bz2
+          tar -xjf busybox-1.36.1.tar.bz2
+          cd busybox-1.36.1
+          
+          # Configure for a purely static compilation
+          make defconfig
+          sed -i 's/^.*CONFIG_STATIC\b.*$/CONFIG_STATIC=y/' .config
+          make -j$(nproc)
+          
+          # Isolate the exact capabilities we need
+          mkdir -p /tmp/rootfs
+          cp busybox /tmp/rootfs/tar
+          cp busybox /tmp/rootfs/gzip
+
+      - name: Construct Zero-Trust Bootstrap Image
+        run: |
+          cat <<EOF > Dockerfile.bootstrap
+          FROM scratch
+          COPY tar /tar
+          COPY gzip /gzip
+          EOF
+          
+          cd /tmp/rootfs
+          docker build -t ghcr.io/${{ github.repository_owner }}/bootstrap:latest -f ../Dockerfile.bootstrap .
+
+      - name: Authenticate to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build and Push Bootstrap OS
+        run: |
+          docker push ghcr.io/${{ github.repository_owner }}/bootstrap:latest
+
+      - name: Sign Bootstrap Distroless Core
+        uses: sigstore/cosign-installer@11086d25041f77fe8fe7b9ea4e48e3b919ee510a
+        
+      - name: Sign Object
+        run: cosign sign --yes ghcr.io/${{ github.repository_owner }}/bootstrap:latest

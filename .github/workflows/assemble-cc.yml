@@ -1,0 +1,60 @@
+name: Opensource Distroless Assembler - cc
+
+on:
+  workflow_run:
+    workflows: ["Opensource Distroless Assembler - base", "Opensource Distroless Build - gcc"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  assemble:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    
+    steps:
+      - name: Setup Cosign
+        uses: sigstore/cosign-installer@11086d25041f77fe8fe7b9ea4e48e3b919ee510a
+        
+      - name: Verify Ancestry (Base + GCC)
+        run: |
+          # Prove mathematical origin of the parent OS and the C++ Runtime component
+          cosign verify --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ghcr.io/${{ github.repository_owner }}/base:latest
+          cosign verify --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ghcr.io/${{ github.repository_owner }}/artifacts-gcc:latest
+          
+      - name: Construct CC Image
+        run: |
+          cat <<EOF > Dockerfile
+          FROM alpine as extractor
+          COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-gcc:latest /gcc-layer.tar.gz /
+          RUN mkdir /rootfs && tar -xzf /gcc-layer.tar.gz -C /rootfs
+              
+          FROM ghcr.io/${{ github.repository_owner }}/base:latest
+          COPY --from=extractor /rootfs /
+          EOF
+          
+          docker push ghcr.io/${{ github.repository_owner }}/cc:latest
+
+      - name: Run CC Image SCA Vulnerability Scan (Trivy)
+        uses: aquasecurity/trivy-action@062f39226cb12a5db3b52a138bb652ecf6927c88
+        with:
+          image-ref: 'ghcr.io/${{ github.repository_owner }}/cc:latest'
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+          
+      - name: Sign Distroless CC
+        run: |
+          cosign sign --yes ghcr.io/${{ github.repository_owner }}/cc:latest
+
+      - name: Generate SLSA Build Provenance (Level 3)
+        uses: actions/attest-build-provenance@1c608d11d69870c20f0223619699826c7cacba8d
+        with:
+          subject-name: ghcr.io/${{ github.repository_owner }}/cc
+          push-to-registry: true
+

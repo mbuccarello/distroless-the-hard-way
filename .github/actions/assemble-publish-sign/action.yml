@@ -1,0 +1,40 @@
+name: 'Sovereign Assemble Publish & Sign'
+description: 'Publishes, signs, and generates SLSA provenance for Sovereign Distroless images'
+inputs:
+  image-name:
+    description: 'The name of the image (e.g. dotnet)'
+    required: true
+  tags:
+    description: 'Space-separated list of tags to push and sign (e.g. "8.0 latest")'
+    required: true
+  registry:
+    description: 'The OCI registry'
+    required: false
+    default: 'ghcr.io'
+  github-token:
+    description: 'GitHub Token for authentication'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Publish to Registry
+      shell: bash
+      run: |
+        echo "${{ inputs.github-token }}" | docker login ${{ inputs.registry }} -u ${{ github.actor }} --password-stdin
+        for tag in ${{ inputs.tags }}; do
+          docker push ${{ inputs.registry }}/${{ github.repository_owner }}/${{ inputs.image-name }}:$tag
+        done
+
+    - name: Sign Sovereign Product
+      shell: bash
+      run: |
+        for tag in ${{ inputs.tags }}; do
+          cosign sign --yes ${{ inputs.registry }}/${{ github.repository_owner }}/${{ inputs.image-name }}:$tag
+        done
+
+    - name: Generate SLSA Build Provenance (Level 3)
+      uses: actions/attest-build-provenance@1c608d11d69870c20f0223619699826c7cacba8d
+      with:
+        subject-name: ${{ inputs.registry }}/${{ github.repository_owner }}/${{ inputs.image-name }}
+        push-to-registry: true

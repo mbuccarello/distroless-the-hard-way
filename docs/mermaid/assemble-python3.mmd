@@ -1,0 +1,21 @@
+sequenceDiagram
+    participant R as Registry (ghcr.io/opensource-distroless)
+    participant S as Source (python-standalone)
+    participant GH as GitHub Action (Python Assembler)
+    participant Sec as Security (Cosign/Trivy)
+    
+    GH->>R: Pull `cc:latest`
+    R-->>GH: Download verified Opensource Distroless foundation
+    GH->>Sec: `cosign verify` cc:latest ancestry
+    Sec-->>GH: Pass
+    
+    GH->>S: curl cpython.tar.gz
+    S-->>GH: Python Application Payload
+    
+    GH->>GH: `FROM cc:latest` \n Overlay python into `/usr/local/python`
+    
+    GH->>Sec: `trivy image` Final Output Container
+    Sec-->>GH: Pass (0 CRITICAL/HIGH CVEs)
+    
+    GH->>R: Push Execution Container (python3:latest)
+    GH->>Sec: `cosign sign` Final OCI Manifest

@@ -1,0 +1,25 @@
+name: Opensource Distroless E2E - php
+
+on:
+  workflow_run:
+    workflows: ["Opensource Distroless Assembler - php"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  e2e-test:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+
+      - name: Execute E2E Application (Opensource Distroless Distroless PHP)
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker run --rm -v ${{ github.workspace }}/E2E/php:/app -w /app ghcr.io/${{ github.repository_owner }}/php:latest test.php

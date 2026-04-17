@@ -1,0 +1,75 @@
+name: Opensource Distroless Assembler - dotnet
+
+on:
+  workflow_run:
+    workflows: ["Opensource Distroless Assembler - cc"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  assemble:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    
+    steps:
+      - name: Download Official Microsoft .NET SDK/Runtime
+        run: |
+          mkdir -p payload
+          # Fetch official .NET 8.0 Runtime
+          curl -L "https://download.visualstudio.microsoft.com/download/pr/907cc36c-94cc-45f8-bba9-7ce53fe2d392/c8b21efbde79fc74dcdd1378f4eedb79/dotnet-runtime-8.0.2-linux-x64.tar.gz" -o payload/dotnet.tar.gz
+          echo "84bd5ccea2ef7ebaf98bf708ee611a21e6be60cb7a87311ce8ecbe82bb8d8888 payload/dotnet.tar.gz" | sha256sum -c -
+
+      - name: Setup Cosign & Trivy
+        uses: sigstore/cosign-installer@11086d25041f77fe8fe7b9ea4e48e3b919ee510a
+          
+      - name: Verify CC Ancestry
+        run: |
+          cosign verify --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ghcr.io/${{ github.repository_owner }}/cc:latest
+          
+      - name: Construct .NET Execution Environment
+        run: |
+          cat <<EOF > Dockerfile
+          FROM alpine as extractor
+          COPY payload/dotnet.tar.gz /
+          RUN mkdir -p /usr/share/dotnet && tar -xzf /dotnet.tar.gz -C /usr/share/dotnet
+          
+          FROM ghcr.io/${{ github.repository_owner }}/cc:latest
+          COPY --from=extractor /usr/share/dotnet /usr/share/dotnet
+          
+          COPY --from=extractor /bin/ln /bin/ln
+          RUN ["/bin/ln", "-s", "/usr/share/dotnet/dotnet", "/usr/bin/dotnet"]
+          
+          ENV DOTNET_ROOT=/usr/share/dotnet
+          ENV PATH=\$DOTNET_ROOT:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+          
+          ENTRYPOINT ["/usr/bin/dotnet"]
+          EOF
+          
+          docker build -t ghcr.io/${{ github.repository_owner }}/dotnet:8.0 .
+          docker build -t ghcr.io/${{ github.repository_owner }}/dotnet:latest .
+
+      - name: Functional Smoke Test (Verification)
+        run: |
+          docker run --rm ghcr.io/${{ github.repository_owner }}/dotnet:latest --version
+
+      - name: Run Final Image SCA Vulnerability Scan (Trivy)
+        uses: aquasecurity/trivy-action@062f39226cb12a5db3b52a138bb652ecf6927c88
+        with:
+          image-ref: 'ghcr.io/${{ github.repository_owner }}/dotnet:latest'
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Publish, Sign, and Attest Opensource Distroless Product
+        uses: ./.github/actions/assemble-publish-sign
+        with:
+          image-name: 'dotnet'
+          tags: '8.0 latest'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+

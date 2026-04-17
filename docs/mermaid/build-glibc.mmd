@@ -1,0 +1,18 @@
+sequenceDiagram
+    participant GH as GitHub Action
+    participant S as Source (gnu.org)
+    participant Sec as Security (Semgrep/Trivy)
+    participant R as Registry (ghcr.io/opensource-distroless)
+    
+    GH->>S: curl glibc-2.39.tar.gz
+    S-->>GH: Download pristine source
+    GH->>Sec: Semgrep static SAST scan
+    Sec-->>GH: Pass
+    
+    GH->>GH: Execute `make` in alpine sandbox
+    
+    GH->>Sec: Trivy SCA/SBOM scan on compiled tar.gz
+    Sec-->>GH: output: glibc-sbom.spdx.json
+    
+    GH->>R: Push intermediate scratch container (artifacts-glibc)
+    GH->>R: Sign via Cosign OIDC credentials

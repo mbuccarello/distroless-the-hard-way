@@ -1,0 +1,16 @@
+sequenceDiagram
+    participant GH as GitHub Action
+    participant S as Source (zlib.net)
+    participant Sec as Security (Trivy)
+    participant R as Registry (ghcr.io/opensource-distroless)
+    
+    GH->>S: curl zlib-1.x.tar.gz
+    S-->>GH: Download pristine source
+    
+    GH->>GH: Execute `make CFLAGS=-O3` in alpine sandbox
+    
+    GH->>Sec: Trivy SCA/SBOM scan on compiled tar.gz
+    Sec-->>GH: output: zlib-sbom.spdx.json
+    
+    GH->>R: Push intermediate scratch container (artifacts-zlib)
+    GH->>R: Sign via Cosign OIDC credentials

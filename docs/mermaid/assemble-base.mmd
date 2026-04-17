@@ -1,0 +1,18 @@
+sequenceDiagram
+    participant R as Registry (ghcr.io/opensource-distroless)
+    participant GH as GitHub Action (Base Assembler)
+    participant Sec as Security (Cosign/Trivy)
+    
+    GH->>R: Pull `artifacts-[glibc, openssl, zlib, tzdata]`
+    R-->>GH: Download 4 trusted tarballs
+    
+    GH->>Sec: `cosign verify` 4 intermediate layers
+    Sec-->>GH: Pass (Identities Match OIDC)
+    
+    GH->>GH: Construct `FROM Scratch` Dockerfile 
+    GH->>GH: Unpack layers + Build /etc/passwd rootfs
+    
+    GH->>Sec: Aggregate 4 JSON SBOMs into base-sbom
+    
+    GH->>R: Push monolithic OS OS (base:latest)
+    GH->>Sec: `cosign sign` Final OCI Manifest

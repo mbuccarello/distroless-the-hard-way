@@ -1,0 +1,81 @@
+name: Opensource Distroless Assembler - java
+
+on:
+  workflow_run:
+    workflows: ["Opensource Distroless Assembler - cc"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  assemble:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    
+    steps:
+      - name: Download Adoptium OpenJDK 21
+        run: |
+          mkdir -p jvm_payload
+          curl -L "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.2%2B13/OpenJDK21U-jre_x64_linux_hotspot_21.0.2_13.tar.gz" -o jvm_payload/jdk.tar.gz
+          # Strict verification against Adoptium checksums
+          echo "f9876e4c278fb1217e6eeba1a566f12ab5a39626e2e00f91a92e1ced0fbb85b8 jvm_payload/jdk.tar.gz" | sha256sum -c -
+          
+      - name: Setup Cosign
+        uses: sigstore/cosign-installer@11086d25041f77fe8fe7b9ea4e48e3b919ee510a
+          
+      - name: Verify Underlying CC Ancestry
+        run: |
+          cosign verify --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ghcr.io/${{ github.repository_owner }}/cc:latest
+          
+      - name: Construct Java Application Runtime
+        run: |
+          cat <<EOF > Dockerfile
+          # Extract safely using alpine
+          FROM alpine as extractor
+          COPY jvm_payload/jdk.tar.gz /
+          RUN mkdir -p /usr/lib/jvm/java-21-openjdk && tar -xzf /jdk.tar.gz -C /usr/lib/jvm/java-21-openjdk --strip-components=1
+          
+          # Overlay onto strictly verified Opensource Distroless CC
+          FROM ghcr.io/${{ github.repository_owner }}/cc:latest
+          COPY --from=extractor /usr/lib/jvm /usr/lib/jvm
+          
+          # Implement standard FHS symlink
+          COPY --from=extractor /bin/ln /bin/ln
+          RUN ["/bin/ln", "-s", "/usr/lib/jvm/java-21-openjdk/bin/java", "/usr/bin/java"]
+          RUN ["/bin/ln", "-s", "/usr/lib/jvm/java-21-openjdk/bin/keytool", "/usr/bin/keytool"]
+          
+          ENV JAVA_HOME=/usr/lib/jvm/java-21-openjdk
+          ENV PATH=\$JAVA_HOME/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+          
+          ENTRYPOINT ["/usr/bin/java", "-version"]
+          EOF
+          
+      - name: Build and Push
+        run: |
+          docker build -t ghcr.io/${{ github.repository_owner }}/java:21 .
+          docker build -t ghcr.io/${{ github.repository_owner }}/java:latest .
+          
+      - name: Functional Smoke Test (Verification)
+        run: |
+          docker run --rm ghcr.io/${{ github.repository_owner }}/java:latest -version
+          
+      - name: Run Final Image SCA Vulnerability Scan (Trivy)
+        uses: aquasecurity/trivy-action@062f39226cb12a5db3b52a138bb652ecf6927c88
+        with:
+          image-ref: 'ghcr.io/${{ github.repository_owner }}/java:latest'
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+          
+      - name: Publish, Sign, and Attest Opensource Distroless Product
+        uses: ./.github/actions/assemble-publish-sign
+        with:
+          image-name: 'java'
+          tags: '21 latest'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+

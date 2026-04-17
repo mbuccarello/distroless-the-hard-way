@@ -1,0 +1,80 @@
+name: Opensource Distroless Build - zlib
+
+on:
+  push:
+    paths:
+      - '.github/workflows/build-zlib.yml'
+  workflow_dispatch:
+
+jobs:
+  build-and-sign:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+
+      - name: Setup Cosign
+        uses: sigstore/cosign-installer@11086d25041f77fe8fe7b9ea4e48e3b919ee510a
+        
+      - name: Fetch and Verify Zlib Source
+        run: |
+          mkdir -p workspace/src workspace/out
+          curl -L https://zlib.net/zlib-1.3.1.tar.gz -o workspace/zlib.tar.gz
+          echo "9a93b2b7dfdac77ceba5a558a580e74667dd6fede4585b91eefb60f03b72df23 workspace/zlib.tar.gz" | sha256sum -c -
+          tar -xzf workspace/zlib.tar.gz -C workspace/src --strip-components=1
+
+      - name: SAST Scan (Semgrep)
+        uses: returntocorp/semgrep-action@707a0f757f49516625fb18accf3f3388701237e1
+        with:
+          config: >-
+            p/security-audit
+            p/secrets
+          
+      - name: Compile Zlib (Alpine Sandbox)
+        uses: addnab/docker-run-action@4f65afd065ccd200c6306932104fd66bac0fba5c
+        with:
+          image: alpine:latest
+          options: -v ${{ github.workspace }}/workspace:/workspace
+          run: |
+            apk add --no-cache build-base make
+            cd /workspace/src
+            export SOURCE_DATE_EPOCH=315532800
+            ./configure --prefix=/usr
+            make -j$(nproc) CFLAGS="-O3"
+            make install DESTDIR=/workspace/out
+            
+      - name: Package Payload
+        run: tar -czf zlib-layer.tar.gz -C workspace/out .
+        
+      - name: Generate SBOM (Trivy)
+        uses: aquasecurity/trivy-action@062f39226cb12a5db3b52a138bb652ecf6927c88
+        with:
+          scan-type: 'fs'
+          scan-ref: 'workspace/out'
+          format: 'spdx-json'
+          output: 'zlib-sbom.spdx.json'
+
+      - name: Push to GHCR as OCI Scratch Artifact
+        run: |
+          echo "FROM scratch" > Dockerfile
+          echo "ADD zlib-layer.tar.gz /" >> Dockerfile
+          docker build -t ghcr.io/${{ github.repository_owner }}/artifacts-zlib:latest .
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker push ghcr.io/${{ github.repository_owner }}/artifacts-zlib:latest
+          
+      - name: Sign OCI Artifact Keyless (Cosign)
+        run: |
+          cosign sign --yes ghcr.io/${{ github.repository_owner }}/artifacts-zlib:latest
+
+      - name: Generate SLSA Build Provenance (Level 3)
+        uses: actions/attest-build-provenance@1c608d11d69870c20f0223619699826c7cacba8d
+        with:
+          subject-name: ghcr.io/${{ github.repository_owner }}/artifacts-zlib
+          push-to-registry: true
+

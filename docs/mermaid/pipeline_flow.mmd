@@ -1,0 +1,34 @@
+sequenceDiagram
+    autonumber
+    participant Dev as Blueprint Push (Main)
+    participant Atomic as Atomic Action Workflows
+    participant Security as OSS Security Scanners
+    participant Reg as GitHub Registry (ghcr.io)
+    participant Assembler as Assembler Action Workflows
+    
+    Dev->>Atomic: Trigger `.github/workflows/build-glibc.yml`
+    activate Atomic
+    
+    Atomic->>Security: Execute SAST (Semgrep) on C-source
+    Security-->>Atomic: Pass
+    Atomic->>Atomic: Compile native `.so` files
+    Atomic->>Security: Execute SCA/SBOM generation (Trivy/Syft)
+    Security-->>Atomic: Pass (Outputs glibc-sbom.json)
+    Atomic->>Security: Sign artifact manifest (Cosign)
+    
+    Atomic->>Reg: Push intermediate artifact `opensource-distroless/artifacts-glibc`
+    deactivate Atomic
+    
+    note over Reg, Assembler: Once glibc, openssl, zlib, tzdata are updated in Registry...
+    
+    Assembler->>Reg: `.github/workflows/assemble-base.yml` runs
+    activate Assembler
+    Assembler->>Reg: Pull isolated atomic artifacts
+    Reg-->>Assembler: Download Verified `.tar.gz` and SBOMs
+    
+    Assembler->>Assembler: Construct `FROM Scratch` monolithic base
+    Assembler->>Security: Sign aggregated final OCI manifest
+    Assembler->>Reg: Push `opensource-distroless/base:latest`
+    deactivate Assembler
+    
+    Reg-->>Assembler: Triggers `assemble-cc.yml` upon base success

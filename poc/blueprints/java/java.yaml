@@ -1,0 +1,11 @@
+name: "sovereign-distroless/java"
+version: "21.0.2"
+depends_on:
+  - "sovereign-distroless/cc"
+sources:
+  - url: "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.2%2B13/OpenJDK21U-jdk_aarch64_linux_hotspot_21.0.2_13.tar.gz"
+    sha256: ""
+    unpack_dir: "src_java"
+build_steps:
+  - "mkdir -p /sovereignforge_out/usr/lib/jvm"
+  - "cp -r src_java/* /sovereignforge_out/usr/lib/jvm/"

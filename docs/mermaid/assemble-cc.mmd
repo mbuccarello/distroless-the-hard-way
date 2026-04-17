@@ -1,0 +1,15 @@
+sequenceDiagram
+    participant R as Registry (ghcr.io/opensource-distroless)
+    participant GH as GitHub Action (CC Assembler)
+    participant Sec as Security (Cosign)
+    
+    GH->>R: Pull `base:latest` and `artifacts-gcc:latest`
+    R-->>GH: Download trusted ancestral OS and C++ blobs
+    
+    GH->>Sec: `cosign verify` parent lineages
+    Sec-->>GH: Pass (Identities Match OIDC)
+    
+    GH->>GH: `FROM base:latest` \n `COPY --from=artifacts-gcc / /`
+    
+    GH->>R: Push updated runtime (cc:latest)
+    GH->>Sec: `cosign sign` Final OCI Manifest

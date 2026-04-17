@@ -1,0 +1,29 @@
+name: Opensource Distroless E2E - java
+
+on:
+  workflow_run:
+    workflows: ["Opensource Distroless Assembler - java"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  e2e-test:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+
+      - name: Build E2E Application (SDK)
+        run: |
+          docker run --rm -v ${{ github.workspace }}/E2E/java:/src -w /src mcr.microsoft.com/openjdk/jdk:21-ubuntu javac HelloOpensource Distroless.java
+
+      - name: Execute E2E Application (Opensource Distroless Distroless Java)
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker run --rm -v ${{ github.workspace }}/E2E/java:/app -w /app ghcr.io/${{ github.repository_owner }}/java:latest HelloOpensource Distroless

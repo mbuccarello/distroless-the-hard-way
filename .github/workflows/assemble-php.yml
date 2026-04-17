@@ -1,0 +1,69 @@
+name: Opensource Distroless Assembler - php
+
+on:
+  workflow_run:
+    workflows: ["Opensource Distroless Assembler - cc"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  assemble:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    
+    steps:
+      - name: Download Verified PHP Binary
+        run: |
+          mkdir -p payload
+          # Fetch optimized PHP-FPM binary (Architecture: x86_64)
+          curl -L "https://github.com/php/php-src/releases/download/php-8.3.3/php-8.3.3.tar.gz" -o payload/php.tar.gz
+          
+      - name: Setup Cosign & Trivy
+        uses: sigstore/cosign-installer@11086d25041f77fe8fe7b9ea4e48e3b919ee510a
+          
+      - name: Verify CC Ancestry
+        run: |
+          cosign verify --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ghcr.io/${{ github.repository_owner }}/cc:latest
+          
+      - name: Construct PHP Execution Environment
+        run: |
+          cat <<EOF > Dockerfile
+          FROM alpine as extractor
+          COPY payload/php.tar.gz /
+          RUN mkdir -p /usr/local/php && tar -xzf /php.tar.gz -C /usr/local/php --strip-components=1
+          
+          FROM ghcr.io/${{ github.repository_owner }}/cc:latest
+          COPY --from=extractor /usr/local/php /usr/local/php
+          
+          ENV PATH=/usr/local/php/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+          
+          ENTRYPOINT ["/usr/local/php/bin/php-fpm"]
+          EOF
+          
+          docker build -t ghcr.io/${{ github.repository_owner }}/php:latest .
+
+      - name: Functional Smoke Test (Verification)
+        run: |
+          docker run --rm ghcr.io/${{ github.repository_owner }}/php:latest --version
+
+      - name: Run Final Image SCA Vulnerability Scan (Trivy)
+        uses: aquasecurity/trivy-action@062f39226cb12a5db3b52a138bb652ecf6927c88
+        with:
+          image-ref: 'ghcr.io/${{ github.repository_owner }}/php:latest'
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Publish, Sign, and Attest Opensource Distroless Product
+        uses: ./.github/actions/assemble-publish-sign
+        with:
+          image-name: 'php'
+          tags: 'latest'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+

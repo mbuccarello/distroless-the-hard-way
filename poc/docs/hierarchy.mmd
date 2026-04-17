@@ -1,0 +1,25 @@
+graph TD
+    subgraph Level 0: Foundation
+        B["opensource-distroless/base"]
+        B1("glibc")
+        B2("openssl")
+        B3("zlib")
+        B4("tzdata")
+        B --- B1 & B2 & B3 & B4
+    end
+
+    subgraph Level 1: C++ Runtime
+        C["opensource-distroless/cc"]
+        C1("libstdc++")
+        C2("libgcc_s")
+        C --- C1 & C2
+    end
+
+    subgraph Level 2: Execution Engine
+        J["opensource-distroless/java"]
+        J1("OpenJDK JVM")
+        J --- J1
+    end
+
+    B --> C
+    C --> J

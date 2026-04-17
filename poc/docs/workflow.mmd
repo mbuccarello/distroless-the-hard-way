@@ -1,0 +1,7 @@
+graph TD
+    A["Blueprint YAML"] -->|"1. Parse & Fetch"| B("Upstream Sources (.tar.gz)")
+    B -->|"2. Cryptographic Check"| C{"SHA256 Match?"}
+    C -- Yes --> D["Ephemeral Build Sandbox"]
+    C -- No --> E["Abort Build"]
+    D -->|"3. Compile raw C/C++"| F[/"/sovereignforge_out"/]
+    F -->|"4. Extract directly to scratch"| G(("Final Pristine OCI Image"))

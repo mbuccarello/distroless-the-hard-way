@@ -1,0 +1,21 @@
+sequenceDiagram
+    participant R as Registry (ghcr.io/opensource-distroless)
+    participant S as Source (CPAN / Perl.org)
+    participant GH as GitHub Action (Perl Assembler)
+    participant Sec as Security (Cosign/Trivy)
+    
+    GH->>R: Pull `cc:latest`
+    R-->>GH: Download verified Opensource Distroless foundation
+    GH->>Sec: `cosign verify` cc:latest ancestry
+    Sec-->>GH: Pass
+    
+    GH->>S: curl perl-5.x.tar.gz
+    S-->>GH: Perl Application Payload
+    
+    GH->>GH: `FROM cc:latest` \n Overlay Perl into `/usr/local/perl`
+    
+    GH->>Sec: `trivy image` Final Output Container
+    Sec-->>GH: Pass (0 CRITICAL/HIGH CVEs)
+    
+    GH->>R: Push Execution Container (perl:latest)
+    GH->>Sec: `cosign sign` Final OCI Manifest

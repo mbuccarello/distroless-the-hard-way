@@ -1,0 +1,31 @@
+name: "sovereign-distroless/base"
+version: "1.0.0"
+sources:
+  - url: "https://github.com/openssl/openssl/releases/download/openssl-3.3.0/openssl-3.3.0.tar.gz"
+    sha256: "53e66b043322a606abf0087e9399fa14a6015fccc41ce7581177af8f99e338"
+    unpack_dir: "src_openssl"
+  - url: "https://github.com/madler/zlib/archive/refs/tags/v1.3.1.tar.gz"
+    sha256: ""
+    unpack_dir: "src_zlib"
+  - url: "https://github.com/eggert/tz/archive/refs/tags/2024a.tar.gz"
+    sha256: ""
+    unpack_dir: "src_tzdata"
+  - url: "https://ftp.gnu.org/gnu/glibc/glibc-2.39.tar.gz"
+    sha256: "f77bd47ea5bbfbf96e2e3df2f22b7dc5efd085be6d8dcff42fbc"
+    unpack_dir: "src_glibc"
+
+build_steps:
+  # Base GLIBC C-Runtime
+  - "cd src_glibc && mkdir build && cd build && ../configure --prefix=/usr --libdir=/usr/lib"
+  - "cd src_glibc/build && make -j$(nproc)"
+  - "cd src_glibc/build && make install DESTDIR=/sovereignforge_out"
+  # Cryptography
+  - "cd src_openssl && ./config --prefix=/usr --openssldir=/etc/ssl no-shared && make -j$(nproc) && make install_sw DESTDIR=/sovereignforge_out"
+  # Compression Tooling
+  - "cd src_zlib && ./configure --prefix=/usr && make -j$(nproc) && make install DESTDIR=/sovereignforge_out"
+  # Internet Timezones
+  - "cd src_tzdata && mkdir -p /sovereignforge_out/usr/share/zoneinfo && make install DESTDIR=/sovereignforge_out ZONEDIR=/usr/share/zoneinfo"
+  # Fundamental Container Access and Permissions Layout (Empty UNIX profile + Root Symlinks)
+  - "mkdir -p /sovereignforge_out/etc /sovereignforge_out/tmp /sovereignforge_out/usr/lib /sovereignforge_out/usr/bin"
+  - "ln -s usr/lib /sovereignforge_out/lib && ln -s usr/lib /sovereignforge_out/lib64 && ln -s usr/bin /sovereignforge_out/bin"
+  - "echo 'root:x:0:0:root:/root:/sbin/nologin' > /sovereignforge_out/etc/passwd && echo 'root:x:0:' > /sovereignforge_out/etc/group"

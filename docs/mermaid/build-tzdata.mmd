@@ -1,0 +1,16 @@
+sequenceDiagram
+    participant GH as GitHub Action
+    participant S as Source (iana.org)
+    participant Sec as Security (Trivy)
+    participant R as Registry (ghcr.io/opensource-distroless)
+    
+    GH->>S: curl tzdata202x.tar.gz
+    S-->>GH: Download pristine source
+    
+    GH->>GH: Execute `make install` to unpack profiles
+    
+    GH->>Sec: Trivy SCA/SBOM scan on directory
+    Sec-->>GH: output: tzdata-sbom.spdx.json
+    
+    GH->>R: Push intermediate scratch container (artifacts-tzdata)
+    GH->>R: Sign via Cosign OIDC credentials

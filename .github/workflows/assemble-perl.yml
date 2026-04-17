@@ -1,0 +1,68 @@
+name: Opensource Distroless Assembler - perl
+
+on:
+  workflow_run:
+    workflows: ["Opensource Distroless Assembler - cc"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  assemble:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    
+    steps:
+      - name: Download Verified Perl Binary
+        run: |
+          mkdir -p payload
+          curl -L "https://www.cpan.org/src/5.0/perl-5.38.2.tar.gz" -o payload/perl.tar.gz
+          
+      - name: Setup Cosign & Trivy
+        uses: sigstore/cosign-installer@11086d25041f77fe8fe7b9ea4e48e3b919ee510a
+          
+      - name: Verify CC Ancestry
+        run: |
+          cosign verify --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ghcr.io/${{ github.repository_owner }}/cc:latest
+          
+      - name: Construct Perl Execution Environment
+        run: |
+          cat <<EOF > Dockerfile
+          FROM alpine as extractor
+          COPY payload/perl.tar.gz /
+          RUN mkdir -p /usr/local/perl && tar -xzf /perl.tar.gz -C /usr/local/perl --strip-components=1
+          
+          FROM ghcr.io/${{ github.repository_owner }}/cc:latest
+          COPY --from=extractor /usr/local/perl /usr/local/perl
+          
+          ENV PATH=/usr/local/perl/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+          
+          ENTRYPOINT ["/usr/local/perl/bin/perl"]
+          EOF
+          
+          docker build -t ghcr.io/${{ github.repository_owner }}/perl:latest .
+
+      - name: Functional Smoke Test (Verification)
+        run: |
+          docker run --rm ghcr.io/${{ github.repository_owner }}/perl:latest --version
+
+      - name: Run Final Image SCA Vulnerability Scan (Trivy)
+        uses: aquasecurity/trivy-action@062f39226cb12a5db3b52a138bb652ecf6927c88
+        with:
+          image-ref: 'ghcr.io/${{ github.repository_owner }}/perl:latest'
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Publish, Sign, and Attest Opensource Distroless Product
+        uses: ./.github/actions/assemble-publish-sign
+        with:
+          image-name: 'perl'
+          tags: 'latest'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
