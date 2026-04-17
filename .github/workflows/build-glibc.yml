@@ -72,6 +72,7 @@ jobs:
       - name: Sign OCI Artifact Keyless (Cosign)
         run: |
           cosign sign --yes ghcr.io/${{ github.repository_owner }}/artifacts-glibc:latest
+          cosign attach sbom --sbom glibc-sbom.spdx.json ghcr.io/${{ github.repository_owner }}/artifacts-glibc:latest
 
       - name: Generate SLSA Build Provenance (Level 3)
         uses: actions/attest-build-provenance@1c608d11d69870c20f0223619699826c7cacba8d

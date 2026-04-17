@@ -1,5 +1,8 @@
 # Distroless The Hard Way
 
+[![E2E Orchestrator](https://github.com/mbuccarello/distroless-the-hard-way/actions/workflows/e2e-orchestrator.yml/badge.svg)](https://github.com/mbuccarello/distroless-the-hard-way/actions/workflows/e2e-orchestrator.yml)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/mbuccarello/distroless-the-hard-way/badge)](https://securityscorecards.dev/viewer/?uri=github.com/mbuccarello/distroless-the-hard-way)
+
 Distroless The Hard Way is an educational and highly technical guide to building secure, minimal OCI container images entirely from upstream source code. It is designed to walk you through the painful but necessary steps of establishing a zero-trust supply chain without relying on pre-compiled distributions.
 
 ## Acknowledgments & Inspiration
@@ -48,6 +51,7 @@ For a deep dive into verification logic across all runtimes, see the [Runtime Ve
 
 To maintain a zero-trust posture, we integrate advanced security instrumentation at every stage of the lifecycle:
 
+- **[SLSA Level 3 Provenance](docs/SLSA-Level-3.md)**: Generating non-falsifiable cryptographic attestations mapping final artifacts to their immutable source code commits.
 - **[Static Analysis (Semgrep)](docs/Semgrep.md)**: Auditing source code for vulnerabilities prior to compilation.
 - **[Binary Capability Analysis (Malcontent)](docs/Malcontent.md)**: Inspecting finalized binaries for unexpected capabilities or malware.
 - **[Keyless Cryptographic Signing](docs/Signing.md)**: Leveraging Sigstore/Cosign OIDC mechanisms for verifiable provenance without static private keys.
@@ -95,3 +99,10 @@ distroless-the-hard-way/
 │   └── pipelines/             # Step-by-step technical tutorials
 └── poc/                       # Archived Prototype Documentation (fully isolated)
 ```
+
+---
+
+## Roadmap
+
+As the repository stabilizes, we will introduce several architectural enhancements:
+- **Multi-Architecture Manifests**: Expanding pipeline compilation from strictly `amd64` to multi-arch support (`amd64` / `arm64`) using `buildx` matrix strategies to natively support AWS Graviton and Apple Silicon targets.
