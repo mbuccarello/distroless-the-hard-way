@@ -2,6 +2,7 @@ name: Distroless The Hard Way - Bootstrap Builder
 
 on:
   workflow_dispatch:
+  workflow_call:
 
 jobs:
   build-bootstrap:

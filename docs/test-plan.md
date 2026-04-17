@@ -1,35 +1,53 @@
-# Distroless The Hard Way: Validation & Test Plan
+# Validation & Test Plan
 
-If you have forked this repository to your own GitHub account and have enabled the `GITHUB_TOKEN` write permissions (see [Registry Authentication Setup](GHCR-Token.md)), you can validate the entire architecture from scratch.
+"Distroless The Hard Way" is an educational repository enforcing a strictly decoupled, zero-trust cascade. You can validate the entire architecture using one of two methods: the **Automated Gateway**, or the **Manual Educational Walkthrough**.
 
-Because this architecture enforces a strictly decoupled, zero-trust cascade, you cannot simply trigger the final pipeline. You must build the dependencies in chronological order.
+Ensure you have enabled the `GITHUB_TOKEN` write permissions (see [Registry Authentication Setup](GHCR-Token.md)) before proceeding.
 
-## 1. Stage 0: The Extractor Bootstrap
-* **Action**: Navigate to the **Actions** tab in GitHub.
+---
+
+## Method 1: The Automated Gateway (The Easy Way)
+For automated validation of the entire cryptographic dependency graph, we utilize a master Directed Acyclic Graph (DAG) orchestrator.
+
+1. Navigate to the **Actions** tab in GitHub.
+2. Select the `Distroless The Hard Way - E2E Orchestrator` workflow.
+3. Click **Run workflow**.
+
+The orchestrator will automatically construct everything chronologically:
+* It spins up Pipeline 0 (Bootstrap)
+* It fans out Stage 1 in parallel (glibc, openssl, zlib, tzdata)
+* It waits for all Stage 1 results, merging them into Stage 2 (Base Assembly)
+* It steps into Stage 3 (C++ Assembly)
+* It fans out across the entire Test Matrix (Node.js, Python, Java, etc.) to prove runtime integrity.
+
+---
+
+## Method 2: Step-by-Step Compilation (The Educational Way)
+To truly grasp the concept of compiling a zero-trust supply chain from scratch, you should ignore the automator and manually trace the dependency tree yourself.
+
+#### 1. Stage 0: The Extractor Bootstrap
 * **Target Workflow**: `Distroless The Hard Way - Bootstrap Builder`
-* **Trigger**: Click **Run workflow**.
-* **Validation**: Wait for the job to complete successfully. This compiles our zero-trust static extraction binary from source and pushes it to your personal `ghcr.io` namespace.
+* **Trigger**: Click **Run workflow** manually.
+* **Validation**: This compiles our static extraction binary from source and pushes it to your `ghcr.io` namespace.
 
-## 2. Stage 1: Atomic Foundations
-* **Action**: From the Actions tab, you must trigger all four foundation pipelines individually into the system.
-* **Target Workflows**:
+#### 2. Stage 1: Atomic Foundations
+* **Target Workflows**: Manually trigger all four foundation pipelines:
   - `Opensource Distroless Build - glibc`
   - `Opensource Distroless Build - openssl`
   - `Opensource Distroless Build - zlib`
   - `Opensource Distroless Build - tzdata`
-* **Validation**: Ensure all four turn green. This verifies that `Semgrep` successfully audited the raw source and `Trivy` scanned the resulting artifacts before signing them.
+* **Validation**: Ensure all turn green to verify successful raw source compilation and SCA scanning.
 
-## 3. Stage 2: Base Assembly
-* **Action**: The base assembler dynamically watches the foundations. It *may* trigger automatically when the four prior steps finish. If not, trigger it manually.
+#### 3. Stage 2: Base Assembly
 * **Target Workflow**: `Opensource Distroless Assembler - base`
-* **Trigger**: Click **Run workflow** if it hasn't started.
-* **Validation**: Watch the logs. Validate that Docker natively executed the `/tar` command via the Exec-form without using `/bin/sh` or `alpine`. Ensure `malcontent` completes the capability analysis without throwing critical errors.
+* **Trigger**: Click **Run workflow** if not automatically triggered by GitHub.
+* **Validation**: Validate that Docker natively executed the `/tar` command safely from our bootstrap image without using `/bin/sh`. Ensure `malcontent` capability analysis passes.
 
-## 4. Stage 3 & Execution Verification (E2E)
-Once the `base` image is built, you can compile the execution runtimes and test them using our End-to-End framework.
+#### 4. Stage 3 & Execution Verification (E2E)
+Once the `base` image is built, compile the execution runtimes:
 
-1. **Build the C++ Runtime**: Run the `Opensource Distroless Build - gcc` workflow.
-2. **Assemble the C++ Runtime**: Run the `Opensource Distroless Assembler - cc` workflow.
-3. **Run Validations**: Finally, run any of the application runtime tests (e.g., `Distroless The Hard Way - Test - Java`, `Test - Nodejs`, `Test - Python3`).
+1. **Build the C++ Runtime**: Run `Opensource Distroless Build - gcc`
+2. **Assemble the C++ Runtime**: Run `Opensource Distroless Assembler - cc`
+3. **Run Validations**: Trigger any of the tests: (e.g., `Distroless The Hard Way - Test - Java`).
 
-When these E2E pipelines turn green, you have successfully proven that your distroless environment can compile and execute complex applications natively using the pure zero-trust layers you just mathematically generated from scratch!
+When these pipelines turn green, you have successfully proven that your native distroless environment can execute complex applications securely!

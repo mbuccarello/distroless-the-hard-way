@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/build-gcc.yml'
   workflow_dispatch:
+  workflow_call:
 
 jobs:
   build-and-sign:
