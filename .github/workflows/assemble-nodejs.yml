@@ -27,7 +27,7 @@ jobs:
           echo "84edbca2facfe519cb8d9ec7cc39cb7db00c14b7914e9f783eeab2c58a69d76c payload/node.tar.gz" | sha256sum -c -
           
       - name: Setup Cosign & Trivy
-        uses: sigstore/cosign-installer@d0224403f7425230756a10af497e77a0c842838a
+        uses: sigstore/cosign-installer@c56c2d3e59e4281cc41dea2217323ba5694b171e
           
       - name: Verify CC Ancestry
         run: |

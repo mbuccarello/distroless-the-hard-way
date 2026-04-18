@@ -20,7 +20,7 @@ jobs:
     
     steps:
       - name: Setup Cosign
-        uses: sigstore/cosign-installer@d0224403f7425230756a10af497e77a0c842838a
+        uses: sigstore/cosign-installer@c56c2d3e59e4281cc41dea2217323ba5694b171e
         
       - name: Verify Ancestry (Base + GCC)
         run: |
@@ -62,7 +62,7 @@ jobs:
           cosign attach sbom --sbom cc-sbom.spdx.json ghcr.io/${{ github.repository_owner }}/cc:latest
 
       - name: Generate SLSA Build Provenance (Level 3)
-        uses: actions/attest-build-provenance@520d128f165991a673d52daec27962ea98a03ca5
+        uses: actions/attest-build-provenance@7668571508540a607bdfd90a87a560489fe372eb
         with:
           subject-name: ghcr.io/${{ github.repository_owner }}/cc
           push-to-registry: true

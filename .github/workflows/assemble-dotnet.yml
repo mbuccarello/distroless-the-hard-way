@@ -27,7 +27,7 @@ jobs:
           echo "84bd5ccea2ef7ebaf98bf708ee611a21e6be60cb7a87311ce8ecbe82bb8d8888 payload/dotnet.tar.gz" | sha256sum -c -
 
       - name: Setup Cosign & Trivy
-        uses: sigstore/cosign-installer@d0224403f7425230756a10af497e77a0c842838a
+        uses: sigstore/cosign-installer@c56c2d3e59e4281cc41dea2217323ba5694b171e
           
       - name: Verify CC Ancestry
         run: |

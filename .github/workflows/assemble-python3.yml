@@ -26,7 +26,7 @@ jobs:
           curl -L "https://github.com/indygreg/python-build-standalone/releases/download/20240224/cpython-3.12.2+20240224-x86_64-unknown-linux-gnu-install_only.tar.gz" -o payload/python.tar.gz
           
       - name: Setup Cosign & Trivy
-        uses: sigstore/cosign-installer@d0224403f7425230756a10af497e77a0c842838a
+        uses: sigstore/cosign-installer@c56c2d3e59e4281cc41dea2217323ba5694b171e
           
       - name: Verify CC Ancestry
         run: |
