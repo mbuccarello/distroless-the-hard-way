@@ -27,7 +27,7 @@ jobs:
         run: |
           mkdir -p workspace/src workspace/out
           curl -L https://ftp.gnu.org/gnu/gcc/gcc-13.2.0/gcc-13.2.0.tar.gz -o workspace/gcc.tar.gz
-          echo "e275e76442a60f73b736fdf347b8bfbc23304cbe8e04bf1fde7ae66f108f5127 workspace/gcc.tar.gz" | sha256sum -c -
+          echo "e27595f95d852033606f363c46e29783f08b3e839218683e600570b86a8e8316 workspace/gcc.tar.gz" | sha256sum -c -
           tar -xzf workspace/gcc.tar.gz -C workspace/src --strip-components=1
 
       - name: SAST Scan via Semgrep

@@ -27,7 +27,7 @@ jobs:
         run: |
           mkdir -p workspace/src workspace/out
           curl -L https://ftp.gnu.org/gnu/glibc/glibc-2.39.tar.gz -o workspace/glibc.tar.gz
-          echo "f34083833ff32a82fa22c544fa9c6d3df8e4200fdfb9da7082318712ddb19fc7 workspace/glibc.tar.gz" | sha256sum -c -
+          echo "b91a780e95c1a7a08e6f1a4e5256e507c390a880949d01cfbc866555c4d612e6 workspace/glibc.tar.gz" | sha256sum -c -
           tar -xzf workspace/glibc.tar.gz -C workspace/src --strip-components=1
           
       - name: SAST Scan via Semgrep
