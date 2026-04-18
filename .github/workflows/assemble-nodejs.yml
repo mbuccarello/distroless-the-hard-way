@@ -27,7 +27,7 @@ jobs:
           echo "84edbca2facfe519cb8d9ec7cc39cb7db00c14b7914e9f783eeab2c58a69d76c payload/node.tar.gz" | sha256sum -c -
           
       - name: Setup Cosign & Trivy
-        uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003
+        uses: sigstore/cosign-installer@d0224403f7425230756a10af497e77a0c842838a
           
       - name: Verify CC Ancestry
         run: |
@@ -64,7 +64,7 @@ jobs:
           docker run --rm ghcr.io/${{ github.repository_owner }}/nodejs:latest --version
 
       - name: Run Final Image SCA Vulnerability Scan (Trivy)
-        uses: aquasecurity/trivy-action@062f39226cb12a5db3b52a138bb652ecf6927c88
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
         with:
           image-ref: 'ghcr.io/${{ github.repository_owner }}/nodejs:latest'
           format: 'table'

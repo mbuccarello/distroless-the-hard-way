@@ -18,10 +18,10 @@ jobs:
     
     steps:
       - name: Checkout Code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Setup Cosign
-        uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003
+        uses: sigstore/cosign-installer@d0224403f7425230756a10af497e77a0c842838a
         
       - name: Fetch and Verify GNU glibc Source
         run: |
@@ -31,7 +31,7 @@ jobs:
           tar -xzf workspace/glibc.tar.gz -C workspace/src --strip-components=1
           
       - name: SAST Scan via Semgrep
-        uses: returntocorp/semgrep-action@707a0f757f49516625fb18accf3f3388701237e1
+        uses: semgrep/semgrep-action@646969566277c1d765874c78d6b9d31190bc1f4e
         with:
           config: "p/c"
           input: workspace/src/
@@ -39,7 +39,7 @@ jobs:
       - name: Compile GNU glibc (Alpine Sandbox)
         uses: addnab/docker-run-action@4f65afd065ccd200c6306932104fd66bac0fba5c
         with:
-          image: alpine:latest
+          image: public.ecr.aws/docker/library/alpine:latest
           options: -v ${{ github.workspace }}/workspace:/workspace
           run: |
             apk add --no-cache build-base bash gawk bison python3 make
@@ -54,7 +54,7 @@ jobs:
         run: tar -czf glibc-layer.tar.gz -C workspace/out .
         
       - name: Generate SBOM (Trivy)
-        uses: aquasecurity/trivy-action@062f39226cb12a5db3b52a138bb652ecf6927c88
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
         with:
           scan-type: 'fs'
           scan-ref: 'workspace/out'
@@ -75,7 +75,7 @@ jobs:
           cosign attach sbom --sbom glibc-sbom.spdx.json ghcr.io/${{ github.repository_owner }}/artifacts-glibc:latest
 
       - name: Generate SLSA Build Provenance (Level 3)
-        uses: actions/attest-build-provenance@1c608d11d69870c20f0223619699826c7cacba8d
+        uses: actions/attest-build-provenance@520d128f165991a673d52daec27962ea98a03ca5
         with:
           subject-name: ghcr.io/${{ github.repository_owner }}/artifacts-glibc
           push-to-registry: true

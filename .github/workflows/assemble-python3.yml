@@ -26,7 +26,7 @@ jobs:
           curl -L "https://github.com/indygreg/python-build-standalone/releases/download/20240224/cpython-3.12.2+20240224-x86_64-unknown-linux-gnu-install_only.tar.gz" -o payload/python.tar.gz
           
       - name: Setup Cosign & Trivy
-        uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003
+        uses: sigstore/cosign-installer@d0224403f7425230756a10af497e77a0c842838a
           
       - name: Verify CC Ancestry
         run: |
@@ -60,7 +60,7 @@ jobs:
           docker run --rm ghcr.io/${{ github.repository_owner }}/python3:latest --version
 
       - name: Run Final Image SCA Vulnerability Scan (Trivy)
-        uses: aquasecurity/trivy-action@062f39226cb12a5db3b52a138bb652ecf6927c88
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
         with:
           image-ref: 'ghcr.io/${{ github.repository_owner }}/python3:latest'
           format: 'table'
