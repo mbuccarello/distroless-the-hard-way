@@ -26,7 +26,7 @@ jobs:
       - name: Fetch and Verify Zlib Source
         run: |
           mkdir -p workspace/src workspace/out
-          curl -L https://zlib.net/zlib-1.3.1.tar.gz -o workspace/zlib.tar.gz
+          curl -L https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz -o workspace/zlib.tar.gz
           echo "1cc0414cf524e14bdfacab4ab1cdefd596a2023ea133e224f9d54566ef8b2a75 workspace/zlib.tar.gz" | sha256sum -c -
           tar -xzf workspace/zlib.tar.gz -C workspace/src --strip-components=1
 
