@@ -31,7 +31,7 @@ jobs:
           tar -xzf workspace/openssl.tar.gz -C workspace/src --strip-components=1
           
       - name: SAST Scan via Semgrep
-        uses: semgrep/semgrep-action@646969566277c1d765874c78d6b9d31190bc1f4e
+        uses: semgrep/semgrep-action@713efdd345f3035192eaa63f56867b88e63e4e5d
         with:
           config: "p/c"
           input: workspace/src/
