@@ -41,7 +41,7 @@ jobs:
       - name: Compile Zlib (Alpine Sandbox)
         uses: addnab/docker-run-action@4f65fabd2431ebc8d299f8e5a018d79a769ae185
         with:
-          image: public.ecr.aws/docker/library/alpine:latest
+          image: ghcr.io/${{ github.repository_owner }}/base-alpine:latest
           options: -v ${{ github.workspace }}/workspace:/workspace
           run: |
             apk add --no-cache build-base make

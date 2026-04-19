@@ -40,10 +40,10 @@ jobs:
       - name: Compile GNU glibc (Alpine Sandbox)
         uses: addnab/docker-run-action@4f65fabd2431ebc8d299f8e5a018d79a769ae185
         with:
-          image: public.ecr.aws/docker/library/alpine:latest
+          image: ghcr.io/${{ github.repository_owner }}/base-alpine:latest
           options: -v ${{ github.workspace }}/workspace:/workspace
           run: |
-            apk add --no-cache build-base bash gawk bison python3 make linux-headers
+            apk add --no-cache build-base bash gawk bison python3 make linux-headers sed diffutils grep
             mkdir -p /workspace/build
             cd /workspace/build
             export SOURCE_DATE_EPOCH=315532800 # 1980 timestamps for reproducibility

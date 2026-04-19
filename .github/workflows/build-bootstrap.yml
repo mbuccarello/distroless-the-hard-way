@@ -20,7 +20,7 @@ jobs:
       - name: Build Static Busybox (Alpine Sandbox)
         uses: addnab/docker-run-action@v3
         with:
-          image: public.ecr.aws/docker/library/alpine:latest
+          image: ghcr.io/${{ github.repository_owner }}/base-alpine:latest
           options: -v ${{ github.workspace }}:/workspace
           run: |
             apk add --no-cache build-base wget bzip2
