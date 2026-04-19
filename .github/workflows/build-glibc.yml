@@ -47,7 +47,7 @@ jobs:
             mkdir -p /workspace/build
             cd /workspace/build
             export SOURCE_DATE_EPOCH=315532800 # 1980 timestamps for reproducibility
-            ../src/configure --prefix=/usr -O2 --disable-werror
+            CFLAGS="-O2" ../src/configure --prefix=/usr --disable-werror
             make -j$(nproc)
             make install DESTDIR=/workspace/out
             
