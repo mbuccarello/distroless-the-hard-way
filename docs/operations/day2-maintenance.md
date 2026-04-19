@@ -25,10 +25,24 @@ The foundation build process uses hardcoded SHA256 hashes to ensure bit-level re
 - If an upstream project (e.g., Glibc, OpenSSL) releases a new point version.
 - If an upstream project regenerates a source archive with the same version name (rare, but happens).
 
-### How to Update
-1. Download the file locally: `curl -L <URL> -o test.tar.gz`.
-2. Compute the hash: `shasum -a 256 test.tar.gz`.
-3. Update the corresponding `build-<component>.yml` file in `.github/workflows/`.
+### How to Verify and Calculate SHAs
+To ensure the supply chain remains "bit-perfect," follow this procedure when updating a component:
+1. **Identify Upstream URL**: Locate the canonical source URL (e.g., IANA for tzdata, GNU for glibc).
+2. **Download Artifact**:
+   ```bash
+   curl -L <URL> -o /tmp/component.tar.gz
+   ```
+3. **Calculate Hash**:
+   ```bash
+   # Use shasum for macOS/Linux
+   shasum -a 256 /tmp/component.tar.gz | cut -d' ' -f1
+   ```
+4. **Cross-Verify**: If the upstream project provides a `.sig` or `.asc` file (e.g., GNU projects), verify it with GPG before trusting the hash.
+   ```bash
+   # Example for GNU projects
+   gpg --verify component.tar.gz.sig
+   ```
+5. **Update Workflow**: Update the `echo "<HASH> workspace/..." | sha256sum -c -` line in the corresponding build YAML.
 
 ---
 

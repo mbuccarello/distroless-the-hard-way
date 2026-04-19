@@ -43,13 +43,13 @@ jobs:
           image: ghcr.io/${{ github.repository_owner }}/base-alpine:latest
           options: -v ${{ github.workspace }}/workspace:/workspace
           run: |
-            apk add --no-cache build-base bash gawk bison python3 make linux-headers sed diffutils grep perl texinfo
+            apk add --no-cache build-base bash gawk bison python3 python3-dev make linux-headers sed diffutils grep perl texinfo
             mkdir -p /workspace/build
             cd /workspace/build
             export SOURCE_DATE_EPOCH=315532800 # 1980 timestamps for reproducibility
             PYTHON=python3 ../src/configure --prefix=/usr CFLAGS="-O2" --disable-werror
-            make -j$(nproc)
-            make install DESTDIR=/workspace/out
+            make -j$(nproc) PYTHON=python3
+            make install DESTDIR=/workspace/out PYTHON=python3
             
       - name: Package Payload
         run: tar -czf glibc-layer.tar.gz -C workspace/out .

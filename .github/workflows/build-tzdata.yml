@@ -26,8 +26,8 @@ jobs:
       - name: Fetch and Verify IANA Source
         run: |
           mkdir -p workspace/src workspace/out
-          curl -L https://data.iana.org/time-zones/releases/tzdata2024a.tar.gz -o workspace/tzdata.tar.gz
-          echo "3b4694469e3568d7122b0f4967397e59c1b72e51921389e09d17d5c589b27670 workspace/tzdata.tar.gz" | sha256sum -c -
+          curl -L https://data.iana.org/time-zones/releases/tzdata2024b.tar.gz -o workspace/tzdata.tar.gz
+          echo "70e754db126a8d0db3d16d6b4cb5f7ec1e04d5f261255e4558a67fe92d39e550 workspace/tzdata.tar.gz" | sha256sum -c -
           tar -xzf workspace/tzdata.tar.gz -C workspace/src
           
       - name: Compile Timezones (Alpine Sandbox)
