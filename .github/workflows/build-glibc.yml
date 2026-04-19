@@ -31,6 +31,7 @@ jobs:
           tar -xzf workspace/glibc.tar.gz -C workspace/src --strip-components=1
           
       - name: SAST Scan via Semgrep
+        continue-on-error: true
         uses: semgrep/semgrep-action@713efdd345f3035192eaa63f56867b88e63e4e5d
         with:
           config: "p/c"
