@@ -23,11 +23,17 @@ jobs:
       - name: Setup Cosign
         uses: sigstore/cosign-installer@c56c2d3e59e4281cc41dea2217323ba5694b171e
         
-      - name: Fetch and Verify IANA Source
+      - name: Fetch and Verify IANA Source (Code + Data)
         run: |
           mkdir -p workspace/src workspace/out
+          # IANA 2024b requires both code (Makefile/scripts) and data
+          curl -L https://data.iana.org/time-zones/releases/tzcode2024b.tar.gz -o workspace/tzcode.tar.gz
           curl -L https://data.iana.org/time-zones/releases/tzdata2024b.tar.gz -o workspace/tzdata.tar.gz
+          
+          echo "31674488a032fcfc3fb76fbf4cc3415c9a66ca0b2984e72f778a879899324c48 workspace/tzcode.tar.gz" | sha256sum -c -
           echo "70e754db126a8d0db3d16d6b4cb5f7ec1e04d5f261255e4558a67fe92d39e550 workspace/tzdata.tar.gz" | sha256sum -c -
+          
+          tar -xzf workspace/tzcode.tar.gz -C workspace/src
           tar -xzf workspace/tzdata.tar.gz -C workspace/src
           
       - name: Compile Timezones (Alpine Sandbox)
