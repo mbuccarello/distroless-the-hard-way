@@ -88,5 +88,18 @@ gh attestation verify ghcr.io/<owner>/artifacts-<component>:latest --owner mbucc
 
 ---
 
+## 6. Build Environment Constraints
+
+### GNU C Library (Glibc)
+> [!IMPORTANT]
+> **Host Incompatibility**: Never attempt to build Glibc on an Alpine (musl-based) host. The musl system headers will conflict with Glibc headers, causing macro redefinitions (e.g., `PAGE_SIZE`) that fail the build.
+> - **Requirement**: Always use a Glibc-native sandbox (e.g., `fedora`, `debian`, `ubuntu`).
+
+### Timezone Data (tzdata)
+> [!NOTE]
+> **Dual-Source Requirement**: Version 2024b and later require merging two upstream tarballs: `tzcodeYYYYx.tar.gz` (logic) and `tzdataYYYYx.tar.gz` (definitions). Building from data-only packages will fail.
+
+---
+
 > [!IMPORTANT]
 > **ABI Stability**: When applying patches to `glibc` or `openssl`, always verify that you are not breaking the Application Binary Interface (ABI), as these libraries are shared by all downstream language runtimes.
