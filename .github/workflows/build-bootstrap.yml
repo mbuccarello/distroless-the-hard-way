@@ -26,7 +26,7 @@ jobs:
           image: fedora:40
           options: -v ${{ github.workspace }}:/workspace
           run: |
-            dnf install -y gcc make binutils wget bzip2 glibc-static
+            dnf install -y gcc make binutils wget bzip2 glibc-static file
             mkdir -p /workspace/build /workspace/rootfs
             cd /workspace/build
             wget https://busybox.net/downloads/busybox-1.36.1.tar.bz2
