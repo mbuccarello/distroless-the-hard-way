@@ -36,8 +36,8 @@ To achieve **Total Isolation**, we no longer pull the base Alpine image directly
 
 ### Stage 1: The GNU Pivot (Host OS Strategy)
 We discovered that building **Glibc** on a **musl-based** host (Alpine) causes severe header conflicts between the two C libraries. 
-- **The Fix**: We use **Fedora (glibc-native)** as the build sandbox for foundational libraries. 
-- **The Result**: A standard GNU toolchain that generates bit-perfect binaries without macro redefinitions.
+- **The Fix (Total GNU Alignment)**: We use **Fedora (glibc-native)** as the build sandbox for **all** compiled components, including the Stage 0 Bootstrap tool.
+- **The Result**: A standardized GNU toolchain across the entire lifecycle, ensuring that even our static bootstrap utilities are built with the same libc standards as the final product.
 
 ### Stage 2: Static Bootstrap Assembler
 To maintain a pure **zero-trust** posture, we do not use the host's `tar` or `sh` to assemble the final images.
