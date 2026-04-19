@@ -30,7 +30,7 @@ jobs:
           curl -L https://data.iana.org/time-zones/releases/tzcode2024b.tar.gz -o workspace/tzcode.tar.gz
           curl -L https://data.iana.org/time-zones/releases/tzdata2024b.tar.gz -o workspace/tzdata.tar.gz
           
-          echo "31674488a032fcfc3fb76fbf4cc3415c9a66ca0b2984e72f778a879899324c48 workspace/tzcode.tar.gz" | sha256sum -c -
+          echo "5e438fc449624906af16a18ff4573739f0cda9862e5ec28d3bcb19cbaed0f672 workspace/tzcode.tar.gz" | sha256sum -c -
           echo "70e754db126a8d0db3d16d6b4cb5f7ec1e04d5f261255e4558a67fe92d39e550 workspace/tzdata.tar.gz" | sha256sum -c -
           
           tar -xzf workspace/tzcode.tar.gz -C workspace/src
