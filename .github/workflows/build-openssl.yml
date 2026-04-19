@@ -65,7 +65,7 @@ jobs:
         id: push
         run: |
           echo "FROM scratch" > Dockerfile
-          echo "ADD openssl-layer.tar.gz /" >> Dockerfile
+          echo "COPY openssl-layer.tar.gz /" >> Dockerfile
           docker build -t ghcr.io/${{ github.repository_owner }}/artifacts-openssl:latest .
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           docker push ghcr.io/${{ github.repository_owner }}/artifacts-openssl:latest

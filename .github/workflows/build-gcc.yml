@@ -70,7 +70,7 @@ jobs:
         id: push
         run: |
           echo "FROM scratch" > Dockerfile
-          echo "ADD gcc-layer.tar.gz /" >> Dockerfile
+          echo "COPY gcc-layer.tar.gz /" >> Dockerfile
           docker build -t ghcr.io/${{ github.repository_owner }}/artifacts-gcc:latest .
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           docker push ghcr.io/${{ github.repository_owner }}/artifacts-gcc:latest
