@@ -43,7 +43,7 @@ jobs:
           image: public.ecr.aws/docker/library/alpine:latest
           options: -v ${{ github.workspace }}/workspace:/workspace
           run: |
-            apk add --no-cache build-base bash musl-dev gmp-dev mpc1-dev mpfr-dev flex bison
+            apk add --no-cache build-base bash musl-dev gmp-dev mpc1-dev mpfr-dev flex bison linux-headers
             mkdir -p /workspace/build
             cd /workspace/build
             export SOURCE_DATE_EPOCH=315532800

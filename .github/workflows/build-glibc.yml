@@ -43,7 +43,7 @@ jobs:
           image: public.ecr.aws/docker/library/alpine:latest
           options: -v ${{ github.workspace }}/workspace:/workspace
           run: |
-            apk add --no-cache build-base bash gawk bison python3 make
+            apk add --no-cache build-base bash gawk bison python3 make linux-headers
             mkdir -p /workspace/build
             cd /workspace/build
             export SOURCE_DATE_EPOCH=315532800 # 1980 timestamps for reproducibility
