@@ -99,8 +99,6 @@ jobs:
           ENV TZ=UTC
           EOF
 
-      - name: Authenticate to GitHub Container Registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Build and Push Base OS
         run: |

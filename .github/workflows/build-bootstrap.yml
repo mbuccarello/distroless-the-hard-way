@@ -17,6 +17,9 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
+      - name: Authenticate to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
       - name: Build Static Busybox (Alpine Sandbox)
         uses: addnab/docker-run-action@v3
         with:
@@ -58,8 +61,6 @@ jobs:
           EOF
           docker build -t ghcr.io/${{ github.repository_owner }}/bootstrap:latest -f Dockerfile.bootstrap .
 
-      - name: Authenticate to GitHub Container Registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Build and Push Bootstrap OS
         run: |

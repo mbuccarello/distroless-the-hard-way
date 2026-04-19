@@ -19,12 +19,20 @@ runs:
   using: "composite"
   steps:
     - name: Publish to Registry
+      id: push
       shell: bash
       run: |
         echo "${{ inputs.github-token }}" | docker login ${{ inputs.registry }} -u ${{ github.actor }} --password-stdin
+        # We assume the first tag is the primary one for attestation purposes
+        FIRST_TAG=$(echo "${{ inputs.tags }}" | awk '{print $1}')
+        IMAGE_NAME="${{ inputs.registry }}/${{ github.repository_owner }}/${{ inputs.image-name }}:$FIRST_TAG"
+        
         for tag in ${{ inputs.tags }}; do
           docker push ${{ inputs.registry }}/${{ github.repository_owner }}/${{ inputs.image-name }}:$tag
         done
+        
+        DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "$IMAGE_NAME" | cut -d'@' -f2)
+        echo "digest=$DIGEST" >> $GITHUB_OUTPUT
 
     - name: Sign Sovereign Product
       shell: bash
@@ -34,7 +42,8 @@ runs:
         done
 
     - name: Generate SLSA Build Provenance (Level 3)
-      uses: actions/attest-build-provenance@1c608d11d69870c20f0223619699826c7cacba8d
+      uses: actions/attest-build-provenance@7668571508540a607bdfd90a87a560489fe372eb
       with:
         subject-name: ${{ inputs.registry }}/${{ github.repository_owner }}/${{ inputs.image-name }}
+        subject-digest: ${{ steps.push.outputs.digest }}
         push-to-registry: true

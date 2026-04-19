@@ -30,6 +30,10 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
+      - name: Authenticate to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+
       - name: Setup Cosign
         uses: sigstore/cosign-installer@c56c2d3e59e4281cc41dea2217323ba5694b171e
 
