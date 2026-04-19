@@ -1,0 +1,99 @@
+name: Opensource Distroless Hardener - Security Patching
+
+on:
+  workflow_dispatch:
+    inputs:
+      component:
+        description: 'Component to harden (zlib, glibc, openssl, etc.)'
+        required: true
+        type: choice
+        options:
+          - zlib
+          - glibc
+          - openssl
+          - tzdata
+      version:
+        description: 'Version to patch'
+        required: true
+        default: 'latest'
+
+jobs:
+  harden-and-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Setup Cosign
+        uses: sigstore/cosign-installer@c56c2d3e59e4281cc41dea2217323ba5694b171e
+
+      - name: Load Component Metadata
+        id: metadata
+        run: |
+          # In a real scenario, we would parse the corresponding build-*.yml
+          # for version and URL. For this educational process, we assume
+          # standardized versions as defined in the project architecture.
+          echo "component=${{ github.event.inputs.component }}" >> $GITHUB_OUTPUT
+
+      - name: Fetch and Verify Source
+        run: |
+          mkdir -p workspace/src workspace/out
+          if [ "${{ github.event.inputs.component }}" == "zlib" ]; then
+            curl -L https://github.com/madler/zlib/archive/refs/tags/v1.3.1.tar.gz -o workspace/src.tar.gz
+            echo "17e88863f3600672ab49182f217281b6fc4d3c762bde361935e436a95214d05c  workspace/src.tar.gz" | sha256sum -c -
+          elif [ "${{ github.event.inputs.component }}" == "glibc" ]; then
+            curl -L https://ftp.gnu.org/gnu/glibc/glibc-2.39.tar.gz -o workspace/src.tar.gz
+            echo "b91a780e95c1a7a08e6f1a4e5256e507c390a880949d01cfbc866555c4d612e6  workspace/src.tar.gz" | sha256sum -c -
+          fi
+          tar -xzf workspace/src.tar.gz -C workspace/src --strip-components=1
+
+      - name: Apply Security Patches
+        run: |
+          PATCH_DIR="patches/${{ github.event.inputs.component }}"
+          if [ -d "$PATCH_DIR" ] && [ "$(ls -A $PATCH_DIR/*.patch 2>/dev/null)" ]; then
+            echo "Found patches in $PATCH_DIR, applying..."
+            for patch in $PATCH_DIR/*.patch; do
+              patch -p1 -d workspace/src < "$patch"
+            done
+          else
+            echo "No patches found for ${{ github.event.inputs.component }}. Proceeding with vanilla source."
+          fi
+
+      - name: Hardened SAST Scan (Semgrep)
+        uses: semgrep/semgrep-action@713efdd345f3035192eaa63f56867b88e63e4e5d
+        with:
+          config: p/security-audit
+        # Note: In the Hardener track, this IS blocking by default to verify remediation.
+
+      - name: Compile Hardened Payload (Alpine Sandbox)
+        uses: addnab/docker-run-action@4f65fabd2431ebc8d299f8e5a018d79a769ae185
+        with:
+          image: public.ecr.aws/docker/library/alpine:latest
+          options: -v ${{ github.workspace }}/workspace:/workspace
+          run: |
+            apk add --no-cache build-base make
+            cd /workspace/src
+            ./configure --prefix=/usr
+            make -j$(nproc)
+            make install DESTDIR=/workspace/out
+
+      - name: Package and Push Hardened OCI Artifact
+        run: |
+          tar -czf payload-hardened.tar.gz -C workspace/out .
+          echo "FROM scratch" > Dockerfile
+          echo "ADD payload-hardened.tar.gz /" >> Dockerfile
+          IMAGE_NAME="ghcr.io/${{ github.repository_owner }}/artifacts-${{ github.event.inputs.component }}:latest-hardened"
+          docker build -t $IMAGE_NAME .
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker push $IMAGE_NAME
+          
+      - name: Sign Hardened Artifact Keyless (Cosign)
+        run: |
+          IMAGE_NAME="ghcr.io/${{ github.repository_owner }}/artifacts-${{ github.event.inputs.component }}:latest-hardened"
+          cosign sign --yes $IMAGE_NAME

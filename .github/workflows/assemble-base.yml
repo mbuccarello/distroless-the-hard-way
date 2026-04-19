@@ -106,6 +106,8 @@ jobs:
         run: |
           docker build -t ghcr.io/${{ github.repository_owner }}/base:latest .
           docker push ghcr.io/${{ github.repository_owner }}/base:latest
+          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "ghcr.io/${{ github.repository_owner }}/base:latest" | cut -d'@' -f2)
+          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
 
       - name: Run Base Image SCA Vulnerability Scan (Trivy)
         uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
@@ -138,5 +140,6 @@ jobs:
         uses: actions/attest-build-provenance@7668571508540a607bdfd90a87a560489fe372eb
         with:
           subject-name: ghcr.io/${{ github.repository_owner }}/base
+          subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
 

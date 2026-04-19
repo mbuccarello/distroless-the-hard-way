@@ -53,12 +53,15 @@ jobs:
           output: 'tzdata-sbom.spdx.json'
 
       - name: Push to GHCR as OCI Scratch Artifact
+        id: push
         run: |
           echo "FROM scratch" > Dockerfile
           echo "ADD tzdata-layer.tar.gz /" >> Dockerfile
           docker build -t ghcr.io/${{ github.repository_owner }}/artifacts-tzdata:latest .
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           docker push ghcr.io/${{ github.repository_owner }}/artifacts-tzdata:latest
+          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "ghcr.io/${{ github.repository_owner }}/artifacts-tzdata:latest" | cut -d'@' -f2)
+          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
           
       - name: Sign OCI Artifact Keyless (Cosign)
         run: |
@@ -69,5 +72,6 @@ jobs:
         uses: actions/attest-build-provenance@7668571508540a607bdfd90a87a560489fe372eb
         with:
           subject-name: ghcr.io/${{ github.repository_owner }}/artifacts-tzdata
+          subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
 
