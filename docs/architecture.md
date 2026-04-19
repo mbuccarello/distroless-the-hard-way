@@ -1,43 +1,68 @@
-# Architecture: Decoupled Components
+# Architecture: Total Isolation & Zero-Trust Lifecycle
 
-The idea is to compiling different base immage layer like in the google distr4oless bazel build, compiling `base`, `cc`, and `java` layers independently without extracting pre-compiled Ubuntu or Debian packages like the standard Google Distroless model.
-
-
----
-
-## The Open-Source Security Gateways (SAST & SCA)
-
-In a monolithic build, determining *where* a vulnerability originated in the final image is nearly impossible. By isolating every foundational library (`glibc`, `openssl`, `zlib`, `gcc`) into its own discrete GitHub Action pipeline (`build-<library>.yml`), Opensource-Distroless enforces aggressive, component-level security gating:
-
-1. **Source Download:** The workflow `curl`s the specific C-code from the GNU FTP or Github.
-2. **SAST Scan (`Semgrep` / `Cppcheck`):** Before compiling, the raw C-code is statistically scanned for buffer overflows, memory leaks, and known malicious manipulation patterns.
-3. **Compilation:** The artifact is mathematically compiled natively (with timestamps stripped for reproducibility).
-4. **SCA & SBOM (`Trivy` / `Syft`):** The output `.tar.gz` binary is scanned against CVE databases, and a bespoke Software Bill of Materials (SBOM) is digitally generated exclusively for this single component.
-5. **Signing & Push (`Cosign`):** The artifact is wrapped in an intermediate `FROM scratch` OCI Blob, signed securely using GitHub OIDC keyless infrastructure, and pushed to `ghcr.io/opensource-distroless/artifacts-<name>`.
-
-If *any* of those gateways fail—for example, if a severe CVE is found in `zlib`—that specific workflow halts immediately. The compromised artifact is never pushed, protecting the overall `base` image from contamination.
-
-**Detailed Step-by-Step Atomic Pipeline Guides:**
-*   [**`build-glibc.yml`**](pipelines/build-glibc.md)
-*   [**`build-openssl.yml`**](pipelines/build-openssl.md)
-*   [**`build-zlib.yml`**](pipelines/build-zlib.md)
-*   [**`build-tzdata.yml`**](pipelines/build-tzdata.md)
-*   [**`build-gcc.yml`**](pipelines/build-gcc.md)
+Distroless The Hard Way implements a **decoupled, multi-stage artifact lifecycle** designed to eliminate external dependencies and ensure bit-perfect supply chain integrity.
 
 ---
 
-## Pipeline Orchestration
+## 1. The High-Level Lifecycle
 
-Once the atomic foundational components are vetted and published to the Container Registry as isolated OCI blobs, the "Assembler Workflows" combine them chronologically.
+Our architecture is split into four distinct stages to separate build concerns from assembly concerns.
 
-![GitHub Actions Cross-Trigger Pipeline Diagram](images/pipeline_flow.png)
+```mermaid
+sequenceDiagram
+    participant U as Upstream (GNU/IANA/Alpine)
+    participant M as Stage -1: Mirror Registry
+    participant F as Stage 1: Foundation (Fedora Host)
+    participant A as Stage 2: Assembler (Static Bootstrap)
+    participant P as Stage 3: Project Product
 
-### The Assemblers
-*   [**`assemble-base.yml`**](pipelines/assemble-base.md): Retrieves the signed `glibc`, `openssl`, `zlib`, and `tzdata` intermediate payloads from `ghcr.io`. It verifies their Cosign signatures, merges them over an empty root filesystem, and publishes the operational OS standard `opensource-distroless/base`.
-*   [**`assemble-cc.yml`**](pipelines/assemble-cc.md): Triggers upon the base completion. Fetches the verified `gcc` (libstdc++) artifact and layers it.
-*   [**`assemble-java.yml`**](pipelines/assemble-java.md): Layers the pre-compiled OpenJDK binary runtime on top of the Opensource Distroless CC environment.
-*   [**`assemble-nodejs.yml`**](pipelines/assemble-nodejs.md): Verified Node.js LTS layer.
-*   [**`assemble-python3.yml`**](pipelines/assemble-python3.md): Standalone Python 3.12 layer.
-*   [**`assemble-dotnet.yml`**](pipelines/assemble-dotnet.md): .NET 8.0 Runtime layer.
-*   [**`assemble-php.yml`**](pipelines/assemble-php.md): PHP 8.3-FPM layer.
-*   [**`assemble-perl.yml`**](pipelines/assemble-perl.md): Perl 5.38 layer.
+    U->>M: Cache Base Images (Alpine)
+    M->>F: Provide Trusted Environment
+    U->>F: Pure Source Code (.tar.gz)
+    F->>F: Compile Glibc/OpenSSL/Zlib
+    F->>A: Push Intermediate Signed Payloads
+    A->>A: Extraction via Static Bootstrap
+    A->>P: Final Distroless Image (Signed + SLSA)
+```
+
+---
+
+## 2. Technical Pillars
+
+### Stage -1: Mirror Isolation
+To achieve **Total Isolation**, we no longer pull the base Alpine image directly from Docker Hub during multiple builds. This prevents `ToManyRequests` rate limits and ensures that even if an upstream image is deleted, our pipeline remains operational.
+- **Workflow**: `mirror-base.yml`
+- **Output**: `ghcr.io/mbuccarello/base-alpine:latest`
+
+### Stage 1: The GNU Pivot (Host OS Strategy)
+We discovered that building **Glibc** on a **musl-based** host (Alpine) causes severe header conflicts between the two C libraries. 
+- **The Fix**: We use **Fedora (glibc-native)** as the build sandbox for foundational libraries. 
+- **The Result**: A standard GNU toolchain that generates bit-perfect binaries without macro redefinitions.
+
+### Stage 2: Static Bootstrap Assembler
+To maintain a pure **zero-trust** posture, we do not use the host's `tar` or `sh` to assemble the final images.
+- **Bootstrapping**: We natively compile a **strictly static BusyBox** (Stage 0).
+- **Assembly**: This single, signed binary is the *only* tool allowed to extract components and create the rootfs (e.g., `/etc/passwd`) inside a `FROM scratch` container.
+- **Linkage**: By enforcing `CONFIG_STATIC=y`, we ensure the tool runs without requiring any external shared libraries.
+
+---
+
+## 3. Supply Chain Security Gateways
+
+At every stage, we apply the following gates:
+1. **Source Integrity**: SHA256 verification of raw `.tar.gz` downloads.
+2. **SAST Scan**: Semgrep analysis of the C source code.
+3. **SCA & SBOM**: Trivy generation of SPDX records.
+4. **Attestation**: SLSA Level 3 provenance linking the binary to the specific commit.
+5. **Transparency**: Keyless Sigstore (Cosign) signing of every layer.
+
+---
+
+## 4. Current Pipeline Matrix
+
+| Workflow | Stage | Purpose | Host Environment |
+| :--- | :--- | :--- | :--- |
+| `mirror-base.yml` | -1 | Registry Isolation | Ubuntu |
+| `build-bootstrap.yml` | 0 | Assembly Tooling | Alpine -> Static |
+| `build-glibc.yml` | 1 | C Runtime | Fedora |
+| `assemble-base.yml` | 2 | OS Construction | Scratch (Static) |

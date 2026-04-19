@@ -23,6 +23,7 @@ When generating or modifying GitHub Action assembly pipelines, you must include 
 4. **Trivy:** SBOM/SCA generation.
 
 ## 4. Documentation Standards
+- **Architectural Documentation Enforcement:** You are strictly prohibited from considering an architectural change (e.g. Pivot to Fedora, new Mirroring layers, Bootstrap modifications) as "Done" until the corresponding `.md` documentation in `docs/` or `README.md` has been updated to reflect the new technical reality.
 - **Mandatory Synchronization:** Each time you create a new layer, modify a GitHub Action workflow, or notably change the CI logic, you **must** proactively check if a documentation update in `docs/` is required.
 - **Graphical Diagrams (Mermaid):** Agents MUST create a graphical architecture diagram or sequence diagram (using Mermaid syntax) whenever it makes sense to graphically explain the architecture, a related pipeline, or an operative workflow.
 - **Educational & Professional Tone:** Documentation must be written as step-by-step tutorials explaining the "why", not just the "how". You must adopt the tone of a senior technical manager. Describe architecture and work academically. Do not use AI filler text, excessive marketing adjectives, or emojis.
