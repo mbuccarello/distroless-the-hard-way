@@ -23,12 +23,25 @@ jobs:
       - name: Setup Cosign
         uses: sigstore/cosign-installer@c56c2d3e59e4281cc41dea2217323ba5694b171e
         
-      - name: Fetch Target GCC Source
+      - name: Fetch and Verify GCC Source (GPG Signature)
         run: |
           mkdir -p workspace/src workspace/out
-          wget https://ftp.gnu.org/gnu/gcc/gcc-13.2.0/gcc-13.2.0.tar.xz -O workspace/gcc.tar.xz
-          echo "82370f7d5403063548970e7a2754d9b4b003666b618991a0fac3e10bd9b533f0 workspace/gcc.tar.xz" | sha256sum -c -
-          tar -xJf workspace/gcc.tar.xz -C workspace/src --strip-components=1
+          cd workspace
+          wget https://ftp.gnu.org/gnu/gcc/gcc-13.2.0/gcc-13.2.0.tar.xz
+          wget https://ftp.gnu.org/gnu/gcc/gcc-13.2.0/gcc-13.2.0.tar.xz.sig
+          
+          # Import GCC Release Manager keys
+          # GNU key for GCC 13 (e.g., Jakub Jelinek)
+          gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys \
+            D3A93CAD751C2AF4F8C7AD516C35B999583A0917 \
+            B9D0A164669A4D3B || echo "Keyserver failed, trying alternative..."
+          
+          # Attempt verification (allow continuation for log analysis if it fails, but we target success)
+          gpg --verify gcc-13.2.0.tar.xz.sig gcc-13.2.0.tar.xz || \
+            (echo "GPG verification failed, computing local hash for debug: $(sha256sum gcc-13.2.0.tar.xz)" && exit 1)
+          
+          cd ..
+          tar -xJf workspace/gcc-13.2.0.tar.xz -C workspace/src --strip-components=1
 
       - name: SAST Scan via Semgrep
         continue-on-error: true
