@@ -4,22 +4,40 @@ Distroless The Hard Way implements a modular, Decoupled Component Architecture (
 
 ---
 
-## 1. Pipeline Lifecycle Specification
+## 1. Pipeline Lifecycle Specification (Layered Master Model)
 
-The build process is logically partitioned into functional stages. Each stage is isolated to prevent cross-contamination of build environments.
+The build process is managed by a three-tier Master Orchestration system. This structure eliminates race conditions by enforcing strict sequentiality between architectural layers.
 
 ```mermaid
 graph TD
-    S1[-1: Mirror Registry] --> S0[0: Static Bootstrap]
-    S1 --> S1_F[1: Foundations]
-    S0 --> S2[2: OS Core Assembly]
-    S1_F --> S2
-    S2 --> S3[3: Verification]
+    Push["Git Push to main"] --> F["Master Foundations"]
     
-    subgraph "Isolation Zone"
-    S1
-    S0
-    S1_F
+    subgraph Layer1 ["Layer 1: Foundations (GNU-Native Builders)"]
+        F --> B1["build-openssl"]
+        F --> B2["build-zlib"]
+        F --> B3["build-tzdata"]
+        F --> B4["build-bootstrap"]
+        B1 --> G["build-glibc"]
+        B2 --> G
+        G --> GC["build-gcc"]
+    end
+    
+    GC --> A["Master Assembly"]
+    
+    subgraph Layer2 ["Layer 2: Assembly (Image Construction)"]
+        A --> AB["assemble-base"]
+        AB --> AC["assemble-cc"]
+        AC --> L1["assemble-java"]
+        AC --> L2["assemble-python"]
+        AC --> L3["assemble-nodejs"]
+    end
+    
+    L1 --> V["Master Validation"]
+    L2 --> V
+    L3 --> V
+    
+    subgraph Layer3 ["Layer 3: Validation (E2E)"]
+        V --> E2E["e2e-orchestrator"]
     end
 ```
 

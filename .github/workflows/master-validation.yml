@@ -1,0 +1,39 @@
+name: "Layer 3: Validation (E2E Functional Tests)"
+
+on:
+  workflow_run:
+    workflows: ["Layer 2: Assembly (Image Construction)"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  test-java:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    uses: ./.github/workflows/test-java.yml
+    secrets: inherit
+
+  test-python3:
+    needs: []
+    uses: ./.github/workflows/test-python3.yml
+    secrets: inherit
+
+  test-nodejs:
+    needs: []
+    uses: ./.github/workflows/test-nodejs.yml
+    secrets: inherit
+
+  test-php:
+    needs: []
+    uses: ./.github/workflows/test-php.yml
+    secrets: inherit
+
+  test-perl:
+    needs: []
+    uses: ./.github/workflows/test-perl.yml
+    secrets: inherit
+
+  test-dotnet:
+    needs: []
+    uses: ./.github/workflows/test-dotnet.yml
+    secrets: inherit

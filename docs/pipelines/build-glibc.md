@@ -10,8 +10,9 @@ To ensure binary compatibility and prevent system header conflicts, the build is
 
 ### Sandbox Environment
 - **Host System**: Fedora (latest)
-- **Source**: `ghcr.io/mbuccarello/base-fedora:latest` (Stage 0 Mirror)
-- **Rationale**: Building GNU components on musl-based hosts (e.g., Alpine) is prohibited to prevent environmental contamination of the library's internal definitions.
+- **Source**: `ghcr.io/mbuccarello/base-fedora:latest`
+- **Authentication**: **Docker Login** enabled for secure sandbox pull.
+- **Rationale**: Building GNU components on musl-based hosts (e.g., Alpine) is prohibited to prevent environmental contamination of the library's ABI definitions.
 
 ### Compilation Strategy
 1. **Source Acquisition**: Upstream Glibc source is retrieved from the official GNU mirrors.
@@ -27,9 +28,9 @@ To ensure binary compatibility and prevent system header conflicts, the build is
 | :--- | :--- | :--- |
 | **Integrity** | `sha256sum` | Mandatory hash match against hardcoded reference. |
 | **SAST** | `Semgrep` | Static analysis of C code for memory safety vulnerabilities. |
-| **SCA** | `Trivy` | Generation of SPDX SBOM and CVE scanning. |
-| **Identity** | `Cosign` | Keyless OIDC signing of the resulting OCI artifact. |
-| **SLSA** | `Attest` | Level 3 Build Provenance generation. |
+| **SCA** | `Trivy` | Vulnerability scanning of the compiled binaries. |
+| **Identity** | `Cosign` | Keyless OIDC signing (Manual Binary Install v2.4.1). |
+| **SLSA** | `Attest` | Level 3 Build Provenance via `actions/attest-build-provenance@v2`. |
 
 ---
 

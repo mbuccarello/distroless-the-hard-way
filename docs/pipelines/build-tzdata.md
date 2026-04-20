@@ -11,6 +11,7 @@ Starting with version 2024b, the system implements a **Dual-Source** strategy to
 ### Sandbox Environment
 - **Host System**: Fedora (latest)
 - **Source**: `ghcr.io/mbuccarello/base-fedora:latest`
+- **Authentication**: **Docker Login** required before sandbox pull.
 
 ### Compilation Strategy
 1. **Source Acquisition**: The pipeline fetches two distinct tarballs: `tzcodeYYYYx.tar.gz` (logic) and `tzdataYYYYx.tar.gz` (data).
@@ -24,12 +25,11 @@ Starting with version 2024b, the system implements a **Dual-Source** strategy to
 | Gate | Tool | Specification |
 | :--- | :--- | :--- |
 | **Integrity** | `sha256sum` | Dual-hash verification for code and data packages. |
-| **Identity** | `Cosign` | Keyless OIDC signing of the OCI artifact. |
-| **SLSA** | `Attest` | Level 3 Build Provenance. |
+| **Identity** | `Cosign` | Keyless OIDC signing (Manual Binary Install v2.4.1). |
+| **SLSA** | `Attest` | Level 3 Build Provenance via `actions/attest-build-provenance@v2`. |
 
 ---
 
 ## 3. Artifact Distribution
 
-- **Target**: `ghcr.io/mbuccarello/artifacts-tzdata:latest`
 

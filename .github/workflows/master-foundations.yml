@@ -1,0 +1,35 @@
+name: "Layer 1: Foundations (GNU-Native Builders)"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/build-*.yml'
+  workflow_dispatch:
+
+jobs:
+  bootstrap:
+    uses: ./.github/workflows/build-bootstrap.yml
+    secrets: inherit
+
+  openssl:
+    uses: ./.github/workflows/build-openssl.yml
+    secrets: inherit
+
+  zlib:
+    uses: ./.github/workflows/build-zlib.yml
+    secrets: inherit
+
+  tzdata:
+    uses: ./.github/workflows/build-tzdata.yml
+    secrets: inherit
+
+  glibc:
+    uses: ./.github/workflows/build-glibc.yml
+    secrets: inherit
+
+  gcc:
+    needs: [glibc]
+    uses: ./.github/workflows/build-gcc.yml
+    secrets: inherit

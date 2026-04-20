@@ -1,16 +1,11 @@
 name: Opensource Distroless Assembler - java
 
 on:
-  workflow_run:
-    workflows: ["Opensource Distroless Assembler - cc"]
-    types:
-      - completed
   workflow_dispatch:
   workflow_call:
 
 jobs:
   assemble:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read

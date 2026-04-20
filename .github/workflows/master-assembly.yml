@@ -1,0 +1,49 @@
+name: "Layer 2: Assembly (Image Construction)"
+
+on:
+  workflow_run:
+    workflows: ["Layer 1: Foundations (GNU-Native Builders)"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  base:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    uses: ./.github/workflows/assemble-base.yml
+    secrets: inherit
+
+  cc:
+    needs: [base]
+    uses: ./.github/workflows/assemble-cc.yml
+    secrets: inherit
+
+  java:
+    needs: [cc]
+    uses: ./.github/workflows/assemble-java.yml
+    secrets: inherit
+
+  python3:
+    needs: [cc]
+    uses: ./.github/workflows/assemble-python3.yml
+    secrets: inherit
+
+  nodejs:
+    needs: [cc]
+    uses: ./.github/workflows/assemble-nodejs.yml
+    secrets: inherit
+
+  php:
+    needs: [cc]
+    uses: ./.github/workflows/assemble-php.yml
+    secrets: inherit
+
+  perl:
+    needs: [cc]
+    uses: ./.github/workflows/assemble-perl.yml
+    secrets: inherit
+
+  dotnet:
+    needs: [cc]
+    uses: ./.github/workflows/assemble-dotnet.yml
+    secrets: inherit

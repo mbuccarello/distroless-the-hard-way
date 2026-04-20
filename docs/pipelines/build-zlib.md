@@ -11,6 +11,7 @@ Following the Total GNU Alignment strategy, zlib is compiled within a Glibc-nati
 ### Sandbox Environment
 - **Host System**: Fedora (latest)
 - **Source**: `ghcr.io/mbuccarello/base-fedora:latest`
+- **Authentication**: **Docker Login** required for sandbox image access.
 
 ### Compilation Strategy
 1. **Source Acquisition**: Raw source is retrieved from the official zlib GitHub repository.
@@ -26,8 +27,8 @@ Following the Total GNU Alignment strategy, zlib is compiled within a Glibc-nati
 | **Integrity** | `sha256sum` | Mandatory hash match. |
 | **SAST** | `Semgrep` | Static analysis of the compression logic. |
 | **SCA** | `Trivy` | Continuous vulnerability scanning. |
-| **Identity** | `Cosign` | Keyless OIDC signing. |
-| **SLSA** | `Attest` | Level 3 Build Provenance. |
+| **Identity** | `Cosign` | Keyless OIDC signing (Manual Binary Install v2.4.1). |
+| **SLSA** | `Attest` | Level 3 Build Provenance via `actions/attest-build-provenance@v2`. |
 
 ---
 

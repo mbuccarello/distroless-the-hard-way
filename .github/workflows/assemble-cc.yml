@@ -1,10 +1,6 @@
 name: Opensource Distroless Assembler - cc
 
 on:
-  workflow_run:
-    workflows: ["Opensource Distroless Assembler - base", "Opensource Distroless Build - gcc"]
-    types:
-      - completed
   workflow_dispatch:
   workflow_call:
 
