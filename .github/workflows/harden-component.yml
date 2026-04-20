@@ -34,8 +34,12 @@ jobs:
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
 
-      - name: Setup Cosign
-        uses: sigstore/cosign-installer@c56c2d3e59e4281cc41dea2217323ba5694b171e
+      - name: Install Cosign (Direct Binary)
+        run: |
+          curl -O -L "https://github.com/sigstore/cosign/releases/download/v2.4.1/cosign-linux-amd64"
+          sudo mv cosign-linux-amd64 /usr/local/bin/cosign
+          sudo chmod +x /usr/local/bin/cosign
+          cosign version
 
       - name: Load Component Metadata
         id: metadata
@@ -75,13 +79,13 @@ jobs:
           config: p/security-audit
         # Note: In the Hardener track, this IS blocking by default to verify remediation.
 
-      - name: Compile Hardened Payload (Alpine Sandbox)
+      - name: Compile Hardened Payload (Fedora Glibc-Native Sandbox)
         uses: addnab/docker-run-action@4f65fabd2431ebc8d299f8e5a018d79a769ae185
         with:
-          image: ghcr.io/${{ github.repository_owner }}/base-alpine:latest
+          image: ghcr.io/${{ github.repository_owner }}/base-fedora:latest
           options: -v ${{ github.workspace }}/workspace:/workspace
           run: |
-            apk add --no-cache build-base make
+            dnf install -y gcc make bzip2 diffutils
             cd /workspace/src
             ./configure --prefix=/usr
             make -j$(nproc)

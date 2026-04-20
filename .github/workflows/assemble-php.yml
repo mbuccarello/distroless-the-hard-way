@@ -25,8 +25,12 @@ jobs:
           # Fetch optimized PHP-FPM binary (Architecture: x86_64)
           curl -L "https://github.com/php/php-src/releases/download/php-8.3.3/php-8.3.3.tar.gz" -o payload/php.tar.gz
           
-      - name: Setup Cosign & Trivy
-        uses: sigstore/cosign-installer@c56c2d3e59e4281cc41dea2217323ba5694b171e
+      - name: Install Cosign (Direct Binary)
+        run: |
+          curl -O -L "https://github.com/sigstore/cosign/releases/download/v2.4.1/cosign-linux-amd64"
+          sudo mv cosign-linux-amd64 /usr/local/bin/cosign
+          sudo chmod +x /usr/local/bin/cosign
+          cosign version
           
       - name: Verify CC Ancestry
         run: |
@@ -35,10 +39,13 @@ jobs:
       - name: Construct PHP Execution Environment
         run: |
           cat <<EOF > Dockerfile
-          FROM alpine as extractor
+          # Extract safely using the Stage 1 Static Bootstrap (Glibc-native)
+          FROM ghcr.io/${{ github.repository_owner }}/bootstrap:latest as extractor
           COPY payload/php.tar.gz /
-          RUN mkdir -p /usr/local/php && tar -xzf /php.tar.gz -C /usr/local/php --strip-components=1
+          # Use our own trusted static tar for extraction
+          RUN mkdir -p /usr/local/php && /bin/tar -xzf /php.tar.gz -C /usr/local/php --strip-components=1
           
+          # Overlay onto strictly verified Opensource Distroless CC
           FROM ghcr.io/${{ github.repository_owner }}/cc:latest
           COPY --from=extractor /usr/local/php /usr/local/php
           

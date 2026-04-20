@@ -42,7 +42,7 @@ runs:
         done
 
     - name: Generate SLSA Build Provenance (Level 3)
-      uses: actions/attest-build-provenance@7668571508540a607bdfd90a87a560489fe372eb
+      uses: actions/attest-build-provenance@v2
       with:
         subject-name: ${{ inputs.registry }}/${{ github.repository_owner }}/${{ inputs.image-name }}
         subject-digest: ${{ steps.push.outputs.digest }}

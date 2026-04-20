@@ -26,8 +26,12 @@ jobs:
           curl -L "https://download.visualstudio.microsoft.com/download/pr/907cc36c-94cc-45f8-bba9-7ce53fe2d392/c8b21efbde79fc74dcdd1378f4eedb79/dotnet-runtime-8.0.2-linux-x64.tar.gz" -o payload/dotnet.tar.gz
           echo "84bd5ccea2ef7ebaf98bf708ee611a21e6be60cb7a87311ce8ecbe82bb8d8888 payload/dotnet.tar.gz" | sha256sum -c -
 
-      - name: Setup Cosign & Trivy
-        uses: sigstore/cosign-installer@c56c2d3e59e4281cc41dea2217323ba5694b171e
+      - name: Install Cosign (Direct Binary)
+        run: |
+          curl -O -L "https://github.com/sigstore/cosign/releases/download/v2.4.1/cosign-linux-amd64"
+          sudo mv cosign-linux-amd64 /usr/local/bin/cosign
+          sudo chmod +x /usr/local/bin/cosign
+          cosign version
           
       - name: Verify CC Ancestry
         run: |
@@ -36,13 +40,17 @@ jobs:
       - name: Construct .NET Execution Environment
         run: |
           cat <<EOF > Dockerfile
-          FROM alpine as extractor
+          # Extract safely using the Stage 1 Static Bootstrap (Glibc-native)
+          FROM ghcr.io/${{ github.repository_owner }}/bootstrap:latest as extractor
           COPY payload/dotnet.tar.gz /
-          RUN mkdir -p /usr/share/dotnet && tar -xzf /dotnet.tar.gz -C /usr/share/dotnet
+          # Use our own trusted static tar for extraction
+          RUN mkdir -p /usr/share/dotnet && /bin/tar -xzf /dotnet.tar.gz -C /usr/share/dotnet
           
+          # Overlay onto strictly verified Opensource Distroless CC
           FROM ghcr.io/${{ github.repository_owner }}/cc:latest
           COPY --from=extractor /usr/share/dotnet /usr/share/dotnet
           
+          # Implement standard FHS symlink using our trusted static ln
           COPY --from=extractor /bin/ln /bin/ln
           RUN ["/bin/ln", "-s", "/usr/share/dotnet/dotnet", "/usr/bin/dotnet"]
           

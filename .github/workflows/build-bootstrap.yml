@@ -71,8 +71,12 @@ jobs:
         run: |
           docker push ghcr.io/${{ github.repository_owner }}/bootstrap:latest
 
-      - name: Sign Bootstrap Distroless Core
-        uses: sigstore/cosign-installer@c56c2d3e59e4281cc41dea2217323ba5694b171e
+      - name: Install Cosign (Direct Binary)
+        run: |
+          curl -O -L "https://github.com/sigstore/cosign/releases/download/v2.4.1/cosign-linux-amd64"
+          sudo mv cosign-linux-amd64 /usr/local/bin/cosign
+          sudo chmod +x /usr/local/bin/cosign
+          cosign version
         
-      - name: Sign Object
+      - name: Sign Bootstrap Distroless Core
         run: cosign sign --yes ghcr.io/${{ github.repository_owner }}/bootstrap:latest
