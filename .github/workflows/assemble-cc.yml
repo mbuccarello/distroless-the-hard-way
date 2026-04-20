@@ -21,6 +21,9 @@ jobs:
     steps:
       - name: Setup Cosign
         uses: sigstore/cosign-installer@c56c2d3e59e4281cc41dea2217323ba5694b171e
+
+      - name: Authenticate to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
         
       - name: Verify Ancestry (Base + GCC)
         run: |
@@ -31,14 +34,18 @@ jobs:
       - name: Construct CC Image
         run: |
           cat <<EOF > Dockerfile
-          FROM alpine as extractor
+          FROM scratch as extractor
+          # Use our trusted static bootstrap for extraction
+          COPY --from=ghcr.io/${{ github.repository_owner }}/bootstrap:latest /tar /busybox
           COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-gcc:latest /gcc-layer.tar.gz /
-          RUN mkdir /rootfs && tar -xzf /gcc-layer.tar.gz -C /rootfs
+          RUN ["/busybox", "mkdir", "/rootfs"]
+          RUN ["/busybox", "tar", "-xzf", "/gcc-layer.tar.gz", "-C", "/rootfs"]
               
           FROM ghcr.io/${{ github.repository_owner }}/base:latest
           COPY --from=extractor /rootfs /
           EOF
           
+          docker build -t ghcr.io/${{ github.repository_owner }}/cc:latest .
           docker push ghcr.io/${{ github.repository_owner }}/cc:latest
           DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "ghcr.io/${{ github.repository_owner }}/cc:latest" | cut -d'@' -f2)
           echo "digest=$DIGEST" >> $GITHUB_OUTPUT
