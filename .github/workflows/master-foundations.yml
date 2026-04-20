@@ -8,6 +8,12 @@ on:
       - '.github/workflows/build-*.yml'
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+  attestations: write
+
 jobs:
   bootstrap:
     uses: ./.github/workflows/build-bootstrap.yml
