@@ -26,6 +26,9 @@ jobs:
           sudo mv cosign-linux-amd64 /usr/local/bin/cosign
           sudo chmod +x /usr/local/bin/cosign
           cosign version
+          
+      - name: Authenticate to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
         
       - name: Fetch and Verify GNU glibc Source
         run: |
