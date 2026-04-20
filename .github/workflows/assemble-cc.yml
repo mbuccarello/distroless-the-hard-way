@@ -68,8 +68,11 @@ jobs:
           
       - name: Sign Distroless CC
         run: |
+          echo "Signing image ghcr.io/${{ github.repository_owner }}/cc:latest..."
           cosign sign --yes ghcr.io/${{ github.repository_owner }}/cc:latest
           cosign attach sbom --sbom cc-sbom.spdx.json ghcr.io/${{ github.repository_owner }}/cc:latest
+          # Internal verification
+          cosign verify --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ghcr.io/${{ github.repository_owner }}/cc:latest
 
       - name: Generate SLSA Build Provenance (Level 3)
         uses: actions/attest-build-provenance@7668571508540a607bdfd90a87a560489fe372eb

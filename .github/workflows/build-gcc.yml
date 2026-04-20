@@ -37,21 +37,23 @@ jobs:
           config: "p/c"
           input: workspace/src/
 
-      - name: Compile C++ Runtimes (Alpine Sandbox)
+      - name: Compile C++ Runtimes (Fedora Glibc-Native Sandbox)
         uses: addnab/docker-run-action@4f65fabd2431ebc8d299f8e5a018d79a769ae185
         with:
-          image: ghcr.io/${{ github.repository_owner }}/base-alpine:latest
+          image: ghcr.io/${{ github.repository_owner }}/base-fedora:latest
           options: -v ${{ github.workspace }}/workspace:/workspace
           run: |
-            apk add --no-cache build-base bash musl-dev gmp-dev mpc1-dev mpfr-dev flex bison linux-headers
+            dnf install -y gcc gcc-c++ make binutils wget bzip2 gmp-devel mpc-devel mpfr-devel flex bison diffutils
             mkdir -p /workspace/build
             cd /workspace/build
             export SOURCE_DATE_EPOCH=315532800
             ../src/configure --prefix=/usr \
               --enable-languages=c,c++ \
               --disable-bootstrap \
-              --disable-multilib
-            # We strictly target all-target-libstdc++-v3 to isolate the runtime only
+              --disable-multilib \
+              --disable-nls \
+              --with-system-zlib
+            # Build and install the target C++ runtime only
             make all-target-libstdc++-v3 -j$(nproc)
             make install-target-libstdc++-v3 DESTDIR=/workspace/out
             
