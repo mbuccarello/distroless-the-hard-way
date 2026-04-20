@@ -34,15 +34,21 @@ jobs:
           wget https://ftp.gnu.org/gnu/gcc/gcc-13.2.0/gcc-13.2.0.tar.xz
           wget https://ftp.gnu.org/gnu/gcc/gcc-13.2.0/gcc-13.2.0.tar.xz.sig
           
-          # Import GCC Release Manager keys
-          # GNU key for GCC 13 (e.g., Jakub Jelinek)
-          gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys \
-            D3A93CAD751C2AF4F8C7AD516C35B999583A0917 \
-            B9D0A164669A4D3B || echo "Keyserver failed, trying alternative..."
+          # Harden GCC Release Manager keys import with retries and multiple servers
+          for server in hkps://keyserver.ubuntu.com hkps://keys.openpgp.org hkps://pgp.mit.edu; do
+            echo "Attempting to fetch keys from $server..."
+            gpg --keyserver "$server" --recv-keys \
+              D3A93CAD751C2AF4F8C7AD516C35B999583A0917 \
+              B9D0A164669A4D3B && break || echo "Failed to fetch from $server, trying next..."
+          done
           
-          # Attempt verification (allow continuation for log analysis if it fails, but we target success)
-          gpg --verify gcc-13.2.0.tar.xz.sig gcc-13.2.0.tar.xz || \
-            (echo "GPG verification failed, computing local hash for debug: $(sha256sum gcc-13.2.0.tar.xz)" && exit 1)
+          # Attempt GPG verification
+          if gpg --verify gcc-13.2.0.tar.xz.sig gcc-13.2.0.tar.xz; then
+            echo "GPG verification successful."
+          else
+            echo "GPG verification failed! Falling back to hardcoded SHA256 verification as last resort."
+            echo "e275e76442a6067341a27f04c5c6b83d8613144004c0413528863dc6b5c743da gcc-13.2.0.tar.xz" | sha256sum -c - || exit 1
+          fi
           
           cd ..
           tar -xJf workspace/gcc-13.2.0.tar.xz -C workspace/src --strip-components=1
