@@ -68,7 +68,7 @@ jobs:
           image: ghcr.io/${{ github.repository_owner }}/base-fedora:latest
           options: -v ${{ github.workspace }}/workspace:/workspace
           run: |
-            dnf install -y gcc gcc-c++ make binutils wget bzip2 gmp-devel libmpc-devel mpfr-devel flex bison diffutils
+            dnf install -y gcc gcc-c++ make binutils wget bzip2 gmp-devel libmpc-devel mpfr-devel zlib-devel flex bison diffutils
             mkdir -p /workspace/build
             cd /workspace/build
             export SOURCE_DATE_EPOCH=315532800
