@@ -9,7 +9,7 @@ sequenceDiagram
     GH->>Sec: Semgrep static SAST scan
     Sec-->>GH: Pass
     
-    GH->>GH: Execute `make all-target-libstdc++-v3` in alpine
+    GH->>GH: Compile (Glibc-native Fedora sandbox)
     
     GH->>Sec: Trivy SCA/SBOM scan on compiled tar.gz
     Sec-->>GH: output: gcc-sbom.spdx.json

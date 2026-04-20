@@ -7,7 +7,7 @@ sequenceDiagram
     GH->>S: curl zlib-1.x.tar.gz
     S-->>GH: Download pristine source
     
-    GH->>GH: Execute `make CFLAGS=-O3` in alpine sandbox
+    GH->>GH: Native Compile (Fedora sandbox)
     
     GH->>Sec: Trivy SCA/SBOM scan on compiled tar.gz
     Sec-->>GH: output: zlib-sbom.spdx.json

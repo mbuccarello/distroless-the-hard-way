@@ -9,7 +9,7 @@ sequenceDiagram
     GH->>Sec: Semgrep static SAST scan
     Sec-->>GH: Pass
     
-    GH->>GH: Execute `make` in alpine sandbox
+    GH->>GH: Native Compile (Fedora sandbox)
     
     GH->>Sec: Trivy SCA/SBOM scan on compiled tar.gz
     Sec-->>GH: output: glibc-sbom.spdx.json

@@ -1,0 +1,30 @@
+graph TD
+    Push["Git Push to main"] --> F["Master Foundations"]
+    
+    subgraph Layer1 ["Layer 1: Foundations (GNU-Native Builders)"]
+        F --> B1["build-openssl"]
+        F --> B2["build-zlib"]
+        F --> B3["build-tzdata"]
+        F --> B4["build-bootstrap"]
+        B1 --> G["build-glibc"]
+        B2 --> G
+        G --> GC["build-gcc"]
+    end
+    
+    GC --> A["Master Assembly"]
+    
+    subgraph Layer2 ["Layer 2: Assembly (Image Construction)"]
+        A --> AB["assemble-base"]
+        AB --> AC["assemble-cc"]
+        AC --> L1["assemble-java"]
+        AC --> L2["assemble-python"]
+        AC --> L3["assemble-nodejs"]
+    end
+    
+    L1 --> V["Master Validation"]
+    L2 --> V
+    L3 --> V
+    
+    subgraph Layer3 ["Layer 3: Validation (E2E)"]
+        V --> E2E["e2e-orchestrator"]
+    end
