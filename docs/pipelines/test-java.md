@@ -1,14 +1,11 @@
-> [!NOTE]
-> **The Hard Way:** This is an educational tutorial pipeline. Every single step here performs compilation from raw source. We do not use Debian extraction.
+# Pipeline Specification: E2E Verification - java
 
-# Opensource Distroless E2E Verification: Java
+This pipeline performs automated functional assertions on the [java Distroless image](assemble-java.md).
 
-This pipeline verifies the technical integrity of the [`java:latest`](assemble-java.md) image.
+---
 
-## Verification Logic
-It executes a compiled Java application (`HelloOpensource Distroless`) to assert:
-- **Runtime Integrity**: Successful execution of the Eclipse Temurin JRE.
-- **SSL/TLS Handshake**: Secure request to `google.com` via Opensource Distroless-compiled OpenSSL.
-- **Timezone Accuracy**: Resolution of `Europe/Rome` via Opensource Distroless-compiled `tzdata`.
+## 1. Verification Objectives
+- **Runtime Integrity**: Confirm the java engine initializes within the shell-less environment.
+- **Linkage Validation**: Ensure binary compatibility with the project-native Glibc and OpenSSL libraries.
+- **Functional Check**: Execute a standardized test application and verify the output.
 
-For a deep-dive into our verification strategy, see the [Opensource Distroless E2E Verification Framework](e2e-verification.md).

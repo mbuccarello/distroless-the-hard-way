@@ -1,6 +1,6 @@
-# Contributing to Opensource-Distroless
+# Contributing to Distroless-The-Hard-Way
 
-Thank you for your interest in contributing to Opensource-Distroless! We are on a mission to build a zero-trust, 100% sovereign OS ecosystem.
+Thank you for your interest in contributing to Distroless-The-Hard-Way! We are on a mission to build a zero-trust, 100% sovereign OS ecosystem.
 
 ## 🏗 Architectural Rules
 Before contributing, please read **`GEMINI.md`**. This repository follows strict architectural pillars:
@@ -10,7 +10,7 @@ Before contributing, please read **`GEMINI.md`**. This repository follows strict
 
 ## 🛠 Development Workflow
 1. **Fork the Repo**: Create your feature branch.
-2. **Follow the Stages**: Ensure your addition fits into the `Stage 1 (Atomic) -> Stage 2 (Base) -> Stage 3 (App)` flow.
+2. **Follow the Stages**: Ensure your addition fits into the `Stage 2 (Atomic) -> Stage 3 (Base) -> Stage 4 (App)` flow.
 3. **Add Security Gates**: Every new pipeline *must* include:
    - **SAST**: Semgrep for source code.
    - **SCA**: Trivy for container images.

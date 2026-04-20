@@ -1,30 +1,40 @@
-> [!NOTE]
-> **The Hard Way:** This is an educational tutorial pipeline. Every single step here performs compilation from raw source. We do not use Debian extraction.
+# Pipeline Specification: GNU C Library (glibc)
 
-# Pipeline Strategy: GNU C Library (glibc)
+The `glibc` library is the foundational runtime for the Distroless The Hard Way ecosystem. All downstream language runtimes rely on this component for kernel syscalls and memory management.
 
-The `glibc` pipeline is the absolute bedrock of the Opensource-Distroless ecosystem. Every other runtime (Dotnet, Java, Python, Node.js) relies on this foundational library for kernel syscalls and memory management.
+---
 
-## Zero-Trust Proof Points
+## 1. Build Implementation Details
 
-### 1. Verified Source Acquisition
-We do not trust pre-compiled OS packages. The pipeline fetches the raw source directly from the **GNU FTP mirror**:
-- **Source**: `https://ftp.gnu.org/gnu/glibc/glibc-2.39.tar.gz`
-- **Integrity**: Hardcoded SHA-256 verification (`f34083833ff32a82fa22c544fa9c6d3df8e4200fdfb9da7082318712ddb19fc7`) occurs before any compilation starts.
+To ensure binary compatibility and prevent system header conflicts, the build is executed within a Glibc-native sandbox.
 
-### 2. Static Analysis (SAST)
-Before compilation, the raw C source undergoes a **Semgrep SAST scan** using the `p/c` (C/C++) ruleset to identify potential buffer overflows or security vulnerabilities in the upstream code.
+### Sandbox Environment
+- **Host System**: Fedora (latest)
+- **Source**: `ghcr.io/mbuccarello/base-fedora:latest` (Stage 0 Mirror)
+- **Rationale**: Building GNU components on musl-based hosts (e.g., Alpine) is prohibited to prevent environmental contamination of the library's internal definitions.
 
-### 3. Isolated Sandbox Compilation
-Compilation occurs within a minimal, ephemeral **Alpine Linux sandbox**. This ensures that host-system contamination is architecturally impossible. 
-- **Flags**: Optimized with `-O2` and configured with `--disable-werror` for compatibility.
-- **Reproducibility**: `SOURCE_DATE_EPOCH` is pinned to `315532800` (1980) to ensure deterministic binary output.
+### Compilation Strategy
+1. **Source Acquisition**: Upstream Glibc source is retrieved from the official GNU mirrors.
+2. **Integrity Verification**: SHA-256 validation is performed before any code interaction.
+3. **Optimized Build**: The library is compiled with `-O2` and configured for standard system paths.
+4. **Reproducibility**: Timestamps are normalized via `SOURCE_DATE_EPOCH` to ensure deterministic output.
 
-## Security Artifacts
+---
 
-| Artifact | Purpose |
-| :--- | :--- |
-| **OCI Layer** | `ghcr.io/${{ github.repository_owner }}/artifacts-glibc:latest` (Scratch-based tarball) |
-| **SBOM** | Generated via `trivy` in SPDX format, documenting every compiled header and object. |
-| **Signing** | Keyless signing via **Cosign** linked to GitHub Actions OIDC. |
-| **Provenance** | **SLSA Level 3** build attestation proving the artifact came from this specific workflow. |
+## 2. Technical Audit & Gating
+
+| Gate | Tool | Specification |
+| :--- | :--- | :--- |
+| **Integrity** | `sha256sum` | Mandatory hash match against hardcoded reference. |
+| **SAST** | `Semgrep` | Static analysis of C code for memory safety vulnerabilities. |
+| **SCA** | `Trivy` | Generation of SPDX SBOM and CVE scanning. |
+| **Identity** | `Cosign` | Keyless OIDC signing of the resulting OCI artifact. |
+| **SLSA** | `Attest` | Level 3 Build Provenance generation. |
+
+---
+
+## 3. Artifact Distribution
+
+The finalized library is packaged as an atomic OCI payload:
+- **Target**: `ghcr.io/mbuccarello/artifacts-glibc:latest`
+- **Format**: Scratch-based container containing the compiled `/usr` and `/lib` hierarchies.

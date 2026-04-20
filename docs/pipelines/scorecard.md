@@ -12,4 +12,4 @@
 | **Triggers** |  |
 
 ## Overview
-This pipeline is part of the Opensource-Distroless Decoupled Architecture. It ensures that components are vetted, compiled, and signed according to zero-trust principles.
+This pipeline is part of the Distroless-The-Hard-Way Decoupled Architecture. It ensures that components are vetted, compiled, and signed according to zero-trust principles.

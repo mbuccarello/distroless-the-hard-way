@@ -1,20 +1,18 @@
-# Cryptographic Signing (Keyless)
+# Specification: Cryptographic Artifact Signing
 
-## Supply Chain Signatures
-Every intermediate artifact AND final assembled base image in "Distroless The Hard Way" is cryptographically signed using **Cosign** (part of the Sigstore project).
+Every artifact and image within the Distroless The Hard Way ecosystem is cryptographically signed using Sigstore/Cosign to ensure end-to-end integrity.
 
-## Where Are The Private Keys?
-You will not find any long-lived Private/Public keys stored in the GitHub Secrets of this repository. **This is a feature, not a missing component.**
+---
 
-We utilize **OIDC Keyless Signing**. 
+## 1. Keyless Signing Architecture
 
-## How It Works
-1. When GitHub Actions runs, it is granted an ephemeral OpenID Connect (OIDC) token (`permissions: id-token: write`).
-2. The Action invokes `cosign sign --yes ghcr.io/repository/image`.
-3. Cosign requests an ephemeral, short-lived certificate from the Sigstore Fulcio Certificate Authority.
-4. Fulcio verifies the GitHub Actions OIDC token (proving mathematically that "this exact GitHub repository, at this exact commit, triggered this pipeline").
-5. The image is signed with the ephemeral cert.
-6. The signature and the certificate are published to Rekor (an immutable public transparency log).
-7. The private key used for that signature is then immediately destroyed from memory.
+The project utilizes OIDC-based keyless signing to eliminate the risks associated with static private key management.
 
-By using Keyless signing, we eliminate the immense security risk of a developer's private key being leaked or stolen, guaranteeing that every image was exclusively built through our locked-down CI pipelines.
+- **Mechanism**: Sigstore Fulcio and Rekor.
+- **Identity**: GitHub Actions OIDC tokens (`id-token: write`).
+- **Validation**: Signatures are verifiable via `cosign verify` using the project's OIDC issuer and repository identity.
+
+## 2. Verification Gateways
+
+Downstream assemblers are configured to verify the signatures of all intermediate Stage 2 payloads before ingestion, ensuring that only vetted and signed libraries enter the final OS product.
+

@@ -1,6 +1,6 @@
 # C++ Runtime Blueprint (CC)
 
-The `cc` blueprint is the second tier in the Opensource-Distroless cascade. It layers precisely on top of the `sovereign-distroless/base` foundational OS.
+The `cc` blueprint is the second tier in the Distroless-The-Hard-Way cascade. It layers precisely on top of the `sovereign-distroless/base` foundational OS.
 
 This layer exists because modern execution environments (like the JVM, Node V8, or Python) are written heavily in C++, requiring dynamic GNU C++ libraries to allocate memory and spawn threads.
 

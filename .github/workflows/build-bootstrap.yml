@@ -35,6 +35,8 @@ jobs:
             
             # Configure and build (Total GNU Alignment)
             make defconfig
+            # Workaround for networking/tc.o build error
+            sed -i "s/CONFIG_TC=y/# CONFIG_TC is not set/" .config
             
             # Force absolute static linking for the bootstrap environment
             sed -i 's/^# CONFIG_STATIC is not set/CONFIG_STATIC=y/' .config

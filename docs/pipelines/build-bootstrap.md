@@ -1,36 +1,25 @@
-> [!NOTE]
-> **The Hard Way:** This is an educational tutorial pipeline. Every single step here performs compilation from raw source. We do not use Debian extraction.
+# Pipeline Specification: Stage 1 Static Bootstrap
 
-# Pipeline: Bootstrap Extractor (Stage 0)
+The Stage 1 Bootstrap utility is the primary tool used for image assembly. It provides the minimal filesystem manipulation capabilities needed to construct a rootfs from absolute zero.
 
-## Overview
-When constructing a completely isolated environment (from `scratch`), there are no tools available to move, compress, or extract incoming layers. Traditional methods cheat by temporarily using an `alpine` or `ubuntu` base to extract `.tar.gz` files into a directory, then moving that directory into the final image.
+---
 
-In Distroless The Hard Way, we consider this a violation of zero-trust, as it opens the operation to potential host-based compromises or tainted extraction binaries.
+## 1. Physical Specification
 
-Instead, **Stage 0** compiles a pure, verified version of `tar` and `gzip` natively from `busybox` source code, pushing it to a specialized `bootstrap` OCI image to be used exclusively during assembly phases.
+To achieve absolute zero-trust, the bootstrap utility must run in a `FROM scratch` vacuum without relying on external system libraries.
 
-## Execution Flow
+- **Implementation**: Strictly Static BusyBox.
+- **Linkage**: 100% Statically linked against GNU C Library (Glibc).
+- **Environment**: Compiled on a Fedora host to ensure Glibc-native compatibility.
 
-1. **Source Retrieval**: 
-   The pipeline downloads the pristine `busybox` `.tar.bz2` archive directly from official upstream servers.
+## 2. Build Rationale
 
-2. **Static Compilation**:
-   We configure `busybox` to compile statically (`make defconfig` + `CONFIG_STATIC=y`). This ensures that the resulting `tar` executable has exactly zero dynamically linked dependencies (it does not even require `glibc`).
+The use of a custom-built, static bootstrap utility prevents environmental contamination from the host build system. It ensures that every command (mkdir, sh, tar) in the assembly phase is verified, signed, and fully understood.
 
-3. **Artifact Isolation**:
-   We isolate the exact capabilities we need by pushing only the compiled `tar` and `gzip` binaries into an empty `scratch` image.
+---
 
-4. **Publication & Attestation**:
-   The `bootstrap` image is pushed to the GitHub Container Registry (`ghcr.io`) and cryptographically signed using Cosign (Keyless).
+## 3. Artifact Distribution
 
-## Usage in Assembly
-The generated `bootstrap` image is strictly used as an ephemeral layer during Stage 2 Assembly:
-```dockerfile
-# Pull our zero-trust extractor
-COPY --from=bootstrap /tar /tar
-COPY --from=ghcr.io/org/artifacts-glibc:latest /glibc-layer.tar.gz /
+- **Target**: `ghcr.io/mbuccarello/bootstrap:latest`
+- **Format**: Single atomic binary provided in a scratch container.
 
-# Execute securely natively
-RUN ["/tar", "-xzf", "/glibc-layer.tar.gz"]
-```

@@ -1,9 +1,9 @@
-# Opensource-Distroless Roadmap
+# Distroless-The-Hard-Way Roadmap
 
 This document outlines the strategic progression from the current Python "Proof of Concept" orchestrator into a production-grade, enterprise-ready cryptographically sovereign build engine.
 
 ## Phase 1: Pipeline Security & Software Supply Chain
-While Opensource-Distroless currently verifies cryptographic `sha256` hashes from upstream providers to guarantee origin authenticity, the compiler pipeline must ensure the ingested code itself is fundamentally secure.
+While Distroless-The-Hard-Way currently verifies cryptographic `sha256` hashes from upstream providers to guarantee origin authenticity, the compiler pipeline must ensure the ingested code itself is fundamentally secure.
 
 - [ ] **SAST (Static Application Security Testing):** Integrate static analyzers (like Semgrep or SonarQube) directly into the `build.py` orchestrator. Before executing `make`, the engine will statically scan the C/C++ source code payloads natively for memory leaks, buffer overflows, or known malicious patterns.
 - [ ] **SCA (Software Composition Analysis):** Introduce dependency vulnerability scanners natively to ensure that the specifically downloaded version (e.g., `glibc-2.39`) does not contain known CVEs before compilation begins.

@@ -7,7 +7,7 @@ The GNU Compiler Collection provides the definitive standard C/C++ runtimes requ
 Almost every executable (JVM, Node) relies inherently on the C++ runtime to process arrays and allocate memory objects. By compiling GCC natively, we perfectly align these critical libraries structurally onto our custom `glibc` layer without extracting alien distribution layers.
 
 ## Build Configuration
-To compile strictly the dynamic runtimes efficiently without recompiling the entire GCC toolkit recursively, Opensource-Distroless bypasses the bootstrap phase:
+To compile strictly the dynamic runtimes efficiently without recompiling the entire GCC toolkit recursively, Distroless-The-Hard-Way bypasses the bootstrap phase:
 ```bash
 ../configure --prefix=/usr --enable-languages=c,c++ --disable-multilib --disable-bootstrap
 make

@@ -1,14 +1,11 @@
-> [!NOTE]
-> **The Hard Way:** This is an educational tutorial pipeline. Every single step here performs compilation from raw source. We do not use Debian extraction.
+# Pipeline Specification: E2E Verification - php
 
-# Opensource Distroless E2E Verification: PHP
+This pipeline performs automated functional assertions on the [php Distroless image](assemble-php.md).
 
-This pipeline verifies the technical integrity of the [`php:latest`](assemble-php.md) image.
+---
 
-## Verification Logic
-It executes a PHP-FPM script to assert:
-- **Runtime Integrity**: Successful execution of the natively compiled PHP binary.
-- **SSL/TLS Handshake**: Secure request to `google.com` via Opensource Distroless-compiled OpenSSL.
-- **Timezone Accuracy**: Resolution of `Europe/Rome` via Opensource Distroless-compiled `tzdata`.
+## 1. Verification Objectives
+- **Runtime Integrity**: Confirm the php engine initializes within the shell-less environment.
+- **Linkage Validation**: Ensure binary compatibility with the project-native Glibc and OpenSSL libraries.
+- **Functional Check**: Execute a standardized test application and verify the output.
 
-For a deep-dive into our verification strategy, see the [Opensource Distroless E2E Verification Framework](e2e-verification.md).

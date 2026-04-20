@@ -1,15 +1,15 @@
 > [!NOTE]
 > **The Hard Way:** This is an educational tutorial pipeline. Every single step here performs compilation from raw source. We do not use Debian extraction.
 
-# Pipeline Strategy: Opensource Distroless C++ Image (CC)
+# Pipeline Strategy: Distroless The Hard Way C++ Image (CC)
 
 The `assemble-cc` pipeline extends the `base` image with the natively compiled GNU C++ Runtimes. This creates a foundational execution environment for any application requiring `libstdc++`, `libgcc_s`, or `libgomp`.
 
-## Opensource Distroless Composition Strategy
+## Distroless The Hard Way Composition Strategy
 
-This pipeline follows the **Linear Cascading Hierarchy** of the Opensource-Distroless architecture:
-1.  **Stage 1: Ancestry Verification**: Fetches and cryptographically verifies the `base` image and the atomic `gcc` runtime artifacts.
-2.  **Stage 2: Layered Integration**: 
+This pipeline follows the **Linear Cascading Hierarchy** of the Distroless-The-Hard-Way architecture:
+1.  **Stage 2: Ancestry Verification**: Fetches and cryptographically verifies the `base` image and the atomic `gcc` runtime artifacts.
+2.  **Stage 3: Layered Integration**: 
     -   Starts from the `base:latest` image.
     -   Unpacks and overlays the verified C++ shared objects into the system's library paths (`/usr/lib`).
     -   Ensures that only the dynamic runtime libraries are included, keeping the image size and attack surface at the absolute minimum.

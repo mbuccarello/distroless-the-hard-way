@@ -1,68 +1,58 @@
-# Architecture: Total Isolation & Zero-Trust Lifecycle
+# Technical Specification: System Architecture
 
-Distroless The Hard Way implements a **decoupled, multi-stage artifact lifecycle** designed to eliminate external dependencies and ensure bit-perfect supply chain integrity.
+Distroless The Hard Way implements a modular, Decoupled Component Architecture (DCA) to achieve a zero-trust supply chain. The system is designed to provide bit-perfect reproducibility and cryptographic transparency by eliminating reliance on pre-compiled host OS binaries.
 
 ---
 
-## 1. The High-Level Lifecycle
+## 1. Pipeline Lifecycle Specification
 
-Our architecture is split into four distinct stages to separate build concerns from assembly concerns.
+The build process is logically partitioned into functional stages. Each stage is isolated to prevent cross-contamination of build environments.
 
 ```mermaid
-sequenceDiagram
-    participant U as Upstream (GNU/IANA/Alpine)
-    participant M as Stage -1: Mirror Registry
-    participant F as Stage 1: Foundation (Fedora Host)
-    participant A as Stage 2: Assembler (Static Bootstrap)
-    participant P as Stage 3: Project Product
-
-    U->>M: Cache Base Images (Alpine)
-    M->>F: Provide Trusted Environment
-    U->>F: Pure Source Code (.tar.gz)
-    F->>F: Compile Glibc/OpenSSL/Zlib
-    F->>A: Push Intermediate Signed Payloads
-    A->>A: Extraction via Static Bootstrap
-    A->>P: Final Distroless Image (Signed + SLSA)
+graph TD
+    S1[-1: Mirror Registry] --> S0[0: Static Bootstrap]
+    S1 --> S1_F[1: Foundations]
+    S0 --> S2[2: OS Core Assembly]
+    S1_F --> S2
+    S2 --> S3[3: Verification]
+    
+    subgraph "Isolation Zone"
+    S1
+    S0
+    S1_F
+    end
 ```
 
----
+### Stage 0: Mirror Registry Isolation
+To ensure absolute infrastructure resilience and prevent upstream rate-limiting, the system utilizes a local caching tier.
+*   **Mandate**: No build environment (Alpine, Fedora) is pulled directly from external registries during library compilation.
+*   **Standard**: All build sandboxes must originate from the internal `ghcr.io` mirror.
 
-## 2. Technical Pillars
+### Stage 1: Zero-Trust Bootstrap Utility
+Assembly of a root filesystem within a `FROM scratch` container requires a self-contained execution toolkit.
+*   **Decoupled Requirement**: The system prohibits the use of host-provided `tar`, `sh`, or `mkdir` utilities during image construction.
+*   **Specification**: A 100% static, GNU-based BusyBox binary is compiled from source. This utility provides the minimal syscall interface needed for layer extraction and configuration (e.g., `/etc/passwd` generation).
 
-### Stage -1: Mirror Isolation
-To achieve **Total Isolation**, we no longer pull the base Alpine image directly from Docker Hub during multiple builds. This prevents `ToManyRequests` rate limits and ensures that even if an upstream image is deleted, our pipeline remains operational.
-- **Workflow**: `mirror-base.yml`
-- **Output**: `ghcr.io/mbuccarello/base-alpine:latest`
-
-### Stage 1: The GNU Pivot (Host OS Strategy)
-We discovered that building **Glibc** on a **musl-based** host (Alpine) causes severe header conflicts between the two C libraries. 
-- **The Fix (Total GNU Alignment)**: We use **Fedora (glibc-native)** as the build sandbox for **all** compiled components, including the Stage 0 Bootstrap tool.
-- **The Result**: A standardized GNU toolchain across the entire lifecycle, ensuring that even our static bootstrap utilities are built with the same libc standards as the final product.
-
-### Stage 2: Static Bootstrap Assembler
-To maintain a pure **zero-trust** posture, we do not use the host's `tar` or `sh` to assemble the final images.
-- **Bootstrapping**: We natively compile a **strictly static BusyBox** (Stage 0).
-- **Assembly**: This single, signed binary is the *only* tool allowed to extract components and create the rootfs (e.g., `/etc/passwd`) inside a `FROM scratch` container.
-- **Linkage**: By enforcing `CONFIG_STATIC=y`, we ensure the tool runs without requiring any external shared libraries.
+### Stage 2: The GNU-Native Build Strategy
+The system enforces strict library compatibility by aligning the build host with the target C implementation.
+*   **Glibc Requirement**: Foundational components dependent on the GNU C Library (Glibc, OpenSSL, Zlib) are compiled within a Glibc-native sandbox (Fedora).
+*   **Linkage Standard**: Static libraries are utilized where possible, and dynamic libraries are packaged as atomic OCI artifacts to maintain layer integrity.
 
 ---
 
-## 3. Supply Chain Security Gateways
+## 2. Security Gateways & Controls
 
-At every stage, we apply the following gates:
-1. **Source Integrity**: SHA256 verification of raw `.tar.gz` downloads.
-2. **SAST Scan**: Semgrep analysis of the C source code.
-3. **SCA & SBOM**: Trivy generation of SPDX records.
-4. **Attestation**: SLSA Level 3 provenance linking the binary to the specific commit.
-5. **Transparency**: Keyless Sigstore (Cosign) signing of every layer.
+Each component must pass a sequential set of security checkpoints before promotion to the intermediate registry:
+
+1.  **Source Integrity**: Cryptographic SHA-256 verification of raw source archives.
+2.  **Static Analysis (SAST)**: Semgrep auditing to detect memory corruption patterns and insecure API usage.
+3.  **Binary Attribution**: SLSA Level 3 attestations linking the hashed artifact to the originating build environment and source commit.
+4.  **Identity Verification**: Keyless signing (Cosign/Sigstore) tied to the GitHub Action OIDC workload identity.
 
 ---
 
-## 4. Current Pipeline Matrix
+## 3. Atomic Artifact Model
 
-| Workflow | Stage | Purpose | Host Environment |
-| :--- | :--- | :--- | :--- |
-| `mirror-base.yml` | -1 | Registry Isolation | Ubuntu |
-| `build-bootstrap.yml` | 0 | Assembly Tooling | Alpine -> Static |
-| `build-glibc.yml` | 1 | C Runtime | Fedora |
-| `assemble-base.yml` | 2 | OS Construction | Scratch (Static) |
+The architecture treats every library as a standalone atomic unit.
+- **Packaging**: Components are pushed to the registry as `artifacts-<name>` images.
+- **Consumption**: The Stage 3 Assemblers pull these signed payloads and extract them into a clean rootfs. This decoupling allows for independent patching of a single library (e.g., patching `openssl` without rebuilding `glibc`).

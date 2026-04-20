@@ -13,7 +13,7 @@ Raw source code is fetched directly from the **GNU FTP mirror**:
 - **Integrity**: Hardcoded SHA-256 verification (`e275e76442a60f73b736fdf347b8bfbc23304cbe8e04bf1fde7ae66f108f5127`) occurs before any build activity.
 
 ### 2. Static Analysis (SAST)
-The raw C++ source underwent a **Semgrep SAST scan** using the `p/c` ruleset. This ensures we identify memory safety issues in the upstream compiler runtime before it is integrated into the Opensource Distroless image layers.
+The raw C++ source underwent a **Semgrep SAST scan** using the `p/c` ruleset. This ensures we identify memory safety issues in the upstream compiler runtime before it is integrated into the Distroless The Hard Way image layers.
 
 ### 3. Isolated Sandbox compilation
 Compilation occurs within a minimal **Alpine Linux sandbox**:

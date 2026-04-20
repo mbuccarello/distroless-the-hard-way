@@ -2,7 +2,7 @@
 
 In a **Source-to-OCI** model, we bear the cryptographic responsibility for every binary in our images. Identifying the "right" version for a library like `glibc` or `openssl` is not about choosing the highest number, but about balancing **Security**, **ABI Stability**, and **Runtime Compatibility**.
 
-This document outlines the ground-up strategy for selecting foundational library versions within Opensource-Distroless.
+This document outlines the ground-up strategy for selecting foundational library versions within Distroless-The-Hard-Way.
 
 ---
 
@@ -64,7 +64,7 @@ For a high-assurance distro, we recommend **not** using the "bleeding edge" `gli
 
 ## 🛠 5. The Power to Patch: Custom Security Backporting
 
-Because Opensource-Distroless is a **Source-to-OCI** engine, we are not passive consumers of binaries. We are the "Upstream Maintainers" of our own infrastructure. This gives us the **Power to Patch**.
+Because Distroless-The-Hard-Way is a **Source-to-OCI** engine, we are not passive consumers of binaries. We are the "Upstream Maintainers" of our own infrastructure. This gives us the **Power to Patch**.
 
 ### Why Patch instead of Upgrade?
 When a high-severity CVE is announced for a foundational library like `glibc 2.36`, but the "official" fix is only available in `glibc 2.39`, a standard distribution would force you to upgrade the entire OS layer. 

@@ -1,32 +1,32 @@
-# Runtime Verification Framework (E2E)
+# Technical Specification: E2E Verification Framework
 
-## Overview
+The End-to-End (E2E) Verification Framework provides automated functional validation for the finalized Distroless images.
 
-The runtime integrity of our distroless images is verified via an End-to-End (E2E) testing framework. This process ensures that the atomic foundation libraries (glibc, openssl, etc.) and language rumes (Java, Node.js, etc.) are not only correctly compiled but also functionally compatible in a production-identical, shell-less environment.
+---
 
-## Methodology
+## 1. System Design
 
-Our verification methodology follows a rigorous three-stage process:
+The framework ensures that the absolute minimal library stack is sufficient for real-world application execution. Isolation is maintained by using a three-tier lifecycle:
 
-1.  **Binary Provisioning**: The target distroless image is assembled using our zero-trust bootstrap extractor.
-2.  **Artifact Injection**: A minimal, standardized "smoke test" application is compiled on a trusted SDK host and then injected into the scratch-based distroless container.
-3.  **Functional Execution**: The container is executed without a shell, invoking the application entry point directly. A successful exit code (0) and specific stdout assertions prove the cryptographic and functional correctness of the underlying library ecosystem.
+1. **Compilation Tier**: Smoke-test applications are compiled on a trusted SDK host.
+2. **Injection Tier**: Static binaries are injected into the finalized Distroless images.
+3. **Execution Tier**: The image is executed in a shell-less environment.
 
-## Supported Runtime Matrix
+## 2. Assertion Matrix
 
-The following table details the runtime environments and their corresponding verification logic located in the `E2E/` directory:
+All verification tests must satisfy the following criteria:
+- **Zero-Shell Execution**: Applications must launch directly via syscalls without an OS shell (`/bin/sh`).
+- **Library Linkage**: Successful resolution of OpenSSL and Glibc shared objects.
+- **Environmental Accuracy**: Correct resolution of timezones and unprivileged user context.
 
-| Runtime | Test Application | Source Path | Verification Objective |
-| :--- | :--- | :--- | :--- |
-| **Node.js** | `index.js` | `E2E/nodejs/` | V8 engine execution & basic I/O |
-| **Python 3** | `main.py` | `E2E/python3/` | Interpreter stability & standard library linkage |
-| **Java** | `HelloOpensource.java` | `E2E/java/` | JVM initialization & glibc/libstdc++ compatibility |
-| **.NET** | `HelloOpensource` | `E2E/dotnet/` | CoreCLR execution & native library resolution |
-| **PHP** | `test.php` | `E2E/php/` | PHP engine execution & module loading |
-| **Perl** | `test.pl` | `E2E/perl/` | Perl interpreter integrity |
+---
 
-## Architectural Isolation
+## 3. Product Support Table
 
-By maintaining these tests in a dedicated `E2E/` directory, we decouple the verification logic from the build pipelines. This allows for independent auditing of the test artifacts and ensures that our distroless images remain unpolluted by development headers or build-time dependencies.
+| Runtime | Parent Infrastructure | Deployment Strategy |
+| :--- | :--- | :--- |
+| Node.js | `cc` | LTS Binary Repackaging |
+| Python 3 | `cc` | Standalone CPython Extraction |
+| Java | `cc` | Eclipse Temurin Runtime |
+| .NET | `cc` | Microsoft CoreCLR Deployment |
 
-For detailed instructions on running these tests locally, refer to the individual pipeline guides in `docs/pipelines/`.
