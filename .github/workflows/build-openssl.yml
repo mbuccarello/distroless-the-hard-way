@@ -42,7 +42,6 @@ jobs:
         uses: semgrep/semgrep-action@713efdd345f3035192eaa63f56867b88e63e4e5d
         with:
           config: "p/c"
-          input: workspace/src/
 
       - name: Compile OpenSSL (Fedora Glibc-Native Sandbox)
         uses: addnab/docker-run-action@4f65fabd2431ebc8d299f8e5a018d79a769ae185
