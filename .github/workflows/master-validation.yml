@@ -20,26 +20,26 @@ jobs:
     secrets: inherit
 
   test-python3:
-    needs: []
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     uses: ./.github/workflows/test-python3.yml
     secrets: inherit
 
   test-nodejs:
-    needs: []
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     uses: ./.github/workflows/test-nodejs.yml
     secrets: inherit
 
   test-php:
-    needs: []
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     uses: ./.github/workflows/test-php.yml
     secrets: inherit
 
   test-perl:
-    needs: []
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     uses: ./.github/workflows/test-perl.yml
     secrets: inherit
 
   test-dotnet:
-    needs: []
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     uses: ./.github/workflows/test-dotnet.yml
     secrets: inherit

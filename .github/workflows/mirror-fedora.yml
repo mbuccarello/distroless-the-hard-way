@@ -1,0 +1,47 @@
+name: Opensource Distroless Mirror - Base Fedora
+
+on:
+  workflow_dispatch:
+  workflow_call:
+  schedule:
+    - cron: '0 0 * * 0' # Weekly refresh
+
+jobs:
+  mirror-fedora:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+      id-token: write
+      attestations: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Install Cosign (Direct Binary)
+        run: |
+          curl -O -L "https://github.com/sigstore/cosign/releases/download/v2.4.1/cosign-linux-amd64"
+          sudo mv cosign-linux-amd64 /usr/local/bin/cosign
+          sudo chmod +x /usr/local/bin/cosign
+          cosign version
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Mirror Fedora Image
+        run: |
+          MIRROR_NAME="ghcr.io/${{ github.repository_owner }}/base-fedora:latest"
+          # Attempt to pull from Docker Hub (canonical source)
+          docker pull fedora:40
+          docker tag fedora:40 $MIRROR_NAME
+          docker push $MIRROR_NAME
+          echo "Mirror successful: $MIRROR_NAME"
+
+      - name: Sign Mirrored Image (Cosign)
+        run: |
+          cosign sign --yes ghcr.io/${{ github.repository_owner }}/base-fedora:latest

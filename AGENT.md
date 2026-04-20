@@ -15,6 +15,10 @@ It teaches users how to create distroless container images *without* relying on 
 - **Strict Source Compilation:** Agents must rely entirely on verified raw source code (`.tar.gz`) fetched directly from upstream providers. Everything must be natively compiled.
 - **The Google Distroless Layered Hierarchy:** The architecture strictly enforces a linear cascading hierarchy spanning `base -> cc -> java/python` specifically modeled against Google's Distroless Bazel architecture.
 - **Layered Master Orchestration:** Agents must utilize the tiered orchestrator system (Layer 1: Foundations, Layer 2: Assembly, Layer 3: Validation) to prevent race conditions and ensure cryptographic chain-of-custody.
+- **Naming Conventions:** 
+    - `base-fedora`: Compilation Sandbox (Layer 1 Mirror). Pulls from Docker Hub, pushes to GHCR.
+    - `base`: Distroless OS Foundation (Layer 2 Assembled Product). Built from foundations.
+    - `artifacts-*`: Intermediate OCI payloads (tarballs) produced by Layer 1.
 
 ## 3. Mandatory Security Implementations
 When generating or modifying GitHub Action assembly pipelines, you must include the following validations:

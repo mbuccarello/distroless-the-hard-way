@@ -15,23 +15,32 @@ permissions:
   attestations: write
 
 jobs:
+  mirror:
+    uses: ./.github/workflows/mirror-fedora.yml
+    secrets: inherit
+
   bootstrap:
+    needs: [mirror]
     uses: ./.github/workflows/build-bootstrap.yml
     secrets: inherit
 
   openssl:
+    needs: [mirror]
     uses: ./.github/workflows/build-openssl.yml
     secrets: inherit
 
   zlib:
+    needs: [mirror]
     uses: ./.github/workflows/build-zlib.yml
     secrets: inherit
 
   tzdata:
+    needs: [mirror]
     uses: ./.github/workflows/build-tzdata.yml
     secrets: inherit
 
   glibc:
+    needs: [mirror]
     uses: ./.github/workflows/build-glibc.yml
     secrets: inherit
 
