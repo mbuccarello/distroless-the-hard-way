@@ -14,6 +14,7 @@ It teaches users how to create distroless container images *without* relying on 
 - **Exec-Form Invocation:** Because we extract directly into empty `scratch` containers without an OS, docker instructions must use **Exec Form** (e.g., `RUN ["/tar", "-xzf", "file.tar.gz"]`) to invoke syscall processes directly rather than relying on `/bin/sh`.
 - **Strict Source Compilation:** Agents must rely entirely on verified raw source code (`.tar.gz`) fetched directly from upstream providers. Everything must be natively compiled.
 - **The Google Distroless Layered Hierarchy:** The architecture strictly enforces a linear cascading hierarchy spanning `base -> cc -> java/python` specifically modeled against Google's Distroless Bazel architecture.
+- **Layered Master Orchestration:** Agents must utilize the tiered orchestrator system (Layer 1: Foundations, Layer 2: Assembly, Layer 3: Validation) to prevent race conditions and ensure cryptographic chain-of-custody.
 
 ## 3. Mandatory Security Implementations
 When generating or modifying GitHub Action assembly pipelines, you must include the following validations:
@@ -25,6 +26,7 @@ When generating or modifying GitHub Action assembly pipelines, you must include 
 ## 4. Documentation Standards
 - **Formal Engineering Tone:** Documentation must be written as objective technical specifications. Phrases such as "We discovered", "I found", or "The fix is" are strictly prohibited. Agents must describe the system state and design rationale as technical facts.
 - **Architectural Documentation Enforcement:** Each architectural shift (e.g., build host pivots, staging changes, or bootstrap modifications) is not considered complete until the corresponding `.md` documentation in `docs/` or `README.md` is updated to reflect the new technical specification.
-- **Graphical Diagrams (Mermaid):** Technical flows, pipeline sequences, and architectural relationships must be visualized using Mermaid syntax.
+- **Graphical Diagrams (Mermaid):** Technical flows must be visualized using Mermaid syntax.
+- **Mermaid-to-Image Standard:** Embedded Mermaid blocks are prohibited. Diagram source must be stored in `docs/mermaid/*.mmd`, rendered to `docs/images/*.png` using the **Docker `mermaid-cli`** engine, and referenced as static assets in the documentation.
 - **No Filler Content:** Documentation must focus on the "why" and "how" of the architecture. Avoid AI-generated filler, excessive adjectives, or marketing-style language.
 - **Archived Prototype:** The old python `build.py` orchestrator in the `poc/` directory is strictly an archived prototype and must not be treated as the primary architecture. Do not cross-link new pipelines to the POC.
