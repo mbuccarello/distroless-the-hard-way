@@ -56,7 +56,7 @@ jobs:
 
       - name: Construct Zero-Trust Bootstrap Image
         run: |
-                    cat <<EOF > Dockerfile.bootstrap
+          cat <<EOF > Dockerfile.bootstrap
           FROM scratch
           COPY rootfs/busybox /busybox
           COPY rootfs/tar /tar
