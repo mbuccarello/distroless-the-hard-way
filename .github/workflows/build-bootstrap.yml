@@ -56,10 +56,13 @@ jobs:
 
       - name: Construct Zero-Trust Bootstrap Image
         run: |
-          cat <<EOF > Dockerfile.bootstrap
+                    cat <<EOF > Dockerfile.bootstrap
           FROM scratch
+          COPY rootfs/busybox /busybox
           COPY rootfs/tar /tar
-          COPY rootfs/gzip /gzip
+          COPY rootfs/sh /sh
+          COPY rootfs/mkdir /mkdir
+          COPY rootfs/echo /echo
           EOF
           docker build -t ghcr.io/${{ github.repository_owner }}/bootstrap:latest -f Dockerfile.bootstrap .
 
