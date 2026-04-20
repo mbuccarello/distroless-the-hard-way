@@ -104,6 +104,7 @@ jobs:
 
 
       - name: Build and Push Base OS
+        id: push
         run: |
           docker build -t ghcr.io/${{ github.repository_owner }}/base:latest .
           docker push ghcr.io/${{ github.repository_owner }}/base:latest
