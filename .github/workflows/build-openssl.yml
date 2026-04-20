@@ -49,7 +49,7 @@ jobs:
           image: ghcr.io/${{ github.repository_owner }}/base-fedora:latest
           options: -v ${{ github.workspace }}/workspace:/workspace
           run: |
-            dnf install -y gcc make perl-devel zlib-devel diffutils bzip2
+            dnf install -y gcc make perl-devel perl-FindBin perl-IPC-Cmd perl-File-Compare zlib-devel diffutils bzip2
             cd /workspace/src
             export SOURCE_DATE_EPOCH=315532800
             ./config no-shared --prefix=/usr -O3
