@@ -27,12 +27,16 @@ runs:
         FIRST_TAG=$(echo "${{ inputs.tags }}" | awk '{print $1}')
         IMAGE_NAME="${{ inputs.registry }}/${{ github.repository_owner }}/${{ inputs.image-name }}:$FIRST_TAG"
         
+        # Capture authoritative digest from push output
+        docker push "$IMAGE_NAME" | tee push_output.txt
+        DIGEST=$(grep "digest: sha256:" push_output.txt | head -n1 | awk '{print $3}')
+        
         for tag in ${{ inputs.tags }}; do
-          docker push ${{ inputs.registry }}/${{ github.repository_owner }}/${{ inputs.image-name }}:$tag
+          if [ "$tag" != "$FIRST_TAG" ]; then
+            docker push ${{ inputs.registry }}/${{ github.repository_owner }}/${{ inputs.image-name }}:$tag
+          fi
         done
         
-        # Robust digest retrieval for SLSA attestation
-        DIGEST=$(docker images --no-trunc --quiet --format "{{.Digest}}" ${{ inputs.registry }}/${{ github.repository_owner }}/${{ inputs.image-name }}:$FIRST_TAG)
         echo "digest=$DIGEST" >> $GITHUB_OUTPUT
 
     - name: Sign Sovereign Product
