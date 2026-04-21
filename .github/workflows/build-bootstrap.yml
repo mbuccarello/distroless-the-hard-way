@@ -66,6 +66,8 @@ jobs:
             cp busybox /workspace/rootfs/bin/cp
             cp busybox /workspace/rootfs/bin/mv
             cp busybox /workspace/rootfs/bin/echo
+
+      - name: Construct Zero-Trust Bootstrap Image
         run: |
           cat <<EOF > Dockerfile.bootstrap
           FROM scratch
