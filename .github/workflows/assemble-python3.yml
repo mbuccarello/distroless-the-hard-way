@@ -23,7 +23,7 @@ jobs:
           # Use our trusted Fedora sandbox to download official packages
           # We must install dnf-plugins-core to enable 'dnf download'
           docker run --rm -v $(pwd)/payload/rpm:/payload ghcr.io/${{ github.repository_owner }}/base-fedora:latest \
-            /bin/sh -c "dnf install -y 'dnf-command(download)' && dnf download --resolve --destdir=/payload python3"
+            /bin/sh -c "dnf install -y 'dnf-command(download)' && dnf download --resolve --destdir=/payload python3 python3-libs libxcrypt openssl-libs zlib xz-libs"
           
           # Install rpm2cpio in the runner to extract
           sudo apt-get update && sudo apt-get install -y rpm2cpio cpio

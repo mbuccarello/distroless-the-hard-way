@@ -22,9 +22,9 @@ jobs:
 
       - name: Build E2E Application (SDK)
         run: |
-          docker run --rm -v ${{ github.workspace }}/E2E/java:/src -w /src mcr.microsoft.com/openjdk/jdk:21-ubuntu javac HelloOpensource Distroless.java
+          docker run --rm -v ${{ github.workspace }}/E2E/java:/src -w /src mcr.microsoft.com/openjdk/jdk:21-ubuntu javac HelloOpensource.java
 
       - name: Execute E2E Application (Opensource Distroless Distroless Java)
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker run --rm -v ${{ github.workspace }}/E2E/java:/app -w /app ghcr.io/${{ github.repository_owner }}/java:latest HelloOpensource Distroless
+          docker run --rm -v ${{ github.workspace }}/E2E/java:/app -w /app ghcr.io/${{ github.repository_owner }}/java:latest HelloOpensource
