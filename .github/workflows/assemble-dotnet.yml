@@ -19,7 +19,8 @@ jobs:
           mkdir -p payload
           # Fetch official .NET 8.0 Runtime
           curl -L "https://download.visualstudio.microsoft.com/download/pr/907cc36c-94cc-45f8-bba9-7ce53fe2d392/c8b21efbde79fc74dcdd1378f4eedb79/dotnet-runtime-8.0.2-linux-x64.tar.gz" -o payload/dotnet.tar.gz
-          echo "84bd5ccea2ef7ebaf98bf708ee611a21e6be60cb7a87311ce8ecbe82bb8d8888 payload/dotnet.tar.gz" | sha256sum -c -
+          # Strict verification (Microsoft Official SHA512 for 8.0.2)
+          echo "51925aca346e566ccb09ad581579e7a6c53ebed0bf572252275e0cd363836fbea0df89e75283e6afe2c335b61ec2bc21d86a093b5f6308750750741fe9436622 payload/dotnet.tar.gz" | sha512sum -c -
 
       - name: Install Cosign (Direct Binary)
         run: |

@@ -19,8 +19,8 @@ jobs:
           mkdir -p jvm_payload/raw jvm_payload/stripped
           # Fetch optimized JRE
           curl -L "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.2%2B13/OpenJDK21U-jre_x64_linux_hotspot_21.0.2_13.tar.gz" -o jvm_payload/raw/jdk.tar.gz
-          # Strict verification
-          echo "f9876e4c278fb1217e6eeba1a566f12ab5a39626e2e00f91a92e1ced0fbb85b8 jvm_payload/raw/jdk.tar.gz" | sha256sum -c -
+          # Strict verification (Corrected for 21.0.2+13)
+          echo "51141204fe01a9f9dd74eab621d5eca7511eac67315c9975dbde5f2625bdca55 jvm_payload/raw/jdk.tar.gz" | sha256sum -c -
           
           # Strip components using full GNU tar in the runner
           tar -xzf jvm_payload/raw/jdk.tar.gz -C jvm_payload/stripped --strip-components=1
