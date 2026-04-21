@@ -5,8 +5,8 @@ graph TB
     classDef image fill:#059669,stroke:#064e3b,color:#fff,stroke-width:2px;
     classDef legend fill:#f8fafc,stroke:#cbd5e1,color:#1e293b;
 
-    %% Legend Section (Top Right Position)
-    subgraph Legend ["&nbsp; Documentation Legend &nbsp;"]
+    %% Legend Section
+    subgraph Legend ["<br/>DOCUMENTATION LEGEND<br/>&nbsp;"]
         direction TB
         l1["✅ [SOURCE] Native Build (Hard Way)"]
         l2["⚠️ [FEDORA] RPM Extract (Roadmap)"]
@@ -16,7 +16,7 @@ graph TB
     class l2 fedora;
 
     %% Foundations
-    subgraph L1 ["Layer 1: Foundations"]
+    subgraph L1 ["<br/>LAYER 1: FOUNDATIONS<br/>&nbsp;"]
         direction TB
         glibc["✅ [SOURCE] glibc<br/>(libc.so.6)"]
         openssl["🔐 [SOURCE] openssl<br/>(libssl.so.3)"]
@@ -24,7 +24,7 @@ graph TB
     end
 
     %% Assembly
-    subgraph L2 ["Layer 2: Core Assembly"]
+    subgraph L2 ["<br/>LAYER 2: CORE ASSEMBLY<br/>&nbsp;"]
         direction TB
         base["🚀 base image"]
         cc["🛠️ cc image"]
@@ -35,39 +35,42 @@ graph TB
     end
 
     %% Runtimes
-    subgraph L3 ["Layer 3: Runtimes & Stacks"]
+    subgraph L3 ["<br/>LAYER 3: RUNTIMES & STACKS<br/>&nbsp;"]
         direction LR
         
-        subgraph Python ["Python 3.12"]
-            py_bin["⚠️ [FEDORA] Python Interpreter"]
-            py_libs["⚠️ [FEDORA] libffi, expat, readline,<br/>sqlite, gdbm, libdb"]
-            py_libs -.-> py_bin
+        subgraph PHP ["<br/>PHP 8.3<br/>&nbsp;"]
+            direction TB
+            php_libs["⚠️ libxml2, pcre2,<br/>libedit, ncurses"]
+            php_bin["🐘 PHP Interpreter"]
+            php_libs -.-> php_bin
         end
 
-        subgraph Dotnet [".NET 8.0"]
-            dotnet_bin["✨ [BINARY] Runtime"]
-            dotnet_libs["⚠️ [FEDORA] libicu, krb5-libs"]
+        subgraph Dotnet ["<br/>.NET 8.0<br/>&nbsp;"]
+            direction TB
+            dotnet_libs["⚠️ libicu (Unicode),<br/>krb5-libs (GSSAPI)"]
+            dotnet_bin["✨ .NET Runtime"]
             dotnet_libs -.-> dotnet_bin
         end
 
-        subgraph PHP ["PHP 8.3"]
-            php_bin["⚠️ [FEDORA] PHP Interpreter"]
-            php_libs["⚠️ [FEDORA] libxml2, pcre2,<br/>libedit, ncurses"]
-            php_libs -.-> php_bin
+        subgraph Python ["<br/>Python 3.12<br/>&nbsp;"]
+            direction TB
+            py_libs["⚠️ libffi, expat, readline,<br/>sqlite, gdbm, libdb"]
+            py_bin["🐍 Python Interpreter"]
+            py_libs -.-> py_bin
         end
     end
 
     %% Global Connections
     L1 --> base
-    cc --> Python
-    cc --> Dotnet
     cc --> PHP
+    cc --> Dotnet
+    cc --> Python
 
     %% Applying Classes
-    class glibc,openssl,zlib,libcpp,libgcc source;
+    class glibc,openssl,zlib source;
     class cacert,py_bin,py_libs,dotnet_bin,dotnet_libs,php_bin,php_libs fedora;
     class base,cc image;
 
-    %% Layout spacing
+    %% Spacing
     L1 ~~~ Legend
     L2 ~~~ Legend
