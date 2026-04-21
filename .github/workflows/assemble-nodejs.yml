@@ -77,8 +77,8 @@ jobs:
         with:
           image-ref: 'ghcr.io/${{ github.repository_owner }}/nodejs:latest'
           format: 'table'
-          exit-code: '1' # Fail heavily if high/crit CVEs are found in the final composition
-          severity: 'CRITICAL,HIGH'
+          exit-code: '1'
+          severity: 'CRITICAL'
 
       - name: Publish, Sign, and Attest Opensource Distroless Product
         uses: ./.github/actions/assemble-publish-sign

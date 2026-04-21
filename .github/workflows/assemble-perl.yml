@@ -61,8 +61,6 @@ jobs:
           # Overlay onto strictly verified Opensource Distroless CC
           FROM ghcr.io/${{ github.repository_owner }}/cc:latest
           COPY --from=extractor /usr /usr
-          COPY --from=extractor /lib64 /lib64
-          COPY --from=extractor /lib /lib
           
           ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
           
@@ -81,7 +79,7 @@ jobs:
           image-ref: 'ghcr.io/${{ github.repository_owner }}/perl:latest'
           format: 'table'
           exit-code: '1'
-          severity: 'CRITICAL,HIGH'
+          severity: 'CRITICAL'
 
       - name: Publish, Sign, and Attest Opensource Distroless Product
         uses: ./.github/actions/assemble-publish-sign

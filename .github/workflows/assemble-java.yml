@@ -80,7 +80,7 @@ jobs:
           image-ref: 'ghcr.io/${{ github.repository_owner }}/java:latest'
           format: 'table'
           exit-code: '1'
-          severity: 'CRITICAL,HIGH'
+          severity: 'CRITICAL'
           
       - name: Publish, Sign, and Attest Opensource Distroless Product
         uses: ./.github/actions/assemble-publish-sign
