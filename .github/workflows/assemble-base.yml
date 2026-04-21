@@ -127,6 +127,7 @@ jobs:
           # Primary environment variable to ensure all runtimes find the CA bundle
           ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
           ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+          ENV LD_LIBRARY_PATH=/usr/lib64:/usr/lib:/lib64:/lib
           ENV TZ=UTC
           EOF
 
