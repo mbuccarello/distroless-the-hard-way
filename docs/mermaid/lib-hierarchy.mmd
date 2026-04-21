@@ -1,12 +1,11 @@
 graph TB
     %% Modern Enterprise Design System
     classDef source fill:#6366f1,stroke:#4338ca,color:#fff,stroke-width:2px,font-weight:bold;
-    classDef fedora fill:#f8fafc,stroke:#d97706,color:#92400e,stroke-width:2px,stroke-dasharray: 5 5;
+    classDef fedora fill:#ffffff,stroke:#d97706,color:#92400e,stroke-width:2px,stroke-dasharray: 5 5;
     classDef image fill:#10b981,stroke:#064e3b,color:#fff,stroke-width:2px,font-weight:bold;
     classDef header fill:#1e293b,stroke:#0f172a,color:#fff,font-weight:bold,font-size:16px;
-    classDef container fill:#ffffff,stroke:#e2e8f0,stroke-width:1px;
 
-    %% Main Layout
+    %% Foundations
     subgraph L1_Cont [" "]
         direction TB
         h1["🏗️ LAYER 1: FOUNDATIONS (HARD WAY)"]:::header
@@ -18,8 +17,10 @@ graph TB
             zlib["🗜️ [SOURCE] zlib<br/>(libz.so.1)"]
         end
     end
-    class L1_Cont container;
+    style L1_Cont fill:#ffffff,stroke:#e2e8f0,stroke-width:1px;
+    style L1_Content fill:#ffffff,stroke:none;
 
+    %% Assembly
     subgraph L2_Cont [" "]
         direction TB
         h2["🚀 LAYER 2: CORE ASSEMBLY"]:::header
@@ -34,8 +35,10 @@ graph TB
             base --> cc
         end
     end
-    class L2_Cont container;
+    style L2_Cont fill:#ffffff,stroke:#e2e8f0,stroke-width:1px;
+    style L2_Content fill:#ffffff,stroke:none;
 
+    %% Runtimes
     subgraph L3_Cont [" "]
         direction TB
         h3["✨ LAYER 3: RUNTIMES & FLAVORS"]:::header
@@ -62,7 +65,11 @@ graph TB
             end
         end
     end
-    class L3_Cont container;
+    style L3_Cont fill:#ffffff,stroke:#e2e8f0,stroke-width:1px;
+    style L3_Content fill:#ffffff,stroke:none;
+    style PHP fill:#ffffff,stroke:#e2e8f0;
+    style Dotnet fill:#ffffff,stroke:#e2e8f0;
+    style Python fill:#ffffff,stroke:#e2e8f0;
 
     %% Isolated Legend
     subgraph Legend_Cont [" "]
@@ -71,7 +78,7 @@ graph TB
         l1["✅ [SOURCE] Native Build"]:::source
         l2["⚠️ [FEDORA] RPM Extract"]:::fedora
     end
-    class Legend_Cont container;
+    style Legend_Cont fill:#ffffff,stroke:#e2e8f0,stroke-width:1px;
 
     %% Global Connections
     L1_Content --> base
