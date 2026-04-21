@@ -62,11 +62,6 @@ jobs:
           FROM ghcr.io/${{ github.repository_owner }}/cc:latest
           COPY --from=extractor /usr /usr
           
-          # Implement standard FHS symlinks for Python discovery
-          COPY --from=extractor /bin/ln /bin/ln
-          RUN ["/bin/ln", "-s", "/usr/bin/python3.12", "/usr/bin/python3"]
-          RUN ["/bin/ln", "-s", "/usr/bin/pip3.12", "/usr/bin/pip3"]
-          
           ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
           
           ENTRYPOINT ["/usr/bin/python3"]
