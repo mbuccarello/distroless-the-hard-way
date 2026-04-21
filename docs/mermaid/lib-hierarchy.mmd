@@ -1,29 +1,30 @@
-graph LR
-    %% Global Styles
-    classDef source fill:#4f46e5,stroke:#312e81,color:#fff,stroke-width:2px;
-    classDef fedora fill:#fff7ed,stroke:#c2410c,color:#9a3412,stroke-width:2px,stroke-dasharray: 5 5;
-    classDef image fill:#10b981,stroke:#065f46,color:#fff,stroke-width:2px;
-    classDef legend fill:#fff,stroke:#333;
+graph TB
+    %% Modern Design System
+    classDef source fill:#6366f1,stroke:#4338ca,color:#fff,stroke-width:2px;
+    classDef fedora fill:#fffbeb,stroke:#d97706,color:#92400e,stroke-width:2px,stroke-dasharray: 5 5;
+    classDef image fill:#059669,stroke:#064e3b,color:#fff,stroke-width:2px;
+    classDef legend fill:#f8fafc,stroke:#cbd5e1,color:#1e293b;
 
-    %% Layout Structure
-    subgraph Legend ["&nbsp;"]
+    %% Legend Section (Top Right Position)
+    subgraph Legend ["&nbsp; Documentation Legend &nbsp;"]
         direction TB
-        l1["✅ [SOURCE] Built from Source"]
-        l2["⚠️ [FEDORA] Extracted from RPM"]
+        l1["✅ [SOURCE] Native Build (Hard Way)"]
+        l2["⚠️ [FEDORA] RPM Extract (Roadmap)"]
     end
     class Legend legend;
     class l1 source;
     class l2 fedora;
 
-    %% Main Hierarchy
-    subgraph Foundations ["Layer 1: Foundations (Hard Way)"]
+    %% Foundations
+    subgraph L1 ["Layer 1: Foundations"]
         direction TB
-        glibc["✅ [SOURCE] glibc"]
-        openssl["✅ [SOURCE] openssl (shared)"]
-        zlib["✅ [SOURCE] zlib"]
+        glibc["✅ [SOURCE] glibc<br/>(libc.so.6)"]
+        openssl["🔐 [SOURCE] openssl<br/>(libssl.so.3)"]
+        zlib["🗜️ [SOURCE] zlib<br/>(libz.so.1)"]
     end
 
-    subgraph Base ["Layer 2: Core Images"]
+    %% Assembly
+    subgraph L2 ["Layer 2: Core Assembly"]
         direction TB
         base["🚀 base image"]
         cc["🛠️ cc image"]
@@ -33,44 +34,40 @@ graph LR
         cacert -.-> base
     end
 
-    subgraph Runtimes ["Layer 3: Runtimes (Flavors)"]
-        direction TB
+    %% Runtimes
+    subgraph L3 ["Layer 3: Runtimes & Stacks"]
+        direction LR
         
-        subgraph Python ["Python Stack"]
-            python["🐍 [FEDORA] Python 3.12"]
-            py_libs["⚠️ libffi, expat, readline,<br/>sqlite, gdbm, libdb"]
-            py_libs -.-> python
+        subgraph Python ["Python 3.12"]
+            py_bin["⚠️ [FEDORA] Python Interpreter"]
+            py_libs["⚠️ [FEDORA] libffi, expat, readline,<br/>sqlite, gdbm, libdb"]
+            py_libs -.-> py_bin
         end
 
-        subgraph Dotnet [".NET Stack"]
-            dotnet["✨ [BINARY] .NET 8 Runtime"]
-            dotnet_libs["⚠️ libicu (Unicode),<br/>krb5-libs (GSSAPI)"]
-            dotnet_libs -.-> dotnet
+        subgraph Dotnet [".NET 8.0"]
+            dotnet_bin["✨ [BINARY] Runtime"]
+            dotnet_libs["⚠️ [FEDORA] libicu, krb5-libs"]
+            dotnet_libs -.-> dotnet_bin
         end
 
-        subgraph PHP ["PHP Stack"]
-            php["🐘 [FEDORA] PHP 8.3"]
-            php_libs["⚠️ libxml2, pcre2,<br/>libedit, ncurses"]
-            php_libs -.-> php
+        subgraph PHP ["PHP 8.3"]
+            php_bin["⚠️ [FEDORA] PHP Interpreter"]
+            php_libs["⚠️ [FEDORA] libxml2, pcre2,<br/>libedit, ncurses"]
+            php_libs -.-> php_bin
         end
     end
 
-    %% Connections
-    glibc --> base
-    openssl --> base
-    zlib --> base
-    
-    cc --> python
-    cc --> dotnet
-    cc --> php
+    %% Global Connections
+    L1 --> base
+    cc --> Python
+    cc --> Dotnet
+    cc --> PHP
 
     %% Applying Classes
-    class glibc,openssl,zlib source;
-    class libcpp,libgcc source;
-    class cacert,python,dotnet,php,py_libs,dotnet_libs,php_libs fedora;
+    class glibc,openssl,zlib,libcpp,libgcc source;
+    class cacert,py_bin,py_libs,dotnet_bin,dotnet_libs,php_bin,php_libs fedora;
     class base,cc image;
 
-    %% Invisible alignment to push legend to the right
-    Foundations ~~~ Legend
-    Base ~~~ Legend
-    Runtimes ~~~ Legend
+    %% Layout spacing
+    L1 ~~~ Legend
+    L2 ~~~ Legend
