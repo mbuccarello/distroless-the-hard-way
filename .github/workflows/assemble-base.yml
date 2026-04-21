@@ -97,6 +97,10 @@ jobs:
           RUN ["/busybox", "sh", "-c", "echo 'root:x:0:' > /rootfs/etc/group"]
           RUN ["/busybox", "sh", "-c", "echo 'nobody:x:65534:' >> /rootfs/etc/group"]
           
+          # Implement standard FHS symlinks for UsrMerge compatibility
+          RUN ["/busybox", "sh", "-c", "ln -s usr/lib /rootfs/lib"]
+          RUN ["/busybox", "sh", "-c", "ln -s usr/lib64 /rootfs/lib64"]
+          
           FROM scratch
           COPY --from=extractor /rootfs /
           
