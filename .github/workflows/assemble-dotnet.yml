@@ -54,7 +54,7 @@ jobs:
           RUN ["/bin/ln", "-s", "/usr/share/dotnet/dotnet", "/usr/bin/dotnet"]
           
           ENV DOTNET_ROOT=/usr/share/dotnet
-          ENV PATH=\$DOTNET_ROOT:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+          ENV PATH=/usr/share/dotnet:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
           
           ENTRYPOINT ["/usr/bin/dotnet"]
           EOF
@@ -64,7 +64,7 @@ jobs:
 
       - name: Functional Smoke Test (Verification)
         run: |
-          docker run --rm ghcr.io/${{ github.repository_owner }}/dotnet:latest --version
+          docker run --rm ghcr.io/${{ github.repository_owner }}/dotnet:latest --list-runtimes
 
       - name: Run Final Image SCA Vulnerability Scan (Trivy)
         uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
