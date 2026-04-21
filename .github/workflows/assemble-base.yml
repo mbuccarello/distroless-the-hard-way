@@ -102,24 +102,22 @@ jobs:
           RUN ["/busybox", "ln", "-sf", "usr/lib64", "/rootfs/lib64"]
           
           # --- ATOMIC ROOT TRUST STORE (SSL/TLS SECURITY) ---
-          # We copy the PRE-GENERATED trust store from the official Fedora 40 sandbox.
-          # This ensures all PEM bundles are present, as the RPM extraction alone
-          # wouldn't run the 'update-ca-trust' post-install script.
+          # We copy certificates into the functional 'extractor' stage first
+          # to perform necessary symlink operations before final assembly.
           FROM ghcr.io/${{ github.repository_owner }}/base-fedora:latest as trust-provider
           
-          FROM scratch as base-rootfs
-          COPY --from=extractor /rootfs /
+          # Return to extractor to finish the rootfs preparation
+          FROM extractor as final-builder
+          # Copy the pre-generated trust hierarchy into our rootfs
+          COPY --from=trust-provider /etc/pki/ca-trust/extracted /rootfs/etc/pki/ca-trust/extracted
+          COPY --from=trust-provider /etc/pki/tls/certs /rootfs/etc/pki/tls/certs
           
-          # Copy the pre-generated trust hierarchy
-          COPY --from=trust-provider /etc/pki/ca-trust/extracted /etc/pki/ca-trust/extracted
-          COPY --from=trust-provider /etc/pki/tls/certs /etc/pki/tls/certs
-          
-          # Final symlink for universal compatibility (Python/Go/OpenSSL/GNOME)
-          RUN ["/busybox", "mkdir", "-p", "/etc/ssl/certs"]
-          RUN ["/busybox", "ln", "-sf", "/etc/pki/tls/certs/ca-bundle.crt", "/etc/ssl/certs/ca-certificates.crt"]
+          # Create symlinks using our functional busybox environment
+          RUN ["/busybox", "mkdir", "-p", "/rootfs/etc/ssl/certs"]
+          RUN ["/busybox", "ln", "-sf", "/etc/pki/tls/certs/ca-bundle.crt", "/rootfs/etc/ssl/certs/ca-certificates.crt"]
           
           FROM scratch
-          COPY --from=base-rootfs / /
+          COPY --from=final-builder /rootfs /
           
           ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
           ENV TZ=UTC
