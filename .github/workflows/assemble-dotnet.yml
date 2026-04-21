@@ -30,7 +30,7 @@ jobs:
           mkdir -p payload/rpm payload/extracted
           # Use our trusted Fedora sandbox to download official packages
           docker run --rm -v $(pwd)/payload/rpm:/payload ghcr.io/${{ github.repository_owner }}/base-fedora:latest \
-            /bin/sh -c "dnf install -y 'dnf-command(download)' && dnf download --resolve --destdir=/payload libicu"
+            /bin/sh -c "dnf install -y 'dnf-command(download)' && dnf download --resolve --destdir=/payload libicu krb5-libs"
           
           # Install rpm2cpio in the runner to extract
           sudo apt-get update && sudo apt-get install -y rpm2cpio cpio
