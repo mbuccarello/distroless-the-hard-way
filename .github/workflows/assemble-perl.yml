@@ -37,7 +37,7 @@ jobs:
           FROM ghcr.io/${{ github.repository_owner }}/bootstrap:latest as extractor
           COPY payload/perl.tar.gz /
           # Use our own trusted static tar for extraction
-          RUN mkdir -p /usr/local/perl && /bin/tar -xzf /perl.tar.gz -C /usr/local/perl --strip-components=1
+          RUN ["/bin/sh", "-c", "mkdir -p /usr/local/perl && /bin/tar -xzf /perl.tar.gz -C /usr/local/perl --strip-components=1"]
           
           # Overlay onto strictly verified Opensource Distroless CC
           FROM ghcr.io/${{ github.repository_owner }}/cc:latest

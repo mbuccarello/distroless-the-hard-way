@@ -39,7 +39,7 @@ jobs:
           FROM ghcr.io/${{ github.repository_owner }}/bootstrap:latest as extractor
           COPY payload/dotnet.tar.gz /
           # Use our own trusted static tar for extraction
-          RUN mkdir -p /usr/share/dotnet && /bin/tar -xzf /dotnet.tar.gz -C /usr/share/dotnet
+          RUN ["/bin/sh", "-c", "mkdir -p /usr/share/dotnet && /bin/tar -xzf /dotnet.tar.gz -C /usr/share/dotnet"]
           
           # Overlay onto strictly verified Opensource Distroless CC
           FROM ghcr.io/${{ github.repository_owner }}/cc:latest

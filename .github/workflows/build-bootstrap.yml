@@ -53,8 +53,18 @@ jobs:
             cp busybox /workspace/rootfs/sh
             cp busybox /workspace/rootfs/mkdir
             cp busybox /workspace/rootfs/echo
-
-      - name: Construct Zero-Trust Bootstrap Image
+            cp busybox /workspace/rootfs/bin/sh
+            cp busybox /workspace/rootfs/bin/busybox
+            cp busybox /workspace/rootfs/bin/tar
+            cp busybox /workspace/rootfs/bin/ln
+            cp busybox /workspace/rootfs/bin/mkdir
+            cp busybox /workspace/rootfs/bin/chmod
+            cp busybox /workspace/rootfs/bin/chown
+            cp busybox /workspace/rootfs/bin/rm
+            cp busybox /workspace/rootfs/bin/ls
+            cp busybox /workspace/rootfs/bin/cp
+            cp busybox /workspace/rootfs/bin/mv
+            cp busybox /workspace/rootfs/bin/echo
         run: |
           cat <<EOF > Dockerfile.bootstrap
           FROM scratch
@@ -63,6 +73,7 @@ jobs:
           COPY rootfs/sh /sh
           COPY rootfs/mkdir /mkdir
           COPY rootfs/echo /echo
+          COPY rootfs/bin /bin
           EOF
           docker build -t ghcr.io/${{ github.repository_owner }}/bootstrap:latest -f Dockerfile.bootstrap .
 

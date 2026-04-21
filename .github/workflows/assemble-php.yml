@@ -38,7 +38,7 @@ jobs:
           FROM ghcr.io/${{ github.repository_owner }}/bootstrap:latest as extractor
           COPY payload/php.tar.gz /
           # Use our own trusted static tar for extraction
-          RUN mkdir -p /usr/local/php && /bin/tar -xzf /php.tar.gz -C /usr/local/php --strip-components=1
+          RUN ["/bin/sh", "-c", "mkdir -p /usr/local/php && /bin/tar -xzf /php.tar.gz -C /usr/local/php --strip-components=1"]
           
           # Overlay onto strictly verified Opensource Distroless CC
           FROM ghcr.io/${{ github.repository_owner }}/cc:latest
