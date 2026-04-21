@@ -1,0 +1,41 @@
+graph TD
+    %% Global Styles
+    classDef source fill:#4f46e5,stroke:#312e81,color:#fff,stroke-width:2px;
+    classDef fedora fill:#f3f4f6,stroke:#9ca3af,color:#374151,stroke-width:2px,stroke-dasharray: 5 5;
+    classDef image fill:#10b981,stroke:#065f46,color:#fff,stroke-width:2px;
+
+    subgraph "Layer 1: Foundations (Source Built)"
+        glibc["📦 glibc<br/>(libc.so.6)"]
+        openssl["🔐 openssl<br/>(libssl.so.3)"]
+        zlib["🗜️ zlib<br/>(libz.so.1)"]
+    end
+
+    subgraph "Layer 2: Base Image"
+        base["🚀 base image"]
+        glibc --> base
+        openssl --> base
+        zlib --> base
+        cacert["📜 ca-certificates<br/>(Fedora Extract)"] -.-> base
+    end
+
+    subgraph "Layer 2: CC Layer"
+        cc["🛠️ cc image"]
+        base --> cc
+        libcpp["🧬 libstdc++.so.6<br/>(Source Built)"] --> cc
+        libgcc["🔗 libgcc_s.so.1<br/>(Source Built)"] --> cc
+    end
+
+    subgraph "Layer 2: Runtimes (Flavors)"
+        cc --> python
+        cc --> dotnet
+        cc --> php
+        
+        python["🐍 Python 3<br/>(Fedora RPMs)"]
+        dotnet["✨ .NET 8<br/>(MS + Fedora Libs)"]
+        php["🐘 PHP 8.3<br/>(Fedora RPMs)"]
+    end
+
+    %% Applying Classes
+    class glibc,openssl,zlib,libcpp,libgcc source;
+    class cacert,python,dotnet,php fedora;
+    class base,cc image;

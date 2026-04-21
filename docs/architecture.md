@@ -54,3 +54,7 @@ For projects that officially distribute only source code (requiring OS-level com
 - **Process**: The system uses the `base-fedora` sandbox to fetch official RPMs via `dnf download --resolve`. These RPMs are then extracted in the runner using `rpm2cpio`.
 - **Integrity**: Leverages the binary signing and security patching provided by the Fedora Project maintainers.
 - **Alignment**: Ensures 100% ABI compatibility with the `glibc` and core libraries established in Stage 2 (Foundations).
+
+---
+
+For a complete mapping of library inheritance and the roadmap for transitioning components to full native source builds, refer to the [Library Hierarchy & Build Roadmap](lib-hierarchy.md).

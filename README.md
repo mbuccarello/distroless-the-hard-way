@@ -10,7 +10,7 @@ Distroless The Hard Way is a technical implementation and educational curriculum
 
 ## 🏗️ System Architecture
 
-The build infrastructure is organized into five functional stages, ensuring absolute isolation between source acquisition, compilation, and image assembly.
+The build infrastructure is organized into five functional stages, ensuring absolute isolation between source acquisition, compilation, and image assembly. For a detailed view of how shared libraries are inherited across images, see the [Library Hierarchy & Roadmap](docs/lib-hierarchy.md).
 
 ### Stage 0: Mirror Isolation (Registry Hygiene)
 To prevent upstream rate-limiting and ensure infrastructure resilience, foundational build-time images (e.g., Alpine, Fedora) are cached within an internal registry.
