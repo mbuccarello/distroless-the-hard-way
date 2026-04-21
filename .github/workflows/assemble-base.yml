@@ -102,23 +102,30 @@ jobs:
           RUN ["/busybox", "ln", "-sf", "usr/lib64", "/rootfs/lib64"]
           
           # --- ATOMIC ROOT TRUST STORE (SSL/TLS SECURITY) ---
-          # We copy certificates into the functional 'extractor' stage first
-          # to perform necessary symlink operations before final assembly.
+          # We follow the "Undistro" principle: standard paths and environment variables
+          # instead of mirroring a specific distribution's complex hierarchy.
           FROM ghcr.io/${{ github.repository_owner }}/base-fedora:latest as trust-provider
           
           # Return to extractor to finish the rootfs preparation
           FROM extractor as final-builder
-          # Copy the pre-generated trust hierarchy into our rootfs
-          COPY --from=trust-provider /etc/pki/ca-trust/extracted /rootfs/etc/pki/ca-trust/extracted
-          COPY --from=trust-provider /etc/pki/tls/certs /rootfs/etc/pki/tls/certs
           
-          # Create symlinks using our functional busybox environment
-          RUN ["/busybox", "mkdir", "-p", "/rootfs/etc/ssl/certs"]
-          RUN ["/busybox", "ln", "-sf", "/etc/pki/tls/certs/ca-bundle.crt", "/rootfs/etc/ssl/certs/ca-certificates.crt"]
+          # Create standard directory structure
+          RUN ["/busybox", "mkdir", "-p", "/rootfs/etc/ssl/certs", "/rootfs/etc/pki/tls/certs"]
+          
+          # Copy the primary PEM bundle and OpenSSL configuration
+          COPY --from=trust-provider /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem /rootfs/etc/ssl/certs/ca-certificates.crt
+          COPY --from=trust-provider /etc/pki/tls/openssl.cnf /rootfs/etc/pki/tls/openssl.cnf
+          
+          # Universal symlinks for wide compatibility (Debian/RedHat/Go/Python styles)
+          RUN ["/busybox", "ln", "-sf", "/etc/ssl/certs/ca-certificates.crt", "/rootfs/etc/ssl/cert.pem"]
+          RUN ["/busybox", "ln", "-sf", "/etc/ssl/certs/ca-certificates.crt", "/rootfs/etc/pki/tls/certs/ca-bundle.crt"]
+          RUN ["/busybox", "ln", "-sf", "/etc/pki/tls/openssl.cnf", "/rootfs/etc/ssl/openssl.cnf"]
           
           FROM scratch
           COPY --from=final-builder /rootfs /
           
+          # Primary environment variable to ensure all runtimes find the CA bundle
+          ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
           ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
           ENV TZ=UTC
           EOF

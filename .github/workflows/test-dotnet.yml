@@ -27,4 +27,4 @@ jobs:
       - name: Execute E2E Application (Opensource Distroless Distroless)
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker run --rm -v ${{ github.workspace }}/E2E/dotnet/HelloOpensource/out:/app -w /app ghcr.io/${{ github.repository_owner }}/dotnet:latest dotnet HelloOpensource.dll
+          docker run --rm -v ${{ github.workspace }}/E2E/dotnet/HelloOpensource/out:/app -w /app ghcr.io/${{ github.repository_owner }}/dotnet:latest HelloOpensource.dll

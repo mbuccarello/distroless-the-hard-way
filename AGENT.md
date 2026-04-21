@@ -14,6 +14,7 @@ It teaches users how to create distroless container images *without* relying on 
 - **Exec-Form Invocation:** Because we extract directly into empty `scratch` containers without an OS, docker instructions must use **Exec Form** (e.g., `RUN ["/tar", "-xzf", "file.tar.gz"]`) to invoke syscall processes directly rather than relying on `/bin/sh`.
 - **Strict Source Compilation:** Agents must rely entirely on verified raw source code (`.tar.gz`) fetched directly from upstream providers. Everything must be natively compiled.
 - **The Google Distroless Layered Hierarchy:** The architecture strictly enforces a linear cascading hierarchy spanning `base -> cc -> java/python` specifically modeled against Google's Distroless Bazel architecture.
+- **Undistro Philosophy:** While we leverage Fedora for `glibc` and `openssl` compatibility, we do not inherit the host OS's filesystem structure. Our images are "Undistro"—minimal, standard-compliant, and agnostic to the upstream package provider. Path structures must remain "universal" (e.g., `/etc/ssl/certs/ca-certificates.crt`) rather than matching distribution-specific quirks.
 - **Layered Master Orchestration:** Agents must utilize the tiered orchestrator system (Layer 1: Foundations, Layer 2: Assembly, Layer 3: Validation) to prevent race conditions and ensure cryptographic chain-of-custody.
 - **Naming Conventions:** 
     - `base-fedora`: Compilation Sandbox (Layer 1 Mirror). Pulls from Docker Hub, pushes to GHCR.
