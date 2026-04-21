@@ -64,11 +64,47 @@ distroless-the-hard-way/
 
 ---
 
+## 📦 Consumption & Verification
+
+All images are hosted on the **GitHub Container Registry (GHCR)** and are crytographically signed to ensure supply chain integrity.
+
+### 1. Authenticate to GHCR
+To pull images, you must authenticate using a [GitHub Personal Access Token (PAT)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) with `read:packages` scope.
+
+```bash
+echo "YOUR_PAT" | docker login ghcr.io -u YOUR_USERNAME --password-stdin
+```
+
+### 2. Pull and Run Runtimes
+You can pull the distroless images using standard Docker commands:
+
+```bash
+# Pull PHP
+docker pull ghcr.io/mbuccarello/php:latest
+
+# Run a smoke test
+docker run --rm ghcr.io/mbuccarello/php:latest --version
+```
+
+### 3. Verify Cryptographic Signatures
+We use **Sigstore/Cosign** for keyless signing. You can verify the identity of any image:
+
+```bash
+cosign verify --certificate-identity-regexp ".*" \
+  --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+  ghcr.io/mbuccarello/php:latest
+```
+
+---
+
 ## 🚀 Execution Matrix
 
-| Environment | Base Layer | Status | Upstream Source |
+| Runtime | Base Layer | Status | Upstream Source |
 | :--- | :--- | :--- | :--- |
-| **Go / Rust** | `base` | Operational | Native Binary |
-| **Java** | `cc` | Operational | Eclipse Temurin |
-| **Node.js** | `cc` | Operational | Node.js LTS |
-| **Python 3** | `cc` | Operational | CPython |
+| **Java** | `cc` | ✅ OK | Eclipse Temurin 21 |
+| **Node.js** | `cc` | ✅ OK | Node.js 20 LTS |
+| **.NET** | `cc` | ✅ OK | .NET Runtime 8.0 |
+| **Python 3** | `cc` | ✅ OK | Fedora Python 3.12 |
+| **PHP** | `cc` | ✅ OK | Fedora PHP 8.3 |
+| **Perl** | `cc` | ✅ OK | Fedora Perl 5.38 |
+| **Go / Rust** | `base` | ✅ OK | Native Binaries |
