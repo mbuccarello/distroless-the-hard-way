@@ -14,11 +14,16 @@ jobs:
       attestations: write
     
     steps:
-      - name: Download Verified PHP Binary
+      - name: Download and Strip Verified PHP Binary
         run: |
-          mkdir -p payload
-          # Fetch optimized PHP-FPM binary (Architecture: x86_64)
-          curl -L "https://github.com/php/php-src/releases/download/php-8.3.3/php-8.3.3.tar.gz" -o payload/php.tar.gz
+          mkdir -p payload/raw payload/stripped
+          # Fetch optimized PHP-FPM binary
+          curl -L "https://github.com/php/php-src/releases/download/php-8.3.3/php-8.3.3.tar.gz" -o payload/raw/php.tar.gz
+          
+          # Strip components using full GNU tar in the runner
+          tar -xzf payload/raw/php.tar.gz -C payload/stripped --strip-components=1
+          # Repack clean tarball
+          tar -czf payload/php.tar.gz -C payload/stripped .
           
       - name: Install Cosign (Direct Binary)
         run: |
@@ -37,8 +42,8 @@ jobs:
           # Extract safely using the Stage 1 Static Bootstrap (Glibc-native)
           FROM ghcr.io/${{ github.repository_owner }}/bootstrap:latest as extractor
           COPY payload/php.tar.gz /
-          # Use our own trusted static tar for extraction
-          RUN ["/bin/sh", "-c", "mkdir -p /usr/local/php && /bin/tar -xzf /php.tar.gz -C /usr/local/php --strip-components=1"]
+          # Use our own trusted static tar for extraction (Stripped Payload)
+          RUN ["/bin/sh", "-c", "mkdir -p /usr/local/php && /bin/tar -xzf /php.tar.gz -C /usr/local/php"]
           
           # Overlay onto strictly verified Opensource Distroless CC
           FROM ghcr.io/${{ github.repository_owner }}/cc:latest

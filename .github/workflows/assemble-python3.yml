@@ -14,11 +14,17 @@ jobs:
       attestations: write
     
     steps:
-      - name: Download Verified Static Python Build
+      - name: Download and Strip Official Python 3 Binary
         run: |
-          mkdir -p payload
-          # Fetch highly optimized standalone python
-          curl -L "https://github.com/indygreg/python-build-standalone/releases/download/20240224/cpython-3.12.2+20240224-x86_64-unknown-linux-gnu-install_only.tar.gz" -o payload/python.tar.gz
+          mkdir -p payload/raw payload/stripped
+          # Fetch official Python 3.12 binary
+          curl -L "https://github.com/indygreg/python-build-standalone/releases/download/20240224/cpython-3.12.2+20240224-x86_64-unknown-linux-gnu-pgo-full.tar.zst" -o payload/raw/python.tar.zst
+          
+          # Extract and Strip components using full GNU tar in the runner
+          # Note: indygreg tarballs have a specific 'python' root
+          tar -xaf payload/raw/python.tar.zst -C payload/stripped --strip-components=1
+          # Repack clean tarball
+          tar -czf payload/python.tar.gz -C payload/stripped .
           
       - name: Install Cosign (Direct Binary)
         run: |
@@ -37,8 +43,8 @@ jobs:
           # Extract safely using the Stage 1 Static Bootstrap (Glibc-native)
           FROM ghcr.io/${{ github.repository_owner }}/bootstrap:latest as extractor
           COPY payload/python.tar.gz /
-          # Use our own trusted static tar for extraction
-          RUN ["/bin/sh", "-c", "mkdir -p /usr/local/python && /bin/tar -xzf /python.tar.gz -C /usr/local/python --strip-components=1"]
+          # Use our own trusted static tar for extraction (Stripped Payload)
+          RUN ["/bin/sh", "-c", "mkdir -p /usr/local/python && /bin/tar -xzf /python.tar.gz -C /usr/local/python"]
           
           # Overlay onto strictly verified Opensource Distroless CC
           FROM ghcr.io/${{ github.repository_owner }}/cc:latest

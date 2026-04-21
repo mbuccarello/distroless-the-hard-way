@@ -14,12 +14,18 @@ jobs:
       attestations: write
     
     steps:
-      - name: Download Adoptium OpenJDK 21
+      - name: Download and Strip Adoptium OpenJDK 21
         run: |
-          mkdir -p jvm_payload
-          curl -L "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.2%2B13/OpenJDK21U-jre_x64_linux_hotspot_21.0.2_13.tar.gz" -o jvm_payload/jdk.tar.gz
-          # Strict verification against Adoptium checksums
-          echo "f9876e4c278fb1217e6eeba1a566f12ab5a39626e2e00f91a92e1ced0fbb85b8 jvm_payload/jdk.tar.gz" | sha256sum -c -
+          mkdir -p jvm_payload/raw jvm_payload/stripped
+          # Fetch optimized JRE
+          curl -L "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.2%2B13/OpenJDK21U-jre_x64_linux_hotspot_21.0.2_13.tar.gz" -o jvm_payload/raw/jdk.tar.gz
+          # Strict verification
+          echo "f9876e4c278fb1217e6eeba1a566f12ab5a39626e2e00f91a92e1ced0fbb85b8 jvm_payload/raw/jdk.tar.gz" | sha256sum -c -
+          
+          # Strip components using full GNU tar in the runner
+          tar -xzf jvm_payload/raw/jdk.tar.gz -C jvm_payload/stripped --strip-components=1
+          # Repack clean tarball for the scratch-based construction stage
+          tar -czf jvm_payload/jdk.tar.gz -C jvm_payload/stripped .
           
       - name: Install Cosign (Direct Binary)
         run: |
@@ -38,8 +44,8 @@ jobs:
           # Extract safely using the Stage 1 Static Bootstrap (Glibc-native)
           FROM ghcr.io/${{ github.repository_owner }}/bootstrap:latest as extractor
           COPY jvm_payload/jdk.tar.gz /
-          # Use our own trusted static tar for extraction
-          RUN ["/bin/sh", "-c", "mkdir -p /usr/lib/jvm/java-21-openjdk && /bin/tar -xzf /jdk.tar.gz -C /usr/lib/jvm/java-21-openjdk --strip-components=1"]
+          # Use our own trusted static tar for extraction (Stripped Payload)
+          RUN ["/bin/sh", "-c", "mkdir -p /usr/lib/jvm/java-21-openjdk && /bin/tar -xzf /jdk.tar.gz -C /usr/lib/jvm/java-21-openjdk"]
           
           # Overlay onto strictly verified Opensource Distroless CC
           FROM ghcr.io/${{ github.repository_owner }}/cc:latest

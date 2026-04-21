@@ -14,12 +14,18 @@ jobs:
       attestations: write
     
     steps:
-      - name: Download Official Node.js Binary
+      - name: Download and Strip Official Node.js Binary
         run: |
-          mkdir -p payload
-          # Fetch official Node.js 20 LTS binary
-          curl -L "https://nodejs.org/dist/v20.11.1/node-v20.11.1-linux-x64.tar.gz" -o payload/node.tar.gz
-          echo "84edbca2facfe519cb8d9ec7cc39cb7db00c14b7914e9f783eeab2c58a69d76c payload/node.tar.gz" | sha256sum -c -
+          mkdir -p payload/raw payload/stripped
+          # Fetch official Node.js 20 LTS
+          curl -L "https://nodejs.org/dist/v20.11.1/node-v20.11.1-linux-x64.tar.gz" -o payload/raw/node.tar.gz
+          # Strict verification
+          echo "84edbca2facfe519cb8d9ec7cc39cb7db00c14b7914e9f783eeab2c58a69d76c payload/raw/node.tar.gz" | sha256sum -c -
+          
+          # Strip components using full GNU tar in the runner
+          tar -xzf payload/raw/node.tar.gz -C payload/stripped --strip-components=1
+          # Repack clean tarball
+          tar -czf payload/node.tar.gz -C payload/stripped .
           
       - name: Install Cosign (Direct Binary)
         run: |
@@ -38,8 +44,8 @@ jobs:
           # Extract safely using the Stage 1 Static Bootstrap (Glibc-native)
           FROM ghcr.io/${{ github.repository_owner }}/bootstrap:latest as extractor
           COPY payload/node.tar.gz /
-          # Use our own trusted static tar for extraction
-          RUN ["/bin/sh", "-c", "mkdir -p /usr/local/lib/nodejs && /bin/tar -xzf /node.tar.gz -C /usr/local/lib/nodejs --strip-components=1"]
+          # Use our own trusted static tar for extraction (Stripped Payload)
+          RUN ["/bin/sh", "-c", "mkdir -p /usr/local/lib/nodejs && /bin/tar -xzf /node.tar.gz -C /usr/local/lib/nodejs"]
           
           # Overlay onto strictly verified Opensource Distroless CC
           FROM ghcr.io/${{ github.repository_owner }}/cc:latest
