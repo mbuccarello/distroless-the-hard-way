@@ -14,6 +14,9 @@ jobs:
       attestations: write
     
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        
       - name: Download and Prepare Official Fedora Perl Packages
         run: |
           mkdir -p payload/rpm payload/extracted
@@ -41,26 +44,28 @@ jobs:
           sudo chmod +x /usr/local/bin/cosign
           cosign version
           
-      - name: Verify CC Ancestry
+      - name: Verify Underlying CC Ancestry
         run: |
           cosign verify --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ghcr.io/${{ github.repository_owner }}/cc:latest
           
-      - name: Construct Perl Execution Environment
+      - name: Construct Perl Application Runtime
         run: |
           cat <<EOF > Dockerfile
           # Extract safely using the Stage 1 Static Bootstrap (Glibc-native)
           FROM ghcr.io/${{ github.repository_owner }}/bootstrap:latest as extractor
           COPY payload/perl.tar.gz /
-          # Use our own trusted static tar for extraction (Stripped Payload)
-          RUN ["/bin/sh", "-c", "mkdir -p /usr/local/perl && /bin/tar -xzf /perl.tar.gz -C /usr/local/perl"]
+          # Use our own trusted static tar for extraction
+          RUN ["/bin/sh", "-c", "/bin/tar -xzf /perl.tar.gz -C /"]
           
           # Overlay onto strictly verified Opensource Distroless CC
           FROM ghcr.io/${{ github.repository_owner }}/cc:latest
-          COPY --from=extractor /usr/local/perl /usr/local/perl
+          COPY --from=extractor /usr /usr
+          COPY --from=extractor /lib64 /lib64
+          COPY --from=extractor /lib /lib
           
-          ENV PATH=/usr/local/perl/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+          ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
           
-          ENTRYPOINT ["/usr/local/perl/bin/perl"]
+          ENTRYPOINT ["/usr/bin/perl", "-v"]
           EOF
           
           docker build -t ghcr.io/${{ github.repository_owner }}/perl:latest .

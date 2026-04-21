@@ -14,6 +14,9 @@ jobs:
       attestations: write
     
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        
       - name: Download and Prepare Official Fedora Python 3 Packages
         run: |
           mkdir -p payload/rpm payload/extracted
@@ -41,30 +44,31 @@ jobs:
           sudo chmod +x /usr/local/bin/cosign
           cosign version
           
-      - name: Verify CC Ancestry
+      - name: Verify Underlying CC Ancestry
         run: |
           cosign verify --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ghcr.io/${{ github.repository_owner }}/cc:latest
           
-      - name: Construct Python 3 Execution Environment
+      - name: Construct Python 3 Application Runtime
         run: |
           cat <<EOF > Dockerfile
           # Extract safely using the Stage 1 Static Bootstrap (Glibc-native)
           FROM ghcr.io/${{ github.repository_owner }}/bootstrap:latest as extractor
           COPY payload/python.tar.gz /
-          # Use our own trusted static tar for extraction (Stripped Payload)
-          RUN ["/bin/sh", "-c", "mkdir -p /usr/local/python && /bin/tar -xzf /python.tar.gz -C /usr/local/python"]
+          # Use our own trusted static tar for extraction
+          RUN ["/bin/sh", "-c", "/bin/tar -xzf /python.tar.gz -C /"]
           
           # Overlay onto strictly verified Opensource Distroless CC
           FROM ghcr.io/${{ github.repository_owner }}/cc:latest
-          COPY --from=extractor /usr/local/python /usr/local/python
+          COPY --from=extractor /usr /usr
+          COPY --from=extractor /lib64 /lib64
+          COPY --from=extractor /lib /lib
           
-          # Implement standard FHS symlink using our trusted static ln
+          # Implement standard FHS symlinks for Python discovery
           COPY --from=extractor /bin/ln /bin/ln
-          RUN ["/bin/ln", "-s", "/usr/local/python/bin/python3", "/usr/bin/python3"]
-          RUN ["/bin/ln", "-s", "/usr/local/python/bin/pip3", "/usr/bin/pip3"]
+          RUN ["/bin/ln", "-s", "/usr/bin/python3.12", "/usr/bin/python3"]
+          RUN ["/bin/ln", "-s", "/usr/bin/pip3.12", "/usr/bin/pip3"]
           
-          ENV PYTHON_HOME=/usr/local/python
-          ENV PATH=\$PYTHON_HOME/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+          ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
           
           ENTRYPOINT ["/usr/bin/python3"]
           EOF
