@@ -38,21 +38,21 @@ graph TB
     subgraph L3 ["<br/>LAYER 3: RUNTIMES & STACKS<br/>&nbsp;"]
         direction LR
         
-        subgraph PHP ["<br/>PHP 8.3<br/>&nbsp;"]
+        subgraph PHP ["<br/><br/>PHP 8.3<br/>&nbsp;"]
             direction TB
             php_libs["⚠️ libxml2, pcre2,<br/>libedit, ncurses"]
             php_bin["🐘 PHP Interpreter"]
             php_libs -.-> php_bin
         end
 
-        subgraph Dotnet ["<br/>.NET 8.0<br/>&nbsp;"]
+        subgraph Dotnet ["<br/><br/>.NET 8.0<br/>&nbsp;"]
             direction TB
             dotnet_libs["⚠️ libicu (Unicode),<br/>krb5-libs (GSSAPI)"]
             dotnet_bin["✨ .NET Runtime"]
             dotnet_libs -.-> dotnet_bin
         end
 
-        subgraph Python ["<br/>Python 3.12<br/>&nbsp;"]
+        subgraph Python ["<br/><br/>Python 3.12<br/>&nbsp;"]
             direction TB
             py_libs["⚠️ libffi, expat, readline,<br/>sqlite, gdbm, libdb"]
             py_bin["🐍 Python Interpreter"]
