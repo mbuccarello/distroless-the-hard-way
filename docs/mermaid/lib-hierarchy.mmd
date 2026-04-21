@@ -1,76 +1,89 @@
 graph TB
-    %% Modern Design System
-    classDef source fill:#6366f1,stroke:#4338ca,color:#fff,stroke-width:2px;
-    classDef fedora fill:#fffbeb,stroke:#d97706,color:#92400e,stroke-width:2px,stroke-dasharray: 5 5;
-    classDef image fill:#059669,stroke:#064e3b,color:#fff,stroke-width:2px;
-    classDef legend fill:#f8fafc,stroke:#cbd5e1,color:#1e293b;
+    %% Modern Enterprise Design System
+    classDef source fill:#6366f1,stroke:#4338ca,color:#fff,stroke-width:2px,font-weight:bold;
+    classDef fedora fill:#f8fafc,stroke:#d97706,color:#92400e,stroke-width:2px,stroke-dasharray: 5 5;
+    classDef image fill:#10b981,stroke:#064e3b,color:#fff,stroke-width:2px,font-weight:bold;
+    classDef header fill:#1e293b,stroke:#0f172a,color:#fff,font-weight:bold,font-size:16px;
+    classDef container fill:#ffffff,stroke:#e2e8f0,stroke-width:1px;
 
-    %% Legend Section
-    subgraph Legend ["<br/>DOCUMENTATION LEGEND<br/>&nbsp;"]
+    %% Main Layout
+    subgraph L1_Cont [" "]
         direction TB
-        l1["✅ [SOURCE] Native Build (Hard Way)"]
-        l2["⚠️ [FEDORA] RPM Extract (Roadmap)"]
-    end
-    class Legend legend;
-    class l1 source;
-    class l2 fedora;
-
-    %% Foundations
-    subgraph L1 ["<br/>LAYER 1: FOUNDATIONS<br/>&nbsp;"]
-        direction TB
-        glibc["✅ [SOURCE] glibc<br/>(libc.so.6)"]
-        openssl["🔐 [SOURCE] openssl<br/>(libssl.so.3)"]
-        zlib["🗜️ [SOURCE] zlib<br/>(libz.so.1)"]
-    end
-
-    %% Assembly
-    subgraph L2 ["<br/>LAYER 2: CORE ASSEMBLY<br/>&nbsp;"]
-        direction TB
-        base["🚀 base image"]
-        cc["🛠️ cc image"]
-        cacert["⚠️ [FEDORA] ca-certificates"]
+        h1["🏗️ LAYER 1: FOUNDATIONS (HARD WAY)"]:::header
         
-        base --> cc
-        cacert -.-> base
+        subgraph L1_Content ["&nbsp;"]
+            direction LR
+            glibc["✅ [SOURCE] glibc<br/>(libc.so.6)"]
+            openssl["🔐 [SOURCE] openssl<br/>(libssl.so.3)"]
+            zlib["🗜️ [SOURCE] zlib<br/>(libz.so.1)"]
+        end
     end
+    class L1_Cont container;
 
-    %% Runtimes
-    subgraph L3 ["<br/>LAYER 3: RUNTIMES & STACKS<br/>&nbsp;"]
-        direction LR
+    subgraph L2_Cont [" "]
+        direction TB
+        h2["🚀 LAYER 2: CORE ASSEMBLY"]:::header
         
-        subgraph PHP ["<br/><br/>PHP 8.3<br/>&nbsp;"]
+        subgraph L2_Content ["&nbsp;"]
             direction TB
-            php_libs["⚠️ libxml2, pcre2,<br/>libedit, ncurses"]
-            php_bin["🐘 PHP Interpreter"]
-            php_libs -.-> php_bin
-        end
-
-        subgraph Dotnet ["<br/><br/>.NET 8.0<br/>&nbsp;"]
-            direction TB
-            dotnet_libs["⚠️ libicu (Unicode),<br/>krb5-libs (GSSAPI)"]
-            dotnet_bin["✨ .NET Runtime"]
-            dotnet_libs -.-> dotnet_bin
-        end
-
-        subgraph Python ["<br/><br/>Python 3.12<br/>&nbsp;"]
-            direction TB
-            py_libs["⚠️ libffi, expat, readline,<br/>sqlite, gdbm, libdb"]
-            py_bin["🐍 Python Interpreter"]
-            py_libs -.-> py_bin
+            cacert["⚠️ [FEDORA] ca-certificates"]
+            base["📦 base image"]
+            cc["🛠️ cc image"]
+            
+            cacert -.-> base
+            base --> cc
         end
     end
+    class L2_Cont container;
+
+    subgraph L3_Cont [" "]
+        direction TB
+        h3["✨ LAYER 3: RUNTIMES & FLAVORS"]:::header
+        
+        subgraph L3_Content ["&nbsp;"]
+            direction LR
+            
+            subgraph PHP ["PHP 8.3"]
+                php_libs["⚠️ libxml2, pcre2,<br/>libedit, ncurses"]
+                php_bin["🐘 PHP Interpreter"]
+                php_libs -.-> php_bin
+            end
+
+            subgraph Dotnet [".NET 8.0"]
+                dotnet_libs["⚠️ libicu, krb5-libs"]
+                dotnet_bin["✨ .NET Runtime"]
+                dotnet_libs -.-> dotnet_bin
+            end
+
+            subgraph Python ["Python 3.12"]
+                py_libs["⚠️ libffi, expat, readline,<br/>sqlite, gdbm, libdb"]
+                py_bin["🐍 Python Interpreter"]
+                py_libs -.-> py_bin
+            end
+        end
+    end
+    class L3_Cont container;
+
+    %% Isolated Legend
+    subgraph Legend_Cont [" "]
+        direction TB
+        hl["📖 DOCUMENTATION LEGEND"]:::header
+        l1["✅ [SOURCE] Native Build"]:::source
+        l2["⚠️ [FEDORA] RPM Extract"]:::fedora
+    end
+    class Legend_Cont container;
 
     %% Global Connections
-    L1 --> base
+    L1_Content --> base
     cc --> PHP
     cc --> Dotnet
     cc --> Python
 
     %% Applying Classes
     class glibc,openssl,zlib source;
-    class cacert,py_bin,py_libs,dotnet_bin,dotnet_libs,php_bin,php_libs fedora;
+    class cacert,php_bin,php_libs,dotnet_bin,dotnet_libs,py_bin,py_libs fedora;
     class base,cc image;
 
-    %% Spacing
-    L1 ~~~ Legend
-    L2 ~~~ Legend
+    %% Spacing Hacks
+    L1_Cont ~~~ Legend_Cont
+    L2_Cont ~~~ Legend_Cont
