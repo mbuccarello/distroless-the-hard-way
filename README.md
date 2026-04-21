@@ -1,6 +1,7 @@
 # Distroless The Hard Way
 
 [![E2E Orchestrator](https://github.com/mbuccarello/distroless-the-hard-way/actions/workflows/e2e-orchestrator.yml/badge.svg)](https://github.com/mbuccarello/distroless-the-hard-way/actions/workflows/e2e-orchestrator.yml)
+<!-- Audit v48: Runtime Stabilization Verified -->
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/mbuccarello/distroless-the-hard-way/badge)](https://securityscorecards.dev/viewer/?uri=github.com/mbuccarello/distroless-the-hard-way)
 
 Distroless The Hard Way is a technical implementation and educational curriculum for constructing secure, minimal OCI container images from upstream source code. The project implements a zero-trust supply chain architecture that eliminates reliance on pre-compiled distributions.
