@@ -38,8 +38,19 @@ Each component must pass a sequential set of security checkpoints before promoti
 
 ---
 
-## 3. Atomic Artifact Model
+---
 
-The architecture treats every library as a standalone atomic unit.
-- **Packaging**: Components are pushed to the registry as `artifacts-<name>` images.
-- **Consumption**: The Stage 3 Assemblers pull these signed payloads and extract them into a clean rootfs. This decoupling allows for independent patching of a single library (e.g., patching `openssl` without rebuilding `glibc`).
+## 4. Hybrid Provenance Strategy (The Official Path)
+
+To balance the core requirement of "The Hard Way" (bit-perfect integrity) with the objective of "Zero-Compilation" in the assembly phase, the system implements a dual-path acquisition strategy for language runtimes.
+
+### Type A: Native Binary Alignment (Java, Node.js, .NET)
+For projects that publish official, standalone binary distribution tarballs, the system performs a direct download from the project's primary mirror.
+- **Verification**: Strict cryptographic pinning against official project manifest metadata (e.g., Node.js SHASUMS256, Adoptium API).
+- **Benefit**: Ensures the runtime is exactly as intended by the language maintainers without any intermediary modification.
+
+### Type B: OS-Native Package Extraction (Python, PHP, Perl)
+For projects that officially distribute only source code (requiring OS-level compilation), the system extracts binaries from **Official Fedora 40 Repositories**.
+- **Process**: The system uses the `base-fedora` sandbox to fetch official RPMs via `dnf download --resolve`. These RPMs are then extracted in the runner using `rpm2cpio`.
+- **Integrity**: Leverages the binary signing and security patching provided by the Fedora Project maintainers.
+- **Alignment**: Ensures 100% ABI compatibility with the `glibc` and core libraries established in Stage 2 (Foundations).

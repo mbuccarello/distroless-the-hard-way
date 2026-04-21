@@ -6,9 +6,10 @@ This specification defines the construction of the perl Distroless image, provid
 
 ## 1. Hierarchy Specification
 - **Parent Image**: `ghcr.io/mbuccarello/cc:latest`
-- **Artifact Source**: Verified upstream distribution for the perl runtime.
+- **LTS Version**: Perl 5.38 (Fedora 40)
+- **Provenance Strategy**: Type B (Official OS-Native RPM Extraction)
 
 ## 2. Implementation Logic
-- **Assembly Strategy**: The runtime binaries are extracted into the zero-trust hierarchy using Stage 1 tools.
-- **Hardening**: Unnecessary headers, documentation, and build-time shims are omitted to minimize the attack surface.
+- **Assembly Strategy**: Official Fedora 40 Perl packages are downloaded via the `base-fedora` sandbox. Binaries are then extracted using `rpm2cpio`.
+- **Zero-Compilation**: No Perl source code is compiled; the runtime is sourced directly from the official Fedora distribution.
 

@@ -6,9 +6,10 @@ This specification defines the construction of the dotnet Distroless image, prov
 
 ## 1. Hierarchy Specification
 - **Parent Image**: `ghcr.io/mbuccarello/cc:latest`
-- **Artifact Source**: Verified upstream distribution for the dotnet runtime.
+- **LTS Version**: .NET 8.0 Runtime
+- **Provenance Strategy**: Type A (Official Native Tarball)
 
 ## 2. Implementation Logic
-- **Assembly Strategy**: The runtime binaries are extracted into the zero-trust hierarchy using Stage 1 tools.
-- **Hardening**: Unnecessary headers, documentation, and build-time shims are omitted to minimize the attack surface.
+- **Assembly Strategy**: The runtime binaries are downloaded from the official Microsoft distribution mirrors and verified against the official SHA512 manifest.
+- **Zero-Compilation**: Only pre-compiled official Microsoft binaries are extracted.
 

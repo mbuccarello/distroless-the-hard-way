@@ -6,9 +6,10 @@ This specification defines the construction of the php Distroless image, providi
 
 ## 1. Hierarchy Specification
 - **Parent Image**: `ghcr.io/mbuccarello/cc:latest`
-- **Artifact Source**: Verified upstream distribution for the php runtime.
+- **LTS Version**: PHP 8.3 (Fedora 40)
+- **Provenance Strategy**: Type B (Official OS-Native RPM Extraction)
 
 ## 2. Implementation Logic
-- **Assembly Strategy**: The runtime binaries are extracted into the zero-trust hierarchy using Stage 1 tools.
-- **Hardening**: Unnecessary headers, documentation, and build-time shims are omitted to minimize the attack surface.
+- **Assembly Strategy**: Official Fedora 40 PHP packages (CLI, Common, XML) are downloaded via the `base-fedora` sandbox. Binaries are then extracted using `rpm2cpio`.
+- **Zero-Compilation**: No PHP source code is compiled; the runtime is sourced directly from the official Fedora distribution.
 

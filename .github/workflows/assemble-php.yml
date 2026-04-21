@@ -14,18 +14,25 @@ jobs:
       attestations: write
     
     steps:
-      - name: Download and Strip Verified PHP Binary
+      - name: Download and Prepare Official Fedora PHP Packages
         run: |
-          mkdir -p payload/raw payload/stripped
-          # Fetch optimized PHP-FPM binary
-          curl -L "https://github.com/php/php-src/releases/download/php-8.3.3/php-8.3.3.tar.gz" -o payload/raw/php.tar.gz
-          # Strict verification (Verified SHA256 for PHP 8.3.3)
-          echo "61285ae17a93d172c9f2ebfe4280058d05bda17cadab705ca5b51ba3e6f3a5ac payload/raw/php.tar.gz" | sha256sum -c -
+          mkdir -p payload/rpm payload/extracted
+          # Use our trusted Fedora sandbox to download official packages
+          docker run --rm -v $(pwd)/payload/rpm:/payload ghcr.io/${{ github.repository_owner }}/base-fedora:latest \
+            /bin/sh -c "dnf download --resolve --destdir=/payload php-cli php-common php-xml"
           
-          # Strip components using full GNU tar in the runner
-          tar -xzf payload/raw/php.tar.gz -C payload/stripped --strip-components=1
-          # Repack clean tarball
-          tar -czf payload/php.tar.gz -C payload/stripped .
+          # Install rpm2cpio in the runner to extract
+          sudo apt-get update && sudo apt-get install -y rpm2cpio cpio
+          
+          # Extract all downloaded RPMs into the payload/extracted folder
+          cd payload/rpm
+          for rpm in *.rpm; do
+            rpm2cpio "$rpm" | cpio -idmv -D ../extracted/
+          done
+          cd ../../
+          
+          # Repack the extracted filesystem into a clean tarball for the construction stage
+          tar -czf payload/php.tar.gz -C payload/extracted .
           
       - name: Install Cosign (Direct Binary)
         run: |

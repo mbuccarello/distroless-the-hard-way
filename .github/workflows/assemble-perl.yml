@@ -14,27 +14,25 @@ jobs:
       attestations: write
     
     steps:
-      - name: Download, Build and Pack Official Perl 5.38
+      - name: Download and Prepare Official Fedora Perl Packages
         run: |
-          mkdir -p payload/raw payload/stripped
-          # Fetch official source
-          curl -L "https://www.cpan.org/src/5.0/perl-5.38.2.tar.gz" -o payload/raw/perl-src.tar.gz
-          # Strict verification
-          echo "4955743b603841022fcf1e52ef896913c329a4338e555cc698a956d4b3879637 payload/raw/perl-src.tar.gz" | sha256sum -c -
+          mkdir -p payload/rpm payload/extracted
+          # Use our trusted Fedora sandbox to download official packages
+          docker run --rm -v $(pwd)/payload/rpm:/payload ghcr.io/${{ github.repository_owner }}/base-fedora:latest \
+            /bin/sh -c "dnf download --resolve --destdir=/payload perl"
           
-          # Extract source
-          tar -xzf payload/raw/perl-src.tar.gz -C payload/raw
-          cd payload/raw/perl-5.38.2
-          # Configure for minimal distroless execution
-          ./Configure -des -Dprefix=/usr/local/perl -Dman1dir=none -Dman3dir=none
-          make -j$(nproc)
-          # Use DESTDIR-like install to our stripped folder
-          make install DESTDIR=$(pwd)/../../stripped
+          # Install rpm2cpio in the runner to extract
+          sudo apt-get update && sudo apt-get install -y rpm2cpio cpio
           
+          # Extract all downloaded RPMs into the payload/extracted folder
+          cd payload/rpm
+          for rpm in *.rpm; do
+            rpm2cpio "$rpm" | cpio -idmv -D ../extracted/
+          done
           cd ../../
-          # The files are now in payload/stripped/usr/local/perl
-          # Repack for the scratch stage
-          tar -czf payload/perl.tar.gz -C payload/stripped/usr/local/perl .
+          
+          # Repack the extracted filesystem into a clean tarball for the construction stage
+          tar -czf payload/perl.tar.gz -C payload/extracted .
           
       - name: Install Cosign (Direct Binary)
         run: |

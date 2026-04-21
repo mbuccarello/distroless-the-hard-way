@@ -6,9 +6,10 @@ This specification defines the construction of the java Distroless image, provid
 
 ## 1. Hierarchy Specification
 - **Parent Image**: `ghcr.io/mbuccarello/cc:latest`
-- **Artifact Source**: Verified upstream distribution for the java runtime.
+- **LTS Version**: Java 17 (Adoptium Temurin)
+- **Provenance Strategy**: Type A (Official Native Tarball)
 
 ## 2. Implementation Logic
-- **Assembly Strategy**: The runtime binaries are extracted into the zero-trust hierarchy using Stage 1 tools.
-- **Hardening**: Unnecessary headers, documentation, and build-time shims are omitted to minimize the attack surface.
+- **Assembly Strategy**: The runtime binaries are downloaded directly from the official Adoptium mirrors and verified against the project's SHA256 manifest.
+- **Zero-Compilation**: No Java source code is compiled during this stage; only verified binaries are extracted.
 

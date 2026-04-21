@@ -17,8 +17,8 @@ jobs:
       - name: Download Official Microsoft .NET SDK/Runtime
         run: |
           mkdir -p payload
-          # Fetch official .NET 8.0 Runtime
-          curl -L "https://download.visualstudio.microsoft.com/download/pr/907cc36c-94cc-45f8-bba9-7ce53fe2d392/c8b21efbde79fc74dcdd1378f4eedb79/dotnet-runtime-8.0.2-linux-x64.tar.gz" -o payload/dotnet.tar.gz
+          # Fetch Official .NET 8.0 Runtime (Glibc-native)
+          curl -L "https://dotnetcli.azureedge.net/dotnet/Runtime/8.0.2/dotnet-runtime-8.0.2-linux-x64.tar.gz" -o payload/dotnet.tar.gz
           # Strict verification (Microsoft Official SHA512 for 8.0.2)
           echo "f30f72f55b9e97e36107f920e932477183867726a963ea0d4d151f291981877ba253a7175614c60b386b6a37f9192d97d7402dafdad2529369f512698cb9d1dd payload/dotnet.tar.gz" | sha512sum -c -
 

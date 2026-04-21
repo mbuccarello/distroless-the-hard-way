@@ -14,20 +14,25 @@ jobs:
       attestations: write
     
     steps:
-      - name: Download and Strip Official Python 3 Binary
+      - name: Download and Prepare Official Fedora Python 3 Packages
         run: |
-          sudo apt-get update && sudo apt-get install -y zstd
-          mkdir -p payload/raw payload/stripped
-          # Fetch official Python 3.12 binary
-          curl -L "https://github.com/indygreg/python-build-standalone/releases/download/20240224/cpython-3.12.2+20240224-x86_64-unknown-linux-gnu-pgo-full.tar.zst" -o payload/raw/python.tar.zst
-          # Strict verification
-          echo "4b7e7c7bb0daa771d6e538da1a182cbd02734c21fa3fb4da37d76ac45ae67964 payload/raw/python.tar.zst" | sha256sum -c -
+          mkdir -p payload/rpm payload/extracted
+          # Use our trusted Fedora sandbox to download official packages
+          docker run --rm -v $(pwd)/payload/rpm:/payload ghcr.io/${{ github.repository_owner }}/base-fedora:latest \
+            /bin/sh -c "dnf download --resolve --destdir=/payload python3"
           
-          # Extract and Strip components using full GNU tar in the runner
-          # Note: indygreg tarballs have a specific 'python' root
-          tar -xaf payload/raw/python.tar.zst -C payload/stripped --strip-components=1
-          # Repack clean tarball
-          tar -czf payload/python.tar.gz -C payload/stripped .
+          # Install rpm2cpio in the runner to extract
+          sudo apt-get update && sudo apt-get install -y rpm2cpio cpio
+          
+          # Extract all downloaded RPMs into the payload/extracted folder
+          cd payload/rpm
+          for rpm in *.rpm; do
+            rpm2cpio "$rpm" | cpio -idmv -D ../extracted/
+          done
+          cd ../../
+          
+          # Repack the extracted filesystem into a clean tarball for the construction stage
+          tar -czf payload/python.tar.gz -C payload/extracted .
           
       - name: Install Cosign (Direct Binary)
         run: |

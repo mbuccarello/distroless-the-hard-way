@@ -6,9 +6,10 @@ This specification defines the construction of the nodejs Distroless image, prov
 
 ## 1. Hierarchy Specification
 - **Parent Image**: `ghcr.io/mbuccarello/cc:latest`
-- **Artifact Source**: Verified upstream distribution for the nodejs runtime.
+- **LTS Version**: Node.js 20
+- **Provenance Strategy**: Type A (Official Native Tarball)
 
 ## 2. Implementation Logic
-- **Assembly Strategy**: The runtime binaries are extracted into the zero-trust hierarchy using Stage 1 tools.
-- **Hardening**: Unnecessary headers, documentation, and build-time shims are omitted to minimize the attack surface.
+- **Assembly Strategy**: The runtime binaries are downloaded directly from `nodejs.org` and verified against the official SHASUMS256 manifest.
+- **Zero-Compilation**: Only pre-compiled official binaries are extracted into the hierarchy.
 
