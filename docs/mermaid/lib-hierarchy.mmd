@@ -1,4 +1,4 @@
-%%{init: {'theme': 'base', 'themeVariables': { 'clusterBkg': '#ffffff', 'clusterBorder': '#e2e8f0', 'primaryColor': '#ffffff', 'edgeColor': '#94a3b8' }}}%%
+%%{init: {'theme': 'base', 'themeVariables': { 'clusterBkg': '#ffffff', 'clusterBorder': '#cbd5e1', 'primaryColor': '#ffffff', 'lineColor': '#64748b', 'edgeColor': '#475569' }}}%%
 graph TB
     %% Modern Enterprise Design System
     classDef source fill:#6366f1,stroke:#4338ca,color:#fff,stroke-width:2px,font-weight:bold;
@@ -18,7 +18,7 @@ graph TB
             zlib["🗜️ [SOURCE] zlib<br/>(libz.so.1)"]
         end
     end
-    style L1_Cont fill:#ffffff,stroke:#e2e8f0,stroke-width:1px;
+    style L1_Cont fill:#ffffff,stroke:#cbd5e1,stroke-width:2px;
     style L1_Content fill:#ffffff,stroke:none;
 
     %% Assembly
@@ -30,14 +30,23 @@ graph TB
             direction TB
             cacert["⚠️ [FEDORA] ca-certificates"]
             base["📦 base image"]
-            cc["🛠️ cc image"]
+            
+            subgraph CC_Box ["🛠️ CC Image Content"]
+                direction LR
+                libgcc["✅ [SOURCE] libgcc_s.so.1"]
+                libstd["✅ [SOURCE] libstdc++.so.6"]
+                cc_img["🛠️ cc image"]
+            end
             
             cacert -.-> base
-            base --> cc
+            base ===> cc_img
+            libgcc -.-> cc_img
+            libstd -.-> cc_img
         end
     end
-    style L2_Cont fill:#ffffff,stroke:#e2e8f0,stroke-width:1px;
+    style L2_Cont fill:#ffffff,stroke:#cbd5e1,stroke-width:2px;
     style L2_Content fill:#ffffff,stroke:none;
+    style CC_Box fill:#f8fafc,stroke:#94a3b8,stroke-dasharray: 5 5;
 
     %% Runtimes
     subgraph L3_Cont [" "]
@@ -66,7 +75,7 @@ graph TB
             end
         end
     end
-    style L3_Cont fill:#ffffff,stroke:#e2e8f0,stroke-width:1px;
+    style L3_Cont fill:#ffffff,stroke:#cbd5e1,stroke-width:2px;
     style L3_Content fill:#ffffff,stroke:none;
     style PHP fill:#ffffff,stroke:#e2e8f0;
     style Dotnet fill:#ffffff,stroke:#e2e8f0;
@@ -79,18 +88,18 @@ graph TB
         l1["✅ [SOURCE] Native Build"]:::source
         l2["⚠️ [FEDORA] RPM Extract"]:::fedora
     end
-    style Legend_Cont fill:#ffffff,stroke:#e2e8f0,stroke-width:1px;
+    style Legend_Cont fill:#ffffff,stroke:#cbd5e1,stroke-width:2px;
 
     %% Global Connections
-    L1_Content --> base
-    cc --> PHP
-    cc --> Dotnet
-    cc --> Python
+    L1_Content ===> base
+    cc_img ===> PHP
+    cc_img ===> Dotnet
+    cc_img ===> Python
 
     %% Applying Classes
-    class glibc,openssl,zlib source;
+    class glibc,openssl,zlib,libgcc,libstd source;
     class cacert,php_bin,php_libs,dotnet_bin,dotnet_libs,py_bin,py_libs fedora;
-    class base,cc image;
+    class base,cc_img image;
 
     %% Spacing Hacks
     L1_Cont ~~~ Legend_Cont
