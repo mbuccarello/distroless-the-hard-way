@@ -31,7 +31,8 @@ runs:
           docker push ${{ inputs.registry }}/${{ github.repository_owner }}/${{ inputs.image-name }}:$tag
         done
         
-        DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "$IMAGE_NAME" | cut -d'@' -f2)
+        # Robust digest retrieval for SLSA attestation
+        DIGEST=$(docker images --no-trunc --quiet --format "{{.Digest}}" ${{ inputs.registry }}/${{ github.repository_owner }}/${{ inputs.image-name }}:$FIRST_TAG)
         echo "digest=$DIGEST" >> $GITHUB_OUTPUT
 
     - name: Sign Sovereign Product
