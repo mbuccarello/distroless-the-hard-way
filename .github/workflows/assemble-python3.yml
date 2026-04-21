@@ -16,9 +16,12 @@ jobs:
     steps:
       - name: Download and Strip Official Python 3 Binary
         run: |
+          sudo apt-get update && sudo apt-get install -y zstd
           mkdir -p payload/raw payload/stripped
           # Fetch official Python 3.12 binary
           curl -L "https://github.com/indygreg/python-build-standalone/releases/download/20240224/cpython-3.12.2+20240224-x86_64-unknown-linux-gnu-pgo-full.tar.zst" -o payload/raw/python.tar.zst
+          # Strict verification
+          echo "4b7e7c7bb0daa771d6e538da1a182cbd02734c21fa3fb4da37d76ac45ae67964 payload/raw/python.tar.zst" | sha256sum -c -
           
           # Extract and Strip components using full GNU tar in the runner
           # Note: indygreg tarballs have a specific 'python' root

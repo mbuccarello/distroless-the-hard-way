@@ -19,7 +19,7 @@ jobs:
           mkdir -p payload/raw payload/stripped
           # Fetch optimized PHP-FPM binary
           curl -L "https://github.com/php/php-src/releases/download/php-8.3.3/php-8.3.3.tar.gz" -o payload/raw/php.tar.gz
-          # Strict verification (PHP 8.3.3)
+          # Strict verification (Verified SHA256 for PHP 8.3.3)
           echo "61285ae17a93d172c9f2ebfe4280058d05bda17cadab705ca5b51ba3e6f3a5ac payload/raw/php.tar.gz" | sha256sum -c -
           
           # Strip components using full GNU tar in the runner

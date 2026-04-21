@@ -14,16 +14,27 @@ jobs:
       attestations: write
     
     steps:
-      - name: Download and Strip Verified Perl Binary
+      - name: Download, Build and Pack Official Perl 5.38
         run: |
           mkdir -p payload/raw payload/stripped
-          # Fetch optimized Perl binary
-          curl -L "https://github.com/mbuccarello/distroless-the-hard-way/releases/download/v1.0.0-assets/perl-5.38.2-x86_64.tar.gz" -o payload/raw/perl.tar.gz
+          # Fetch official source
+          curl -L "https://www.cpan.org/src/5.0/perl-5.38.2.tar.gz" -o payload/raw/perl-src.tar.gz
+          # Strict verification
+          echo "4955743b603841022fcf1e52ef896913c329a4338e555cc698a956d4b3879637 payload/raw/perl-src.tar.gz" | sha256sum -c -
           
-          # Strip components using full GNU tar in the runner
-          tar -xzf payload/raw/perl.tar.gz -C payload/stripped --strip-components=1
-          # Repack clean tarball
-          tar -czf payload/perl.tar.gz -C payload/stripped .
+          # Extract source
+          tar -xzf payload/raw/perl-src.tar.gz -C payload/raw
+          cd payload/raw/perl-5.38.2
+          # Configure for minimal distroless execution
+          ./Configure -des -Dprefix=/usr/local/perl -Dman1dir=none -Dman3dir=none
+          make -j$(nproc)
+          # Use DESTDIR-like install to our stripped folder
+          make install DESTDIR=$(pwd)/../../stripped
+          
+          cd ../../
+          # The files are now in payload/stripped/usr/local/perl
+          # Repack for the scratch stage
+          tar -czf payload/perl.tar.gz -C payload/stripped/usr/local/perl .
           
       - name: Install Cosign (Direct Binary)
         run: |
