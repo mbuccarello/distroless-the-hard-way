@@ -101,8 +101,27 @@ jobs:
           RUN ["/busybox", "ln", "-sf", "usr/lib", "/rootfs/lib"]
           RUN ["/busybox", "ln", "-sf", "usr/lib64", "/rootfs/lib64"]
           
-          FROM scratch
+          # --- ROOT TRUST STORE (SSL/TLS SECURITY) ---
+          # We inject the official Fedora 40 ca-certificates bundle.
+          # This provides the 'Root of Trust' needed for OpenSSL to verify remote server identities.
+          # Source: Official Fedora 40 Repositories (Verified via DNF Sandbox)
+          FROM ghcr.io/${{ github.repository_owner }}/base-fedora:latest as trust-builder
+          # Download the CA bundle and the p11-kit-trust extractor
+          RUN dnf download --resolve --destdir=/payload ca-certificates p11-kit-trust
+          
+          FROM scratch as base-rootfs
           COPY --from=extractor /rootfs /
+          # Extract the trust store into the rootfs
+          COPY --from=trust-builder /payload/*.rpm /tmp/
+          COPY --from=ghcr.io/${{ github.repository_owner }}/bootstrap:latest /tar /busybox
+          RUN ["/busybox", "sh", "-c", "for rpm in /tmp/*.rpm; do /busybox rpm2cpio $rpm | /busybox cpio -idmv; done"]
+          
+          # Final symlink for universal compatibility (Python/Go/OpenSSL)
+          RUN ["/busybox", "mkdir", "-p", "/etc/ssl/certs"]
+          RUN ["/busybox", "ln", "-sf", "/etc/pki/tls/certs/ca-bundle.crt", "/etc/ssl/certs/ca-certificates.crt"]
+          
+          FROM scratch
+          COPY --from=base-rootfs / /
           
           ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
           ENV TZ=UTC
