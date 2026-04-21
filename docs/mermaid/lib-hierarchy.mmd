@@ -1,58 +1,76 @@
-graph TD
-    %% Legend
-    subgraph Legend
-        l1["✅ [SOURCE] Built from Source"]
-        l2["⚠️ [FEDORA] Extracted from RPM"]
-    end
+graph LR
+    %% Global Styles
     classDef source fill:#4f46e5,stroke:#312e81,color:#fff,stroke-width:2px;
     classDef fedora fill:#fff7ed,stroke:#c2410c,color:#9a3412,stroke-width:2px,stroke-dasharray: 5 5;
     classDef image fill:#10b981,stroke:#065f46,color:#fff,stroke-width:2px;
+    classDef legend fill:#fff,stroke:#333;
+
+    %% Layout Structure
+    subgraph Legend ["&nbsp;"]
+        direction TB
+        l1["✅ [SOURCE] Built from Source"]
+        l2["⚠️ [FEDORA] Extracted from RPM"]
+    end
+    class Legend legend;
     class l1 source;
     class l2 fedora;
 
-    subgraph "Layer 1: Foundations (Hard Way)"
+    %% Main Hierarchy
+    subgraph Foundations ["Layer 1: Foundations (Hard Way)"]
+        direction TB
         glibc["✅ [SOURCE] glibc"]
         openssl["✅ [SOURCE] openssl (shared)"]
         zlib["✅ [SOURCE] zlib"]
     end
 
-    subgraph "Layer 2: Base Image"
+    subgraph Base ["Layer 2: Core Images"]
+        direction TB
         base["🚀 base image"]
-        glibc --> base
-        openssl --> base
-        zlib --> base
-        cacert["⚠️ [FEDORA] ca-certificates"] -.-> base
-    end
-
-    subgraph "Layer 2: CC Layer"
         cc["🛠️ cc image"]
+        cacert["⚠️ [FEDORA] ca-certificates"]
+        
         base --> cc
-        libcpp["✅ [SOURCE] libstdc++.so.6"] --> cc
-        libgcc["✅ [SOURCE] libgcc_s.so.1"] --> cc
+        cacert -.-> base
     end
 
-    subgraph "Layer 2: Runtimes (Flavors)"
-        cc --> python
-        cc --> dotnet
-        cc --> php
-
-        subgraph "Python Stack"
-            python["⚠️ [FEDORA] Python 3.12"]
-            py_libs["⚠️ [FEDORA] libffi, expat, readline,<br/>sqlite, gdbm, libdb,<br/>libnsl2, libtirpc"] -.-> python
+    subgraph Runtimes ["Layer 3: Runtimes (Flavors)"]
+        direction TB
+        
+        subgraph Python ["Python Stack"]
+            python["🐍 [FEDORA] Python 3.12"]
+            py_libs["⚠️ libffi, expat, readline,<br/>sqlite, gdbm, libdb"]
+            py_libs -.-> python
         end
 
-        subgraph "Dotnet Stack"
+        subgraph Dotnet [".NET Stack"]
             dotnet["✨ [BINARY] .NET 8 Runtime"]
-            dotnet_libs["⚠️ [FEDORA] libicu (Unicode),<br/>krb5-libs (GSSAPI)"] -.-> dotnet
+            dotnet_libs["⚠️ libicu (Unicode),<br/>krb5-libs (GSSAPI)"]
+            dotnet_libs -.-> dotnet
         end
 
-        subgraph "PHP Stack"
-            php["⚠️ [FEDORA] PHP 8.3"]
-            php_libs["⚠️ [FEDORA] libxml2, pcre2,<br/>libedit, ncurses,<br/>xz, bzip2"] -.-> php
+        subgraph PHP ["PHP Stack"]
+            php["🐘 [FEDORA] PHP 8.3"]
+            php_libs["⚠️ libxml2, pcre2,<br/>libedit, ncurses"]
+            php_libs -.-> php
         end
     end
+
+    %% Connections
+    glibc --> base
+    openssl --> base
+    zlib --> base
+    
+    cc --> python
+    cc --> dotnet
+    cc --> php
 
     %% Applying Classes
-    class glibc,openssl,zlib,libcpp,libgcc source;
+    class glibc,openssl,zlib source;
+    class libcpp,libgcc source;
     class cacert,python,dotnet,php,py_libs,dotnet_libs,php_libs fedora;
     class base,cc image;
+
+    %% Invisible alignment to push legend to the right
+    Foundations ~~~ Legend
+    Base ~~~ Legend
+    Runtimes ~~~ Legend
