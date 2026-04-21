@@ -1,13 +1,19 @@
 graph TD
-    %% Global Styles
+    %% Legend
+    subgraph Legend
+        l1["✅ [SOURCE] Built from Source"]
+        l2["⚠️ [FEDORA] Extracted from RPM"]
+    end
     classDef source fill:#4f46e5,stroke:#312e81,color:#fff,stroke-width:2px;
-    classDef fedora fill:#f3f4f6,stroke:#9ca3af,color:#374151,stroke-width:2px,stroke-dasharray: 5 5;
+    classDef fedora fill:#fff7ed,stroke:#c2410c,color:#9a3412,stroke-width:2px,stroke-dasharray: 5 5;
     classDef image fill:#10b981,stroke:#065f46,color:#fff,stroke-width:2px;
+    class l1 source;
+    class l2 fedora;
 
-    subgraph "Layer 1: Foundations (Source Built)"
-        glibc["📦 glibc<br/>(libc.so.6)"]
-        openssl["🔐 openssl<br/>(libssl.so.3/shared)"]
-        zlib["🗜️ zlib<br/>(libz.so.1)"]
+    subgraph "Layer 1: Foundations (Hard Way)"
+        glibc["✅ [SOURCE] glibc"]
+        openssl["✅ [SOURCE] openssl (shared)"]
+        zlib["✅ [SOURCE] zlib"]
     end
 
     subgraph "Layer 2: Base Image"
@@ -15,14 +21,14 @@ graph TD
         glibc --> base
         openssl --> base
         zlib --> base
-        cacert["📜 ca-certificates<br/>(Mozilla/Fedora)"] -.-> base
+        cacert["⚠️ [FEDORA] ca-certificates"] -.-> base
     end
 
     subgraph "Layer 2: CC Layer"
         cc["🛠️ cc image"]
         base --> cc
-        libcpp["🧬 libstdc++.so.6"] --> cc
-        libgcc["🔗 libgcc_s.so.1"] --> cc
+        libcpp["✅ [SOURCE] libstdc++.so.6"] --> cc
+        libgcc["✅ [SOURCE] libgcc_s.so.1"] --> cc
     end
 
     subgraph "Layer 2: Runtimes (Flavors)"
@@ -31,18 +37,18 @@ graph TD
         cc --> php
 
         subgraph "Python Stack"
-            python["🐍 Python 3.12"]
-            py_libs["libffi, expat, readline,<br/>sqlite, gdbm, libdb,<br/>libnsl2, libtirpc"] -.-> python
+            python["⚠️ [FEDORA] Python 3.12"]
+            py_libs["⚠️ [FEDORA] libffi, expat, readline,<br/>sqlite, gdbm, libdb,<br/>libnsl2, libtirpc"] -.-> python
         end
 
         subgraph "Dotnet Stack"
-            dotnet["✨ .NET 8 Runtime"]
-            dotnet_libs["libicu (Unicode),<br/>krb5-libs (GSSAPI)"] -.-> dotnet
+            dotnet["✨ [BINARY] .NET 8 Runtime"]
+            dotnet_libs["⚠️ [FEDORA] libicu (Unicode),<br/>krb5-libs (GSSAPI)"] -.-> dotnet
         end
 
         subgraph "PHP Stack"
-            php["🐘 PHP 8.3"]
-            php_libs["libxml2, pcre2,<br/>libedit, ncurses,<br/>xz, bzip2"] -.-> php
+            php["⚠️ [FEDORA] PHP 8.3"]
+            php_libs["⚠️ [FEDORA] libxml2, pcre2,<br/>libedit, ncurses,<br/>xz, bzip2"] -.-> php
         end
     end
 
