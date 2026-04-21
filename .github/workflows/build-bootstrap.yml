@@ -53,6 +53,7 @@ jobs:
             cp busybox /workspace/rootfs/sh
             cp busybox /workspace/rootfs/mkdir
             cp busybox /workspace/rootfs/echo
+            mkdir -p /workspace/rootfs/bin
             cp busybox /workspace/rootfs/bin/sh
             cp busybox /workspace/rootfs/bin/busybox
             cp busybox /workspace/rootfs/bin/tar
