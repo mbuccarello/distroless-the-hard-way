@@ -40,3 +40,31 @@ The following components are currently extracted from Fedora for convenience and
 ### Priority 3: Full Runtime Bootstrapping
 - [ ] **Python 3 Interpreter**: Move from Fedora RPMs to a full native source compilation.
 - [ ] **PHP 8.x Interpreter**: Move from Fedora RPMs to a full native source compilation.
+
+---
+
+## 4. Fedora Dependency Mapping (dnf download)
+
+The following official Fedora 40 packages are currently utilized to provide runtime-specific libraries and interpreters.
+
+### 🐍 Python 3 Flavor
+- `python3`, `python3-libs`: Core interpreter and standard library.
+- `libffi`, `expat`, `readline`: Runtime support.
+- `sqlite-libs`, `gdbm-libs`, `libdb`: Storage backends.
+- `libnsl2`, `libtirpc`, `libxcrypt`: Legacy and encryption support.
+- `openssl-libs`, `zlib`: Networking and compression (transitional).
+
+### ✨ .NET 8 Flavor
+- `libicu`: Unicode and globalization support (required for runtime start).
+- `krb5-libs`: Kerberos and GSSAPI support for advanced networking.
+
+### 🐘 PHP 8.3 Flavor
+- `php-cli`, `php-common`, `php-xml`: Core interpreter and XML module.
+- `libxml2`, `pcre2`: XML parsing and regex engine.
+- `libedit`, `ncurses-libs`: CLI interaction.
+- `xz-libs`, `bzip2-libs`: Compression support.
+
+### 🐪 Perl 5.38 Flavor
+- `perl-interpreter`, `perl-libs`: Core interpreter.
+- `perl-HTTP-Tiny`, `perl-IO-Socket-SSL`: SSL/Networking support.
+- `libxcrypt`, `gdbm-libs`: Utility libraries.

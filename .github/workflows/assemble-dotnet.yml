@@ -40,6 +40,10 @@ jobs:
           for rpm in *.rpm; do
             rpm2cpio "$rpm" | cpio -idmv -D ../extracted/
           done
+          
+          # Generate metadata for transparency
+          mkdir -p ../extracted/etc
+          ls *.rpm | xargs -n1 basename > ../extracted/etc/distroless-packages.txt
           cd ../../
           
           # Repack the extracted filesystem into a clean tarball
