@@ -6,7 +6,7 @@ graph TD
 
     subgraph "Layer 1: Foundations (Source Built)"
         glibc["📦 glibc<br/>(libc.so.6)"]
-        openssl["🔐 openssl<br/>(libssl.so.3)"]
+        openssl["🔐 openssl<br/>(libssl.so.3/shared)"]
         zlib["🗜️ zlib<br/>(libz.so.1)"]
     end
 
@@ -15,27 +15,38 @@ graph TD
         glibc --> base
         openssl --> base
         zlib --> base
-        cacert["📜 ca-certificates<br/>(Fedora Extract)"] -.-> base
+        cacert["📜 ca-certificates<br/>(Mozilla/Fedora)"] -.-> base
     end
 
     subgraph "Layer 2: CC Layer"
         cc["🛠️ cc image"]
         base --> cc
-        libcpp["🧬 libstdc++.so.6<br/>(Source Built)"] --> cc
-        libgcc["🔗 libgcc_s.so.1<br/>(Source Built)"] --> cc
+        libcpp["🧬 libstdc++.so.6"] --> cc
+        libgcc["🔗 libgcc_s.so.1"] --> cc
     end
 
     subgraph "Layer 2: Runtimes (Flavors)"
         cc --> python
         cc --> dotnet
         cc --> php
-        
-        python["🐍 Python 3<br/>(Fedora RPMs)"]
-        dotnet["✨ .NET 8<br/>(MS + Fedora Libs)"]
-        php["🐘 PHP 8.3<br/>(Fedora RPMs)"]
+
+        subgraph "Python Stack"
+            python["🐍 Python 3.12"]
+            py_libs["libffi, expat, readline,<br/>sqlite, gdbm, libdb,<br/>libnsl2, libtirpc"] -.-> python
+        end
+
+        subgraph "Dotnet Stack"
+            dotnet["✨ .NET 8 Runtime"]
+            dotnet_libs["libicu (Unicode),<br/>krb5-libs (GSSAPI)"] -.-> dotnet
+        end
+
+        subgraph "PHP Stack"
+            php["🐘 PHP 8.3"]
+            php_libs["libxml2, pcre2,<br/>libedit, ncurses,<br/>xz, bzip2"] -.-> php
+        end
     end
 
     %% Applying Classes
     class glibc,openssl,zlib,libcpp,libgcc source;
-    class cacert,python,dotnet,php fedora;
+    class cacert,python,dotnet,php,py_libs,dotnet_libs,php_libs fedora;
     class base,cc image;
