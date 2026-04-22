@@ -40,7 +40,7 @@ jobs:
             mkdir -p /workspace/build /workspace/out/etc/ssl/certs /workspace/out/etc/pki/tls/certs /workspace/out/etc/pki/ca-trust/extracted/pem
             cd /workspace/build
             # Download the official curl script to extract Mozilla's certdata.txt
-            curl -sL https://raw.githubusercontent.com/curl/curl/master/lib/mk-ca-bundle.pl -o mk-ca-bundle.pl
+            curl -sL https://raw.githubusercontent.com/curl/curl/master/scripts/mk-ca-bundle.pl -o mk-ca-bundle.pl
             chmod +x mk-ca-bundle.pl
             # Run the script to generate ca-bundle.crt
             ./mk-ca-bundle.pl
