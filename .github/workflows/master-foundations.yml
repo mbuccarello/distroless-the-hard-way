@@ -39,6 +39,10 @@ jobs:
     uses: ./.github/workflows/build-tzdata.yml
     secrets: inherit
 
+  cacerts:
+    uses: ./.github/workflows/build-cacerts.yml
+    secrets: inherit
+
   glibc:
     needs: [mirror]
     uses: ./.github/workflows/build-glibc.yml

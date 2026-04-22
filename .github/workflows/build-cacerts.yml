@@ -1,0 +1,77 @@
+name: Opensource Distroless Build - cacerts
+
+on:
+  push:
+    paths:
+      - '.github/workflows/build-cacerts.yml'
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  build-and-sign:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write # Required for Cosign
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Install Cosign (Direct Binary)
+        run: |
+          curl -O -L "https://github.com/sigstore/cosign/releases/download/v2.4.1/cosign-linux-amd64"
+          sudo mv cosign-linux-amd64 /usr/local/bin/cosign
+          sudo chmod +x /usr/local/bin/cosign
+          cosign version
+          
+      - name: Authenticate to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        
+      - name: Build Sovereign CA Certificates (Mozilla NSS)
+        uses: addnab/docker-run-action@4f65fabd2431ebc8d299f8e5a018d79a769ae185
+        with:
+          image: fedora:40
+          options: -v ${{ github.workspace }}/workspace:/workspace
+          run: |
+            dnf install -y perl curl wget
+            mkdir -p /workspace/build /workspace/out/etc/ssl/certs /workspace/out/etc/pki/tls/certs /workspace/out/etc/pki/ca-trust/extracted/pem
+            cd /workspace/build
+            # Download the official curl script to extract Mozilla's certdata.txt
+            curl -sL https://raw.githubusercontent.com/curl/curl/master/lib/mk-ca-bundle.pl -o mk-ca-bundle.pl
+            chmod +x mk-ca-bundle.pl
+            # Run the script to generate ca-bundle.crt
+            ./mk-ca-bundle.pl
+            
+            # Place it in the standardized locations
+            cp ca-bundle.crt /workspace/out/etc/ssl/certs/ca-certificates.crt
+            
+      - name: Package Payload
+        run: |
+          cd workspace/out
+          tar -czvf ../cacerts-layer.tar.gz .
+          
+      - name: Create OCI Artifact (Dockerfile)
+        run: |
+          cat <<EOF > Dockerfile
+          FROM scratch
+          COPY workspace/cacerts-layer.tar.gz /
+          EOF
+          docker build -t ghcr.io/${{ github.repository_owner }}/artifacts-cacerts:latest .
+          docker push ghcr.io/${{ github.repository_owner }}/artifacts-cacerts:latest
+          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "ghcr.io/${{ github.repository_owner }}/artifacts-cacerts:latest" | cut -d'@' -f2)
+          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
+        id: push
+        
+      - name: Sign Foundation Artifact
+        run: |
+          cosign sign --yes ghcr.io/${{ github.repository_owner }}/artifacts-cacerts:latest
+          
+      - name: Generate SLSA Build Provenance (Level 3)
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ghcr.io/${{ github.repository_owner }}/artifacts-cacerts
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true

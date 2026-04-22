@@ -45,12 +45,14 @@ jobs:
           COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-zlib:latest /zlib-layer.tar.gz /
           COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-openssl:latest /openssl-layer.tar.gz /
           COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-tzdata:latest /tzdata-layer.tar.gz /
+          COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-cacerts:latest /cacerts-layer.tar.gz /
           
           # Extract foundations into rootfs
           RUN tar -xzf /glibc-layer.tar.gz -C /rootfs
           RUN tar -xzf /zlib-layer.tar.gz -C /rootfs
           RUN tar -xzf /openssl-layer.tar.gz -C /rootfs
           RUN tar -xzf /tzdata-layer.tar.gz -C /rootfs
+          RUN tar -xzf /cacerts-layer.tar.gz -C /rootfs
           
           # Setup basic identity and group files
           RUN echo 'root:x:0:0:root:/root:/bin/sh' > /rootfs/etc/passwd && \
@@ -76,7 +78,6 @@ jobs:
           
           # --- ATOMIC ROOT TRUST STORE (SSL/TLS SECURITY) ---
           # Inject CA trust bundle and create universal compatibility symlinks
-          COPY --from=ghcr.io/${{ github.repository_owner }}/base-fedora:latest /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem /rootfs/etc/ssl/certs/ca-certificates.crt
           RUN chmod 644 /rootfs/etc/ssl/certs/ca-certificates.crt && \
               ln -sf /etc/ssl/certs/ca-certificates.crt /rootfs/etc/ssl/cert.pem && \
               ln -sf /etc/ssl/certs/ca-certificates.crt /rootfs/etc/pki/tls/certs/ca-bundle.crt && \
