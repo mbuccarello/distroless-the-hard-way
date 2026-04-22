@@ -40,6 +40,7 @@ jobs:
     secrets: inherit
 
   cacerts:
+    needs: [mirror]
     uses: ./.github/workflows/build-cacerts.yml
     secrets: inherit
 
