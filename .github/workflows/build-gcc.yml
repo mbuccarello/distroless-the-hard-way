@@ -79,9 +79,9 @@ jobs:
               --disable-multilib \
               --disable-nls \
               --with-system-zlib
-            # Build and install the target C++ runtime only
-            make all-target-libstdc++-v3 -j$(nproc)
-            make install-target-libstdc++-v3 DESTDIR=/workspace/out
+            # Build and install the target C++ runtime and OpenMP
+            make all-target-libstdc++-v3 all-target-libgomp -j$(nproc)
+            make install-target-libstdc++-v3 install-target-libgomp DESTDIR=/workspace/out
             
       - name: Package Payload
         run: tar -czf gcc-layer.tar.gz -C workspace/out .

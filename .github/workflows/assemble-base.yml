@@ -35,30 +35,21 @@ jobs:
         id: push
         run: |
           cat <<EOF > Dockerfile
+          # Use our new static layer as the foundation
+          FROM ghcr.io/${{ github.repository_owner }}/static:latest as static
           # Use Fedora 40 as a powerful extractor to prepare the rootfs
           FROM fedora:40 as extractor
-          RUN mkdir -p /rootfs/etc/pki/tls/certs /rootfs/etc/pki/ca-trust/extracted/pem /rootfs/etc/ssl/certs /rootfs/usr/bin /rootfs/usr/lib64 /rootfs/var/lib/rpm /rootfs/tmp /rootfs/home
-          RUN chmod 1777 /rootfs/tmp
+          COPY --from=static / /rootfs/
           
-          # Copy all foundational layers
+          # Copy dynamic foundational layers
           COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-glibc:latest /glibc-layer.tar.gz /
           COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-zlib:latest /zlib-layer.tar.gz /
           COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-openssl:latest /openssl-layer.tar.gz /
-          COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-tzdata:latest /tzdata-layer.tar.gz /
-          COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-cacerts:latest /cacerts-layer.tar.gz /
           
-          # Extract foundations into rootfs
+          # Extract dynamic foundations into rootfs
           RUN tar -xzf /glibc-layer.tar.gz -C /rootfs
           RUN tar -xzf /zlib-layer.tar.gz -C /rootfs
           RUN tar -xzf /openssl-layer.tar.gz -C /rootfs
-          RUN tar -xzf /tzdata-layer.tar.gz -C /rootfs
-          RUN tar -xzf /cacerts-layer.tar.gz -C /rootfs
-          
-          # Setup basic identity and group files
-          RUN echo 'root:x:0:0:root:/root:/bin/sh' > /rootfs/etc/passwd && \
-              echo 'nobody:x:65534:65534:nobody:/:/sbin/nologin' >> /rootfs/etc/passwd && \
-              echo 'root:x:0:' > /rootfs/etc/group && \
-              echo 'nobody:x:65534:' >> /rootfs/etc/group
           
           # --- NATIVE LIBRARY DISCOVERY (LDCONFIG) ---
           RUN echo '/usr/local/lib' > /rootfs/etc/ld.so.conf && \
@@ -70,23 +61,13 @@ jobs:
           # Generate the binary cache using the host's ldconfig in the rootfs context
           RUN ldconfig -r /rootfs
           
-          # Maintain standard FHS symlinks for UsrMerge compatibility
-          RUN ln -sf usr/lib /rootfs/lib && \
-              ln -sf usr/lib64 /rootfs/lib64 && \
-              ln -sf usr/bin /rootfs/bin && \
-              ln -sf usr/sbin /rootfs/sbin
-          
-          # --- ATOMIC ROOT TRUST STORE (SSL/TLS SECURITY) ---
-          # Inject CA trust bundle and create universal compatibility symlinks
-          RUN chmod 644 /rootfs/etc/ssl/certs/ca-certificates.crt && \
-              ln -sf /etc/ssl/certs/ca-certificates.crt /rootfs/etc/ssl/cert.pem && \
-              ln -sf /etc/ssl/certs/ca-certificates.crt /rootfs/etc/pki/tls/certs/ca-bundle.crt && \
-              ln -sf /etc/ssl/certs/ca-certificates.crt /rootfs/etc/pki/tls/cert.pem && \
-              ln -sf /etc/ssl/certs/ca-certificates.crt /rootfs/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+          # Update Metadata for Base variant
+          RUN sed -i 's/Static/Base (glibc)/' /rootfs/etc/os-release
           
           # Final Assembly: Strictly Verified Opensource Distroless Base
           FROM scratch
           COPY --from=extractor /rootfs /
+          USER 0:0
           ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
           ENV TZ=UTC
           ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt

@@ -14,8 +14,13 @@ permissions:
   attestations: write
 
 jobs:
-  base:
+  static:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    uses: ./.github/workflows/assemble-static.yml
+    secrets: inherit
+
+  base:
+    needs: [static]
     uses: ./.github/workflows/assemble-base.yml
     secrets: inherit
 
@@ -40,12 +45,12 @@ jobs:
     secrets: inherit
 
   php:
-    needs: [cc]
+    needs: [base]
     uses: ./.github/workflows/assemble-php.yml
     secrets: inherit
 
   perl:
-    needs: [cc]
+    needs: [base]
     uses: ./.github/workflows/assemble-perl.yml
     secrets: inherit
 
