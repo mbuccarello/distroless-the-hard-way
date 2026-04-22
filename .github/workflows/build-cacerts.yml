@@ -48,14 +48,12 @@ jobs:
             # Place it in the standardized locations
             cp ca-bundle.crt /workspace/out/etc/ssl/certs/ca-certificates.crt
             
+            # Package Payload INSIDE the container to avoid host permission issues
+            tar -czvf /workspace/cacerts-layer.tar.gz -C /workspace/out .
+            
             # Fix permissions for the host runner
             chown -R $(id -u):$(id -g) /workspace
             
-      - name: Package Payload
-        run: |
-          cd workspace/out
-          tar -czvf ../cacerts-layer.tar.gz .
-          
       - name: Create OCI Artifact (Dockerfile)
         run: |
           cat <<EOF > Dockerfile
