@@ -48,7 +48,7 @@ The following components are currently extracted from Fedora for convenience and
 
 Each flavor is constructed by taking the **CC Image** as a base and injecting the specific runtime plus its OS-level dependencies. These dependencies are currently extracted from official Fedora RPMs to ensure binary compatibility with the source-built `glibc`.
 
-All libraries are unified into `/usr/lib` (and symlinked from `/lib`) to ensure maximum compatibility without requiring `LD_LIBRARY_PATH` or complex `ld.so.conf` configurations, following the **Undistro** principle of simplicity and high-assurance.
+All libraries are unified into `/usr/lib`. Comprehensive symlinks are provided for `/lib`, `/lib64`, and `/usr/lib64` to ensure maximum compatibility for 64-bit runtimes without requiring `LD_LIBRARY_PATH` or complex `ld.so.conf` configurations, following the **Undistro** principle of simplicity and high-assurance.
 
 ### 🐍 Python 3 Flavor
 - `python3`, `python3-libs`: Core interpreter and standard library.
