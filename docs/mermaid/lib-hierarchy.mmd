@@ -57,20 +57,20 @@ graph TB
             direction LR
             
             subgraph PHP ["PHP 8.3"]
-                php_libs["⚠️ libxml2, pcre2,<br/>libedit, ncurses"]
-                php_bin["🐘 PHP Interpreter"]
+                php_libs["⚠️ [FEDORA] libxml2, pcre2,<br/>libedit, ncurses"]
+                php_bin["🐘 [FEDORA] PHP Interpreter"]
                 php_libs -.-> php_bin
             end
 
             subgraph Dotnet [".NET 8.0"]
-                dotnet_libs["⚠️ libicu, krb5-libs"]
-                dotnet_bin["✨ .NET Runtime"]
+                dotnet_libs["⚠️ [FEDORA] libicu, krb5-libs"]
+                dotnet_bin["✨ [BINARY] .NET Runtime"]
                 dotnet_libs -.-> dotnet_bin
             end
 
             subgraph Python ["Python 3.12"]
-                py_libs["⚠️ libffi, expat, readline,<br/>sqlite, gdbm, libdb"]
-                py_bin["🐍 Python Interpreter"]
+                py_libs["⚠️ [FEDORA] libffi, expat, readline,<br/>sqlite, gdbm, libdb"]
+                py_bin["🐍 [FEDORA] Python Interpreter"]
                 py_libs -.-> py_bin
             end
         end
@@ -81,17 +81,8 @@ graph TB
     style Dotnet fill:#ffffff,stroke:#e2e8f0;
     style Python fill:#ffffff,stroke:#e2e8f0;
 
-    %% Isolated Legend
-    subgraph Legend_Cont [" "]
-        direction TB
-        hl["📖 DOCUMENTATION LEGEND"]:::header
-        l1["✅ [SOURCE] Native Build"]:::source
-        l2["⚠️ [FEDORA] RPM Extract"]:::fedora
-    end
-    style Legend_Cont fill:#ffffff,stroke:#cbd5e1,stroke-width:2px;
-
-    %% Global Connections
-    L1_Content ===> base
+    %% Global Connections - CONNECTING CONTAINER TO TARGET NODE
+    L1_Cont ===> base
     cc_img ===> PHP
     cc_img ===> Dotnet
     cc_img ===> Python
@@ -100,7 +91,3 @@ graph TB
     class glibc,openssl,zlib,libgcc,libstd source;
     class cacert,php_bin,php_libs,dotnet_bin,dotnet_libs,py_bin,py_libs fedora;
     class base,cc_img image;
-
-    %% Spacing Hacks
-    L1_Cont ~~~ Legend_Cont
-    L2_Cont ~~~ Legend_Cont

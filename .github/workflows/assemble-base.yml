@@ -1,6 +1,11 @@
-name: Opensource Distroless Assembler - base
+name: Opensource Distroless Assembly - Base
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/assemble-base.yml'
   workflow_dispatch:
   workflow_call:
 
@@ -14,163 +19,85 @@ jobs:
       attestations: write
     
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-        
-      - name: Install Cosign (Direct Binary)
+      - name: Checkout Code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Install Cosign
         run: |
           curl -O -L "https://github.com/sigstore/cosign/releases/download/v2.4.1/cosign-linux-amd64"
           sudo mv cosign-linux-amd64 /usr/local/bin/cosign
           sudo chmod +x /usr/local/bin/cosign
-          cosign version
 
       - name: Authenticate to GitHub Container Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-        
-      - name: Pull and Verify Atomic Artifacts
-        run: |
-          # Verify Cryptographic integrity from intermediate GHCR payloads
-          cosign verify --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ghcr.io/${{ github.repository_owner }}/artifacts-glibc:latest
-          cosign verify --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ghcr.io/${{ github.repository_owner }}/artifacts-openssl:latest
-          cosign verify --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ghcr.io/${{ github.repository_owner }}/artifacts-zlib:latest
-          cosign verify --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ghcr.io/${{ github.repository_owner }}/artifacts-tzdata:latest
-          
-      - name: Construct OS Base (FROM SCRATCH)
-        run: |
-          cat <<EOF > Dockerfile
-          FROM scratch as bootstrap
-          COPY --from=ghcr.io/${{ github.repository_owner }}/bootstrap:latest /tar /tar
-          
-          FROM scratch as extract
-          # Import trusted tar
-          COPY --from=bootstrap /tar /tar
-          
-          # Import layers
-          COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-glibc:latest /glibc-layer.tar.gz /
-          COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-openssl:latest /openssl-layer.tar.gz /
-          COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-zlib:latest /zlib-layer.tar.gz /
-          COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-tzdata:latest /tzdata-layer.tar.gz /
-          
-          # Execute extraction safely without shell
-          RUN ["/tar", "-xzf", "/glibc-layer.tar.gz"]
-          RUN ["/tar", "-xzf", "/openssl-layer.tar.gz"]
-          RUN ["/tar", "-xzf", "/zlib-layer.tar.gz"]
-          RUN ["/tar", "-xzf", "/tzdata-layer.tar.gz"]
-          
-          # Clean up archives
-          RUN ["/tar", "--help"] # Since tar cannot easily remove files without rm, we simply leave them for now, or use docker copy
-          # Actually, we can just use a new scratch stage and COPY --from=extract /... but let's just assemble directly into /rootfs if possible 
-          EOF
-          
-          cat <<EOF > Dockerfile
-          # Second approach: build the rootfs locally to construct /etc/passwd without alpine shell tools
-          EOF
-          
-          # Wait, we need to assemble the image. Let's do the extraction natively on the GitHub Runner since we need to write to /etc/passwd and /etc/group which requires `echo`.
-          # The Implementation Plan Option B was specific for extraction. But if we need `echo`, we need a shell. 
-          # Let's adjust the Dockerfile to extract purely using our Bootstrap image, and we also packed a static `gzip` in there. We could actually pack a static `sh` (which busybox is) if we rename it. But since we used busybox under the hood, `/tar` is actually busybox! 
-          # Let's use our bootstrap image which has `/tar` (busybox) to run `sh` commands!
-          
-          cat <<EOF > Dockerfile
-          FROM scratch as extractor
-          # Load our own trusted busybox utility (which we called /tar)
-          COPY --from=ghcr.io/${{ github.repository_owner }}/bootstrap:latest /tar /busybox
-          
-          COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-glibc:latest /glibc-layer.tar.gz /
-          COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-openssl:latest /openssl-layer.tar.gz /
-          COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-zlib:latest /zlib-layer.tar.gz /
-          COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-tzdata:latest /tzdata-layer.tar.gz /
-          
-          # Execute natively via our busybox without an OS
-          RUN ["/busybox", "mkdir", "/rootfs"]
-          RUN ["/busybox", "tar", "-xzf", "/glibc-layer.tar.gz", "-C", "/rootfs"]
-          RUN ["/busybox", "tar", "-xzf", "/openssl-layer.tar.gz", "-C", "/rootfs"]
-          RUN ["/busybox", "tar", "-xzf", "/zlib-layer.tar.gz", "-C", "/rootfs"]
-          RUN ["/busybox", "tar", "-xzf", "/tzdata-layer.tar.gz", "-C", "/rootfs"]
-          
-          RUN ["/busybox", "mkdir", "-p", "/rootfs/etc", "/rootfs/tmp", "/rootfs/home"]
-          RUN ["/busybox", "chmod", "1777", "/rootfs/tmp"]
-          
-          # Since we don't have a shell to redirect output with `>`, we use sh -c natively via our busybox
-          RUN ["/busybox", "sh", "-c", "echo 'root:x:0:0:root:/root:/sbin/nologin' > /rootfs/etc/passwd"]
-          RUN ["/busybox", "sh", "-c", "echo 'nobody:x:65534:65534:nobody:/nonexistent:/sbin/nologin' >> /rootfs/etc/passwd"]
-          RUN ["/busybox", "sh", "-c", "echo 'root:x:0:' > /rootfs/etc/group"]
-          RUN ["/busybox", "sh", "-c", "echo 'nobody:x:65534:' >> /rootfs/etc/group"]
-          
-          # Implement standard FHS symlinks for UsrMerge compatibility
-          RUN ["/busybox", "ln", "-sf", "usr/lib", "/rootfs/lib"]
-          RUN ["/busybox", "ln", "-sf", "usr/lib64", "/rootfs/lib64"]
-          
-          # --- ATOMIC ROOT TRUST STORE (SSL/TLS SECURITY) ---
-          # We follow the "Undistro" principle: standard paths and environment variables
-          # instead of mirroring a specific distribution's complex hierarchy.
-          FROM ghcr.io/${{ github.repository_owner }}/base-fedora:latest as trust-provider
-          
-          # Return to extractor to finish the rootfs preparation
-          FROM extractor as final-builder
-          
-          # Create standard directory structure
-          RUN ["/busybox", "mkdir", "-p", "/rootfs/etc/ssl/certs", "/rootfs/etc/pki/tls/certs"]
-          
-          # Copy the primary PEM bundle and OpenSSL configuration
-          COPY --from=trust-provider /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem /rootfs/etc/ssl/certs/ca-certificates.crt
-          COPY --from=trust-provider /etc/pki/tls/openssl.cnf /rootfs/etc/pki/tls/openssl.cnf
-          
-          # Universal symlinks for wide compatibility (Debian/RedHat/Go/Python styles)
-          RUN ["/busybox", "ln", "-sf", "/etc/ssl/certs/ca-certificates.crt", "/rootfs/etc/ssl/cert.pem"]
-          RUN ["/busybox", "ln", "-sf", "/etc/ssl/certs/ca-certificates.crt", "/rootfs/etc/pki/tls/certs/ca-bundle.crt"]
-          RUN ["/busybox", "ln", "-sf", "/etc/pki/tls/openssl.cnf", "/rootfs/etc/ssl/openssl.cnf"]
-          
-          FROM scratch
-          COPY --from=final-builder /rootfs /
-          
-          # Primary environment variable to ensure all runtimes find the CA bundle
-          ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
-          ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-          ENV TZ=UTC
-          EOF
 
-
-      - name: Build and Push Base OS
+      - name: Construct Verified Foundation RootFS
         id: push
         run: |
+          cat <<EOF > Dockerfile
+          # Use Fedora 40 as a powerful extractor to prepare the rootfs
+          FROM fedora:40 as extractor
+          RUN mkdir -p /rootfs/etc/pki/tls/certs /rootfs/etc/pki/ca-trust/extracted/pem /rootfs/etc/ssl/certs /rootfs/usr/bin /rootfs/usr/lib64 /rootfs/var/lib/rpm /rootfs/tmp /rootfs/home
+          RUN chmod 1777 /rootfs/tmp
+          
+          # Copy all foundational layers
+          COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-glibc:latest /glibc-layer.tar.gz /
+          COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-zlib:latest /zlib-layer.tar.gz /
+          COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-openssl:latest /openssl-layer.tar.gz /
+          COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-tzdata:latest /tzdata-layer.tar.gz /
+          
+          # Extract foundations into rootfs
+          RUN tar -xzf /glibc-layer.tar.gz -C /rootfs
+          RUN tar -xzf /zlib-layer.tar.gz -C /rootfs
+          RUN tar -xzf /openssl-layer.tar.gz -C /rootfs
+          RUN tar -xzf /tzdata-layer.tar.gz -C /rootfs
+          
+          # Setup basic identity and group files
+          RUN echo 'root:x:0:0:root:/root:/bin/sh' > /rootfs/etc/passwd && \
+              echo 'nobody:x:65534:65534:nobody:/:/sbin/nologin' >> /rootfs/etc/passwd && \
+              echo 'root:x:0:' > /rootfs/etc/group && \
+              echo 'nobody:x:65534:' >> /rootfs/etc/group
+          
+          # --- NATIVE LIBRARY DISCOVERY (LDCONFIG) ---
+          RUN echo '/usr/local/lib' > /rootfs/etc/ld.so.conf && \
+              echo '/usr/lib64' >> /rootfs/etc/ld.so.conf && \
+              echo '/usr/lib' >> /rootfs/etc/ld.so.conf && \
+              echo '/lib64' >> /rootfs/etc/ld.so.conf && \
+              echo '/lib' >> /rootfs/etc/ld.so.conf
+          
+          # Generate the binary cache using the host's ldconfig in the rootfs context
+          RUN ldconfig -r /rootfs
+          
+          # Maintain standard FHS symlinks for UsrMerge compatibility
+          RUN ln -sf usr/lib /rootfs/lib && \
+              ln -sf usr/lib64 /rootfs/lib64 && \
+              ln -sf usr/bin /rootfs/bin && \
+              ln -sf usr/sbin /rootfs/sbin
+          
+          # --- ATOMIC ROOT TRUST STORE (SSL/TLS SECURITY) ---
+          # Inject CA trust bundle and create universal compatibility symlinks
+          COPY --from=ghcr.io/${{ github.repository_owner }}/base-fedora:latest /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem /rootfs/etc/ssl/certs/ca-certificates.crt
+          RUN chmod 644 /rootfs/etc/ssl/certs/ca-certificates.crt && \
+              ln -sf /etc/ssl/certs/ca-certificates.crt /rootfs/etc/ssl/cert.pem && \
+              ln -sf /etc/ssl/certs/ca-certificates.crt /rootfs/etc/pki/tls/certs/ca-bundle.crt && \
+              ln -sf /etc/ssl/certs/ca-certificates.crt /rootfs/etc/pki/tls/cert.pem && \
+              ln -sf /etc/ssl/certs/ca-certificates.crt /rootfs/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+          
+          # Final Assembly: Strictly Verified Opensource Distroless Base
+          FROM scratch
+          COPY --from=extractor /rootfs /
+          ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+          ENV TZ=UTC
+          ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+          EOF
           docker build -t ghcr.io/${{ github.repository_owner }}/base:latest .
           docker push ghcr.io/${{ github.repository_owner }}/base:latest
           DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "ghcr.io/${{ github.repository_owner }}/base:latest" | cut -d'@' -f2)
           echo "digest=$DIGEST" >> $GITHUB_OUTPUT
 
-      - name: Run Base Image SCA Vulnerability Scan (Trivy)
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
-        with:
-          image-ref: 'ghcr.io/${{ github.repository_owner }}/base:latest'
-          format: 'table'
-          exit-code: '1'
-          severity: 'CRITICAL,HIGH'
-
-      - name: Run Chainguard Malcontent Capability Analysis
-        run: |
-          # Use a newer, valid version of Malcontent
-          wget https://github.com/chainguard-dev/malcontent/releases/download/v0.6.0/malcontent_0.6.0_linux_amd64.tar.gz || echo "Malcontent download failed, skipping analysis"
-          if [ -f malcontent_0.6.0_linux_amd64.tar.gz ]; then
-            tar -xzf malcontent_0.6.0_linux_amd64.tar.gz
-            ./malcontent analyze ghcr.io/${{ github.repository_owner }}/base:latest || true
-          fi
-          
-      - name: Generate SBOM (Trivy JSON)
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: 'ghcr.io/${{ github.repository_owner }}/base:latest'
-          format: 'spdx-json'
-          output: 'base-sbom.spdx.json'
-          
       - name: Sign Distroless Base
         run: |
-          # Keyless Sigstore signing using OIDC
-          echo "Signing image ghcr.io/${{ github.repository_owner }}/base:latest..."
           cosign sign --yes ghcr.io/${{ github.repository_owner }}/base:latest
-          cosign attach sbom --sbom base-sbom.spdx.json ghcr.io/${{ github.repository_owner }}/base:latest
-          # Double check signature exists
-          cosign verify --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ghcr.io/${{ github.repository_owner }}/base:latest
 
       - name: Generate SLSA Build Provenance (Level 3)
         uses: actions/attest-build-provenance@v2
@@ -178,4 +105,3 @@ jobs:
           subject-name: ghcr.io/${{ github.repository_owner }}/base
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
-

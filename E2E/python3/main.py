@@ -9,7 +9,9 @@ def verify_ssl():
             if response.status == 200:
                 print("✅ SSL Verification: SUCCESS (Handshake with google.com verified via Opensource OpenSSL)")
     except Exception as e:
+        import ssl
         print(f"❌ SSL Verification: FAILED - {e}")
+        print(f"DEBUG: Default verify paths: {ssl.get_default_verify_paths()}")
         exit(1)
 
 def verify_timezone():

@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use POSIX qw(setenv tzset strftime);
+use POSIX qw(tzset strftime);
 
 print "--------------------------------------------------\n";
 print "🚀 Opensource Distroless E2E Verification (Perl)\n";

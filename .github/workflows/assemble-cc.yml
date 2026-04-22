@@ -37,14 +37,14 @@ jobs:
         id: push
         run: |
           cat <<EOF > Dockerfile
-          FROM scratch as extractor
-          # Use our trusted static bootstrap for extraction
-          COPY --from=ghcr.io/${{ github.repository_owner }}/bootstrap:latest /tar /busybox
+          FROM fedora:40 as extractor
+          RUN mkdir -p /rootfs
+          COPY --from=ghcr.io/${{ github.repository_owner }}/base:latest / /rootfs/
           COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-gcc:latest /gcc-layer.tar.gz /
-          RUN ["/busybox", "mkdir", "/rootfs"]
-          RUN ["/busybox", "tar", "-xzf", "/gcc-layer.tar.gz", "-C", "/rootfs"]
+          RUN tar -xzf /gcc-layer.tar.gz -C /rootfs
+          RUN ldconfig -r /rootfs
               
-          FROM ghcr.io/${{ github.repository_owner }}/base:latest
+          FROM scratch
           COPY --from=extractor /rootfs /
           EOF
           

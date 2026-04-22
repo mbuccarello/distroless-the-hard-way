@@ -1,30 +1,58 @@
-graph TD
-    Push["Git Push to main"] --> F["Master Foundations"]
+%%{init: {'theme': 'base', 'themeVariables': { 'clusterBkg': '#ffffff', 'clusterBorder': '#cbd5e1', 'primaryColor': '#ffffff', 'lineColor': '#64748b', 'edgeColor': '#475569' }}}%%
+graph TB
+    classDef header fill:#0f172a,stroke:#0f172a,color:#fff,font-weight:bold,font-size:16px;
+    classDef action fill:#6366f1,stroke:#4338ca,color:#fff;
+    classDef check fill:#10b981,stroke:#059669,color:#fff;
+
+    Push["Git Push to main"]:::action --> F["Master Foundations"]:::action
     
-    subgraph Layer1 ["Layer 1: Foundations (GNU-Native Builders)"]
-        F --> B1["build-openssl"]
-        F --> B2["build-zlib"]
-        F --> B3["build-tzdata"]
-        F --> B4["build-bootstrap"]
-        B1 --> G["build-glibc"]
-        B2 --> G
-        G --> GC["build-gcc"]
+    subgraph L1_Cont [" "]
+        direction TB
+        h1["🏗️ LAYER 1: FOUNDATIONS (GNU-NATIVE)"]:::header
+        
+        subgraph Layer1 ["&nbsp;"]
+            direction TB
+            F --> B1["build-openssl"]
+            F --> B2["build-zlib"]
+            F --> B3["build-tzdata"]
+            F --> B4["build-bootstrap"]
+            B1 --> G["build-glibc"]
+            B2 --> G
+            G --> GC["build-gcc"]
+        end
     end
+    style L1_Cont fill:#ffffff,stroke:#cbd5e1,stroke-width:2px;
+    style Layer1 fill:#ffffff,stroke:none;
     
-    GC --> A["Master Assembly"]
+    GC ===> A["Master Assembly"]:::action
     
-    subgraph Layer2 ["Layer 2: Assembly (Image Construction)"]
-        A --> AB["assemble-base"]
-        AB --> AC["assemble-cc"]
-        AC --> L1["assemble-java"]
-        AC --> L2["assemble-python"]
-        AC --> L3["assemble-nodejs"]
+    subgraph L2_Cont [" "]
+        direction TB
+        h2["🚀 LAYER 2: ASSEMBLY (IMAGE CONSTRUCTION)"]:::header
+
+        subgraph Layer2 ["&nbsp;"]
+            direction TB
+            A --> AB["assemble-base"]
+            AB --> AC["assemble-cc"]
+            AC --> L1["assemble-java"]
+            AC --> L2["assemble-python"]
+            AC --> L3["assemble-nodejs"]
+        end
     end
+    style L2_Cont fill:#ffffff,stroke:#cbd5e1,stroke-width:2px;
+    style Layer2 fill:#ffffff,stroke:none;
     
-    L1 --> V["Master Validation"]
-    L2 --> V
-    L3 --> V
+    L1 & L2 & L3 ===> V["Master Validation"]:::action
     
-    subgraph Layer3 ["Layer 3: Validation (E2E)"]
-        V --> E2E["e2e-orchestrator"]
+    subgraph L3_Cont [" "]
+        direction TB
+        h3["✅ LAYER 3: VALIDATION (E2E)"]:::header
+        
+        subgraph Layer3 ["&nbsp;"]
+            V --> E2E["e2e-orchestrator"]
+        end
     end
+    style L3_Cont fill:#ffffff,stroke:#cbd5e1,stroke-width:2px;
+    style Layer3 fill:#ffffff,stroke:none;
+
+    class B1,B2,B3,B4,G,GC,AB,AC,L1,L2,L3,E2E action;

@@ -22,7 +22,7 @@ jobs:
 
       - name: Build E2E Application (SDK)
         run: |
-          docker run --rm -v ${{ github.workspace }}/E2E/java:/src -w /src mcr.microsoft.com/openjdk/jdk:21-ubuntu javac HelloOpensource.java
+          docker run --rm -v ${{ github.workspace }}/E2E/java:/src -w /src mcr.microsoft.com/openjdk/jdk:17-ubuntu javac HelloOpensource.java
 
       - name: Execute E2E Application (Opensource Distroless Distroless Java)
         run: |

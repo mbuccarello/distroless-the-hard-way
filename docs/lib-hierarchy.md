@@ -16,6 +16,7 @@ This document maps the shared libraries across the Opensource Distroless hierarc
 | `libssl.so.3` | ✅ **Source** | OpenSSL Source | Foundation |
 | `libz.so.1` | ✅ **Source** | Zlib Source | Foundation |
 | `libstdc++.so.6` | ✅ **Source** | GCC Source | C++ Layer |
+| `libgcc_s.so.1` | ✅ **Source** | GCC Source | C++ Layer |
 | `ca-certificates` | ⚠️ **Fedora Extract** | Fedora 40 | Security |
 | `libicu*.so` | ⚠️ **Fedora Extract** | Fedora 40 | Dotnet Runtime |
 | `libkrb5.so` | ⚠️ **Fedora Extract** | Fedora 40 | Networking |
@@ -45,7 +46,9 @@ The following components are currently extracted from Fedora for convenience and
 
 ## 4. Fedora Dependency Mapping (dnf download)
 
-The following official Fedora 40 packages are currently utilized to provide runtime-specific libraries and interpreters.
+Each flavor is constructed by taking the **CC Image** as a base and injecting the specific runtime plus its OS-level dependencies. These dependencies are currently extracted from official Fedora RPMs to ensure binary compatibility with the source-built `glibc`.
+
+All libraries are unified into `/usr/lib` (and symlinked from `/lib`) to ensure maximum compatibility without requiring `LD_LIBRARY_PATH` or complex `ld.so.conf` configurations, following the **Undistro** principle of simplicity and high-assurance.
 
 ### 🐍 Python 3 Flavor
 - `python3`, `python3-libs`: Core interpreter and standard library.

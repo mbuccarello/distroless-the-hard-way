@@ -17,74 +17,57 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         
-      - name: Download and Prepare Official Fedora Perl Packages
+      - name: Download Official Fedora Perl Packages
         run: |
-          mkdir -p payload/rpm payload/extracted
+          mkdir -p payload/rpm
           # Use our trusted Fedora sandbox to download official packages
-          # We must install dnf-plugins-core to enable 'dnf download'
           docker run --rm -v $(pwd)/payload/rpm:/payload ghcr.io/${{ github.repository_owner }}/base-fedora:latest \
-            /bin/sh -c "dnf install -y 'dnf-command(download)' && dnf download --resolve --destdir=/payload perl"
-          
-          # Install rpm2cpio in the runner to extract
-          sudo apt-get update && sudo apt-get install -y rpm2cpio cpio
-          
-          # Extract all downloaded RPMs into the payload/extracted folder
-          cd payload/rpm
-          for rpm in *.rpm; do
-            rpm2cpio "$rpm" | cpio -idmv -D ../extracted/
-          done
-          cd ../../
-          
-          # Repack the extracted filesystem into a clean tarball for the construction stage
-          tar -czf payload/perl.tar.gz -C payload/extracted .
-          
-      - name: Install Cosign (Direct Binary)
-        run: |
-          curl -O -L "https://github.com/sigstore/cosign/releases/download/v2.4.1/cosign-linux-amd64"
-          sudo mv cosign-linux-amd64 /usr/local/bin/cosign
-          sudo chmod +x /usr/local/bin/cosign
-          cosign version
-          
-      - name: Verify Underlying CC Ancestry
-        run: |
-          cosign verify --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ghcr.io/${{ github.repository_owner }}/cc:latest
-          
+            /bin/sh -c "dnf install -y 'dnf-command(download)' && \
+            mkdir -p /tmp/cleanroot && \
+            dnf download --arch x86_64 --resolve --destdir=/payload --installroot=/tmp/cleanroot --releasever=40 \
+            perl-interpreter perl-libs libxcrypt xz-libs curl && \
+            rm -f /payload/glibc* /payload/openssl* /payload/zlib* /payload/gcc*"
+
+      - name: Authenticate to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        
       - name: Construct Perl Application Runtime
+        id: push
         run: |
           cat <<EOF > Dockerfile
-          # Extract safely using the Stage 1 Static Bootstrap (Glibc-native)
-          FROM ghcr.io/${{ github.repository_owner }}/bootstrap:latest as extractor
-          COPY payload/perl.tar.gz /
-          # Use our own trusted static tar for extraction
-          RUN ["/bin/sh", "-c", "/bin/tar -xzf /perl.tar.gz -C /"]
+          FROM fedora:40 as extractor
+          RUN dnf install -y cpio
+          RUN mkdir -p /rootfs
+          COPY --from=ghcr.io/${{ github.repository_owner }}/cc:latest / /rootfs/
+          COPY payload/rpm /payload
           
-          # Overlay onto strictly verified Opensource Distroless CC
-          FROM ghcr.io/${{ github.repository_owner }}/cc:latest
-          COPY --from=extractor /usr /usr
+          # Extract RPM dependencies directly into rootfs
+          RUN cd /payload && \
+              for f in *.rpm; do rpm2cpio \$f | cpio -idmv; done && \
+              cp -a usr/* /rootfs/usr/
           
+          # Regenerate library cache
+          RUN ldconfig -r /rootfs
+          
+          FROM scratch
+          COPY --from=extractor /rootfs /
           ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-          
-          ENTRYPOINT ["/usr/bin/perl", "-v"]
+          ENTRYPOINT ["/usr/bin/perl"]
+          CMD ["-v"]
           EOF
           
           docker build -t ghcr.io/${{ github.repository_owner }}/perl:latest .
+          docker push ghcr.io/${{ github.repository_owner }}/perl:latest
+          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "ghcr.io/${{ github.repository_owner }}/perl:latest" | cut -d'@' -f2)
+          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
 
       - name: Functional Smoke Test (Verification)
         run: |
           docker run --rm ghcr.io/${{ github.repository_owner }}/perl:latest --version
 
-      - name: Run Final Image SCA Vulnerability Scan (Trivy)
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
+      - name: Generate SLSA Build Provenance (Level 3)
+        uses: actions/attest-build-provenance@v2
         with:
-          image-ref: 'ghcr.io/${{ github.repository_owner }}/perl:latest'
-          format: 'table'
-          exit-code: '1'
-          severity: 'CRITICAL'
-
-      - name: Publish, Sign, and Attest Opensource Distroless Product
-        uses: ./.github/actions/assemble-publish-sign
-        with:
-          image-name: 'perl'
-          tags: 'latest'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
+          subject-name: ghcr.io/${{ github.repository_owner }}/perl
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true

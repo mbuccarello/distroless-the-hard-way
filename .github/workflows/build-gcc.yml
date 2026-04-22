@@ -73,6 +73,7 @@ jobs:
             cd /workspace/build
             export SOURCE_DATE_EPOCH=315532800
             ../src/configure --prefix=/usr \
+              --libdir=/usr/lib64 \
               --enable-languages=c,c++ \
               --disable-bootstrap \
               --disable-multilib \

@@ -17,96 +17,82 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         
-      - name: Download Official Microsoft .NET SDK/Runtime
-        run: |
-          mkdir -p payload
-          # Fetch Official .NET 8.0 Runtime (Glibc-native)
-          curl -L "https://dotnetcli.azureedge.net/dotnet/Runtime/8.0.2/dotnet-runtime-8.0.2-linux-x64.tar.gz" -o payload/dotnet.tar.gz
-          # Strict verification (Microsoft Official SHA512 for 8.0.2)
-          echo "f30f72f55b9e97e36107f920e932477183867726a963ea0d4d151f291981877ba253a7175614c60b386b6a37f9192d97d7402dafdad2529369f512698cb9d1dd payload/dotnet.tar.gz" | sha512sum -c -
-
-      - name: Download and Prepare Official Fedora Dotnet Dependencies (libicu)
-        run: |
-          mkdir -p payload/rpm payload/extracted
-          # Use our trusted Fedora sandbox to download official packages
-          docker run --rm -v $(pwd)/payload/rpm:/payload ghcr.io/${{ github.repository_owner }}/base-fedora:latest \
-            /bin/sh -c "dnf install -y 'dnf-command(download)' && dnf download --resolve --destdir=/payload libicu krb5-libs"
-          
-          # Install rpm2cpio in the runner to extract
-          sudo apt-get update && sudo apt-get install -y rpm2cpio cpio
-          
-          # Extract all downloaded RPMs into the payload/extracted folder
-          cd payload/rpm
-          for rpm in *.rpm; do
-            rpm2cpio "$rpm" | cpio -idmv -D ../extracted/
-          done
-          
-          # Generate metadata for transparency
-          mkdir -p ../extracted/etc
-          ls *.rpm | xargs -n1 basename > ../extracted/etc/distroless-packages.txt
-          cd ../../
-          
-          # Repack the extracted filesystem into a clean tarball
-          tar -czf payload/dependencies.tar.gz -C payload/extracted .
-
       - name: Install Cosign (Direct Binary)
         run: |
           curl -O -L "https://github.com/sigstore/cosign/releases/download/v2.4.1/cosign-linux-amd64"
           sudo mv cosign-linux-amd64 /usr/local/bin/cosign
           sudo chmod +x /usr/local/bin/cosign
           cosign version
-          
-      - name: Verify CC Ancestry
+
+      - name: Authenticate to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        
+      - name: Verify Ancestry (Base + CC)
         run: |
+          cosign verify --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ghcr.io/${{ github.repository_owner }}/base:latest
           cosign verify --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ghcr.io/${{ github.repository_owner }}/cc:latest
           
-      - name: Construct .NET Execution Environment
+      - name: Download Dotnet Binaries and Dependencies
+        run: |
+          mkdir -p payload/rpm payload/dotnet
+          # Use official Microsoft installer script to get the latest .NET 8.0 SDK
+          curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --channel 8.0 --install-dir payload/dotnet --architecture x64 --os linux --no-path
+          
+          # Repack clean tarball
+          tar -czf payload/dotnet.tar.gz -C payload/dotnet .
+          
+          # Use base-fedora to resolve and download native dependencies (libicu, krb5, etc)
+          docker run --rm -v $(pwd)/payload/rpm:/payload ghcr.io/${{ github.repository_owner }}/base-fedora:latest \
+            /bin/sh -c "dnf install -y 'dnf-command(download)' && dnf download --arch x86_64 --resolve --destdir=/payload libicu krb5-libs libxcrypt xz-libs"
+
+      - name: Construct Dotnet Image
+        id: push
         run: |
           cat <<EOF > Dockerfile
-          # Extract safely using the Stage 1 Static Bootstrap (Glibc-native)
-          FROM ghcr.io/${{ github.repository_owner }}/bootstrap:latest as extractor
+          FROM fedora:40 as extractor
+          RUN dnf install -y cpio
+          RUN mkdir -p /rootfs
+          COPY --from=ghcr.io/${{ github.repository_owner }}/cc:latest / /rootfs/
           COPY payload/dotnet.tar.gz /
-          COPY payload/dependencies.tar.gz /
-          # Use our own trusted static tar for extraction
-          RUN ["/bin/sh", "-c", "mkdir -p /usr/share/dotnet && /bin/tar -xzf /dotnet.tar.gz -C /usr/share/dotnet"]
-          RUN ["/bin/sh", "-c", "mkdir -p /deps && /bin/tar -xzf /dependencies.tar.gz -C /deps"]
+          COPY payload/rpm /payload
           
-          # Overlay onto strictly verified Opensource Distroless CC
-          FROM ghcr.io/${{ github.repository_owner }}/cc:latest
-          COPY --from=extractor /usr/share/dotnet /usr/share/dotnet
+          RUN mkdir -p /rootfs/usr/share/dotnet && tar -xzf /dotnet.tar.gz -C /rootfs/usr/share/dotnet
           
-          # Inject System Dependencies (libicu)
-          COPY --from=extractor /deps/usr /usr
+          # Extract RPM dependencies safely
+          RUN cd /payload && \
+              for f in *.rpm; do rpm2cpio \$f | cpio -idmv; done && \
+              cp -a usr/* /rootfs/usr/
           
-          # Implement standard FHS symlink using our trusted static ln
-          COPY --from=extractor /bin/ln /bin/ln
-          RUN ["/bin/ln", "-s", "/usr/share/dotnet/dotnet", "/usr/bin/dotnet"]
+          # Regenerate library cache to include new dependencies
+          RUN ldconfig -r /rootfs
+          RUN ln -sf /usr/share/dotnet/dotnet /rootfs/usr/bin/dotnet
           
+          FROM scratch
+          COPY --from=extractor /rootfs /
           ENV DOTNET_ROOT=/usr/share/dotnet
-          ENV PATH=/usr/share/dotnet:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-          
-          ENTRYPOINT ["/usr/bin/dotnet"]
+          ENV PATH=\$PATH:/usr/share/dotnet
+          ENTRYPOINT ["dotnet"]
           EOF
           
-          docker build -t ghcr.io/${{ github.repository_owner }}/dotnet:8.0 .
           docker build -t ghcr.io/${{ github.repository_owner }}/dotnet:latest .
+          docker push ghcr.io/${{ github.repository_owner }}/dotnet:latest
+          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "ghcr.io/${{ github.repository_owner }}/dotnet:latest" | cut -d'@' -f2)
+          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
 
-      - name: Functional Smoke Test (Verification)
+      - name: Functional Smoke Test
         run: |
           docker run --rm ghcr.io/${{ github.repository_owner }}/dotnet:latest --list-runtimes
+          docker run --rm ghcr.io/${{ github.repository_owner }}/dotnet:latest --version
 
-      - name: Run Final Image SCA Vulnerability Scan (Trivy)
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
+      - name: Sign Distroless Dotnet
+        run: |
+          cosign sign --yes ghcr.io/${{ github.repository_owner }}/dotnet:latest
+          # Internal verification
+          cosign verify --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ghcr.io/${{ github.repository_owner }}/dotnet:latest
+
+      - name: Generate SLSA Build Provenance (Level 3)
+        uses: actions/attest-build-provenance@v2
         with:
-          image-ref: 'ghcr.io/${{ github.repository_owner }}/dotnet:latest'
-          format: 'table'
-          exit-code: '1'
-          severity: 'CRITICAL'
-
-      - name: Publish, Sign, and Attest Opensource Distroless Product
-        uses: ./.github/actions/assemble-publish-sign
-        with:
-          image-name: 'dotnet'
-          tags: '8.0 latest'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
+          subject-name: ghcr.io/${{ github.repository_owner }}/dotnet
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true

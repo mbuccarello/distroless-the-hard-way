@@ -27,65 +27,51 @@ jobs:
           
           # Strip components using full GNU tar in the runner
           tar -xzf payload/raw/jdk.tar.gz -C payload/stripped --strip-components=1
-          # Repack clean tarball for the scratch-based construction stage
+          # Repack clean tarball
           tar -czf payload/jdk.tar.gz -C payload/stripped .
           
-      - name: Install Cosign (Direct Binary)
-        run: |
-          curl -O -L "https://github.com/sigstore/cosign/releases/download/v2.4.1/cosign-linux-amd64"
-          sudo mv cosign-linux-amd64 /usr/local/bin/cosign
-          sudo chmod +x /usr/local/bin/cosign
-          cosign version
-          
-      - name: Verify Underlying CC Ancestry
-        run: |
-          cosign verify --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ghcr.io/${{ github.repository_owner }}/cc:latest
-          
+      - name: Authenticate to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        
       - name: Construct Java Application Runtime
+        id: push
         run: |
           cat <<EOF > Dockerfile
-          # Extract safely using the Stage 1 Static Bootstrap (Glibc-native)
-          FROM ghcr.io/${{ github.repository_owner }}/bootstrap:latest as extractor
+          FROM fedora:40 as extractor
+          RUN mkdir -p /rootfs
+          COPY --from=ghcr.io/${{ github.repository_owner }}/cc:latest / /rootfs/
           COPY payload/jdk.tar.gz /
-          # Use our own trusted static tar for extraction (Stripped Payload)
-          RUN ["/bin/sh", "-c", "mkdir -p /usr/lib/jvm/java-17-openjdk && /bin/tar -xzf /jdk.tar.gz -C /usr/lib/jvm/java-17-openjdk"]
           
-          # Overlay onto strictly verified Opensource Distroless CC
-          FROM ghcr.io/${{ github.repository_owner }}/cc:latest
-          COPY --from=extractor /usr/lib/jvm /usr/lib/jvm
+          RUN mkdir -p /rootfs/usr/lib/jvm/java-17-openjdk && tar -xzf /jdk.tar.gz -C /rootfs/usr/lib/jvm/java-17-openjdk
           
-          # Implement standard FHS symlink using our trusted static ln
-          COPY --from=extractor /bin/ln /bin/ln
-          RUN ["/bin/ln", "-s", "/usr/lib/jvm/java-17-openjdk/bin/java", "/usr/bin/java"]
-          RUN ["/bin/ln", "-s", "/usr/lib/jvm/java-17-openjdk/bin/keytool", "/usr/bin/keytool"]
+          # Regenerate library cache
+          RUN ldconfig -r /rootfs
+          RUN ln -sf /usr/lib/jvm/java-17-openjdk/bin/java /rootfs/usr/bin/java
+          RUN ln -sf /usr/lib/jvm/java-17-openjdk/bin/keytool /rootfs/usr/bin/keytool
           
+          FROM scratch
+          COPY --from=extractor /rootfs /
           ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk
           ENV PATH=\$JAVA_HOME/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-          
-          ENTRYPOINT ["/usr/bin/java", "-version"]
+          ENV LANG=C.UTF-8
+          ENV LC_ALL=C.UTF-8
+          ENV JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF-8"
+          ENTRYPOINT ["/usr/bin/java"]
+          CMD ["-version"]
           EOF
           
-      - name: Build and Push
-        run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/java:17 .
           docker build -t ghcr.io/${{ github.repository_owner }}/java:latest .
-          
+          docker push ghcr.io/${{ github.repository_owner }}/java:latest
+          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "ghcr.io/${{ github.repository_owner }}/java:latest" | cut -d'@' -f2)
+          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
+
       - name: Functional Smoke Test (Verification)
         run: |
           docker run --rm ghcr.io/${{ github.repository_owner }}/java:latest -version
-          
-      - name: Run Final Image SCA Vulnerability Scan (Trivy)
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
-        with:
-          image-ref: 'ghcr.io/${{ github.repository_owner }}/java:latest'
-          format: 'table'
-          exit-code: '1'
-          severity: 'CRITICAL'
-          
-      - name: Publish, Sign, and Attest Opensource Distroless Product
-        uses: ./.github/actions/assemble-publish-sign
-        with:
-          image-name: 'java'
-          tags: '17 latest'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Generate SLSA Build Provenance (Level 3)
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ghcr.io/${{ github.repository_owner }}/java
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true

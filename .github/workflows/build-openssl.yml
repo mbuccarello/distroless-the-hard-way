@@ -52,7 +52,7 @@ jobs:
             dnf install -y gcc make perl-devel perl-FindBin perl-IPC-Cmd perl-File-Compare zlib-devel diffutils bzip2
             cd /workspace/src
             export SOURCE_DATE_EPOCH=315532800
-            ./config --prefix=/usr --libdir=lib --openssldir=/etc/ssl shared no-tests no-docs
+            ./config --prefix=/usr --libdir=lib64 --openssldir=/etc/ssl shared no-tests no-docs enable-md2 enable-rc4 enable-md4 enable-weak-ssl-ciphers
             make -j$(nproc)
             make install_sw DESTDIR=/workspace/out
             

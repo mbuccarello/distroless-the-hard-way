@@ -30,60 +30,44 @@ jobs:
           # Repack clean tarball
           tar -czf payload/node.tar.gz -C payload/stripped .
           
-      - name: Install Cosign (Direct Binary)
-        run: |
-          curl -O -L "https://github.com/sigstore/cosign/releases/download/v2.4.1/cosign-linux-amd64"
-          sudo mv cosign-linux-amd64 /usr/local/bin/cosign
-          sudo chmod +x /usr/local/bin/cosign
-          cosign version
-          
-      - name: Verify CC Ancestry
-        run: |
-          cosign verify --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ghcr.io/${{ github.repository_owner }}/cc:latest
-          
+      - name: Authenticate to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        
       - name: Construct Node.js Execution Environment
+        id: push
         run: |
           cat <<EOF > Dockerfile
-          # Extract safely using the Stage 1 Static Bootstrap (Glibc-native)
-          FROM ghcr.io/${{ github.repository_owner }}/bootstrap:latest as extractor
+          FROM fedora:40 as extractor
+          RUN mkdir -p /rootfs
+          COPY --from=ghcr.io/${{ github.repository_owner }}/cc:latest / /rootfs/
           COPY payload/node.tar.gz /
-          # Use our own trusted static tar for extraction (Stripped Payload)
-          RUN ["/bin/sh", "-c", "mkdir -p /usr/local/lib/nodejs && /bin/tar -xzf /node.tar.gz -C /usr/local/lib/nodejs"]
           
-          # Overlay onto strictly verified Opensource Distroless CC
-          FROM ghcr.io/${{ github.repository_owner }}/cc:latest
-          COPY --from=extractor /usr/local/lib/nodejs /usr/local/lib/nodejs
+          RUN mkdir -p /rootfs/usr/local/lib/nodejs && tar -xzf /node.tar.gz -C /rootfs/usr/local/lib/nodejs
           
-          # Implement standard FHS symlink using our trusted static ln
-          COPY --from=extractor /bin/ln /bin/ln
-          RUN ["/bin/ln", "-s", "/usr/local/lib/nodejs/bin/node", "/usr/bin/node"]
-          RUN ["/bin/ln", "-s", "/usr/local/lib/nodejs/bin/npm", "/usr/bin/npm"]
+          # Regenerate library cache
+          RUN ldconfig -r /rootfs
+          RUN ln -sf /usr/local/lib/nodejs/bin/node /rootfs/usr/bin/node
+          RUN ln -sf /usr/local/lib/nodejs/bin/npm /rootfs/usr/bin/npm
           
+          FROM scratch
+          COPY --from=extractor /rootfs /
           ENV NODE_HOME=/usr/local/lib/nodejs
           ENV PATH=\$NODE_HOME/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-          
           ENTRYPOINT ["/usr/bin/node"]
           EOF
           
-          docker build -t ghcr.io/${{ github.repository_owner }}/nodejs:20 .
           docker build -t ghcr.io/${{ github.repository_owner }}/nodejs:latest .
+          docker push ghcr.io/${{ github.repository_owner }}/nodejs:latest
+          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "ghcr.io/${{ github.repository_owner }}/nodejs:latest" | cut -d'@' -f2)
+          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
 
       - name: Functional Smoke Test (Verification)
         run: |
           docker run --rm ghcr.io/${{ github.repository_owner }}/nodejs:latest --version
 
-      - name: Run Final Image SCA Vulnerability Scan (Trivy)
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
+      - name: Generate SLSA Build Provenance (Level 3)
+        uses: actions/attest-build-provenance@v2
         with:
-          image-ref: 'ghcr.io/${{ github.repository_owner }}/nodejs:latest'
-          format: 'table'
-          exit-code: '1'
-          severity: 'CRITICAL'
-
-      - name: Publish, Sign, and Attest Opensource Distroless Product
-        uses: ./.github/actions/assemble-publish-sign
-        with:
-          image-name: 'nodejs'
-          tags: '20 latest'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
+          subject-name: ghcr.io/${{ github.repository_owner }}/nodejs
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true

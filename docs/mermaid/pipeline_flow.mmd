@@ -1,34 +1,35 @@
+%%{init: {'theme': 'base', 'themeVariables': { 'actorBkg': '#6366f1', 'actorTextColor': '#ffffff', 'actorBorder': '#4338ca', 'noteBkg': '#f8fafc', 'noteBorder': '#cbd5e1', 'signalColor': '#475569', 'loopTextColor': '#1e293b' }}}%%
 sequenceDiagram
     autonumber
-    participant Dev as Blueprint Push (Main)
-    participant Atomic as Atomic Action Workflows
-    participant Security as OSS Security Scanners
-    participant Reg as GitHub Registry (ghcr.io)
-    participant Assembler as Assembler Action Workflows
+    participant Dev as 👤 Blueprint Push (Main)
+    participant Atomic as 📦 Atomic Workflows
+    participant Security as 🛡️ Security Scanners
+    participant Reg as 🏗️ GitHub Registry
+    participant Assembler as ⚙️ Assembler Workflows
     
-    Dev->>Atomic: Trigger `.github/workflows/build-glibc.yml`
+    Dev->>Atomic: Trigger foundations build
     activate Atomic
     
-    Atomic->>Security: Execute SAST (Semgrep) on C-source
+    Atomic->>Security: SAST (Semgrep)
     Security-->>Atomic: Pass
-    Atomic->>Atomic: Compile native `.so` files
-    Atomic->>Security: Execute SCA/SBOM generation (Trivy/Syft)
-    Security-->>Atomic: Pass (Outputs glibc-sbom.json)
-    Atomic->>Security: Sign artifact manifest (Cosign)
+    Atomic->>Atomic: Compile native binaries
+    Atomic->>Security: SCA/SBOM (Trivy/Syft)
+    Security-->>Atomic: Pass (Artifact Verified)
+    Atomic->>Security: Sign manifest (Cosign)
     
-    Atomic->>Reg: Push intermediate artifact `opensource-distroless/artifacts-glibc`
+    Atomic->>Reg: Push artifacts-glibc/ssl/zlib
     deactivate Atomic
     
-    note over Reg, Assembler: Once glibc, openssl, zlib, tzdata are updated in Registry...
+    Note over Reg, Assembler: Atomic foundation artifacts verified
     
-    Assembler->>Reg: `.github/workflows/assemble-base.yml` runs
+    Assembler->>Reg: Run assemble-base.yml
     activate Assembler
-    Assembler->>Reg: Pull isolated atomic artifacts
-    Reg-->>Assembler: Download Verified `.tar.gz` and SBOMs
+    Assembler->>Reg: Pull verified artifacts
+    Reg-->>Assembler: Download .tar.gz + SBOMs
     
-    Assembler->>Assembler: Construct `FROM Scratch` monolithic base
-    Assembler->>Security: Sign aggregated final OCI manifest
-    Assembler->>Reg: Push `opensource-distroless/base:latest`
+    Assembler->>Assembler: Construct Monolithic Base
+    Assembler->>Security: Sign Final OCI Manifest
+    Assembler->>Reg: Push base:latest
     deactivate Assembler
     
-    Reg-->>Assembler: Triggers `assemble-cc.yml` upon base success
+    Reg-->>Assembler: Trigger follow-up layers

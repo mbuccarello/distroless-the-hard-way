@@ -54,7 +54,7 @@ jobs:
             dnf install -y gcc make
             cd /workspace/src
             export SOURCE_DATE_EPOCH=315532800
-            ./configure --prefix=/usr
+            ./configure --prefix=/usr --libdir=/usr/lib64 --sharedlibdir=/usr/lib64
             make -j$(nproc) CFLAGS="-O3"
             make install DESTDIR=/workspace/out
             
