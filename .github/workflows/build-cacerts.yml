@@ -48,6 +48,9 @@ jobs:
             # Place it in the standardized locations
             cp ca-bundle.crt /workspace/out/etc/ssl/certs/ca-certificates.crt
             
+            # Fix permissions for the host runner
+            chown -R $(id -u):$(id -g) /workspace
+            
       - name: Package Payload
         run: |
           cd workspace/out
