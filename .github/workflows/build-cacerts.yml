@@ -33,7 +33,7 @@ jobs:
       - name: Build Sovereign CA Certificates (Mozilla NSS)
         uses: addnab/docker-run-action@4f65fabd2431ebc8d299f8e5a018d79a769ae185
         with:
-          image: fedora:40
+          image: ghcr.io/${{ github.repository_owner }}/base-fedora:latest
           options: -v ${{ github.workspace }}/workspace:/workspace
           run: |
             dnf install -y perl curl wget
