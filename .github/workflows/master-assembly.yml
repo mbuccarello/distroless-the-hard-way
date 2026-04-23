@@ -5,6 +5,12 @@ name: "Layer 2: Assembly (Image Construction)"
 # Diagram: docs/images/lib-hierarchy.png
 
 on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/master-assembly.yml"
+      - ".github/workflows/assemble-*.yml"
+      - "docs/lib-hierarchy.md"
   workflow_run:
     workflows: ["Layer 1.5: Runtime Foundations (Shared Libs)"]
     types:

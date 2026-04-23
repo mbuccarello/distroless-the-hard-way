@@ -5,6 +5,11 @@ name: "Layer 3: Validation (E2E Test Suite)"
 # Diagram: docs/images/layered-architecture.png
 
 on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/master-validation.yml"
+      - ".github/workflows/test-*.yml"
   workflow_run:
     workflows: ["Layer 2: Assembly (Image Construction)"]
     types:
