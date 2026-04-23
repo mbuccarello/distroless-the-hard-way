@@ -23,31 +23,31 @@ jobs:
         include:
           - name: libffi
             url: https://github.com/libffi/libffi/releases/download/v3.4.6/libffi-3.4.6.tar.gz
-            sha: b0aced9f5d60f5a77028ce833c8b417c828d11623910c85c2c79a957827e89e4
+            sha: b0dea9df23c863a7a50e825440f3ebffabd65df1497108e5d437747843895a4e
             config: ""
           - name: libxml2
             url: https://download.gnome.org/sources/libxml2/2.13/libxml2-2.13.0.tar.xz
-            sha: 359196b429188e0ec0e768840b10e54d320980c64c8d452d2f70b4279075bc7b
+            sha: d5a2f36bea96e1fb8297c6046fb02016c152d81ed58e65f3d20477de85291bc9
             config: "--without-python"
           - name: oniguruma
             url: https://github.com/kkos/oniguruma/releases/download/v6.9.9/onig-6.9.9.tar.gz
-            sha: 601602a0e2ff3d8f983c9ccdec92097ca77ad08381cc130283c7ed1e95945bc1
+            sha: 60162bd3b9fc6f4886d4c7a07925ffd374167732f55dce8c491bfd9cd818a6cf
             config: ""
           - name: sqlite
             url: https://www.sqlite.org/2024/sqlite-autoconf-3460000.tar.gz
-            sha: f37905d6484e0374e2a8647754b2e8111f10f845772390a786f7ec0073574929
+            sha: 6f8e6a7b335273748816f9b3b62bbdc372a889de8782d7f048c653a447417a7d
             config: ""
           - name: readline
             url: https://ftp.gnu.org/gnu/readline/readline-8.2.tar.gz
-            sha: 3db37fbc2961f7457494f6f890635467475bc37ec6f81014e7a2b97956cb854d
+            sha: 3feb7171f16a84ee82ca18a36d7b9be109a52c04f492a053331d7d1095007c35
             config: ""
           - name: bzip2
             url: https://sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz
-            sha: ab5a03f77045cd3503a2fbee0d7e3976fd27c189157a050c33a90d8d070b4f8a
+            sha: ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269
             config: ""
           - name: liblzma
             url: https://github.com/tukaani-project/xz/releases/download/v5.6.2/xz-5.6.2.tar.gz
-            sha: 13f4117b96057a7d03a15f3ec5d828a502c462e73f8b05634e26d2e7379761e8
+            sha: 8bfd20c0e1d86f0402f2497cfa71c6ab62d4cd35fd704276e3140bfb71414519
             config: ""
 
     steps:
@@ -67,9 +67,15 @@ jobs:
           RUN curl -L -o source.tar.gz ${{ matrix.url }} && \
               echo "${{ matrix.sha }}  source.tar.gz" | sha256sum -c -
           RUN tar -xzf source.tar.gz --strip-components=1 || tar -xJf source.tar.gz --strip-components=1
-          RUN ./configure --prefix=/artifacts ${{ matrix.config }} && \
-              make -j\$(nproc) && \
-              make install
+          
+          # Build Logic: Check for ./configure, otherwise use make directly (for bzip2)
+          RUN if [ -f "./configure" ]; then \
+                ./configure --prefix=/artifacts ${{ matrix.config }} && \
+                make -j\$(nproc) && \
+                make install; \
+              else \
+                make install PREFIX=/artifacts; \
+              fi
           
           FROM scratch
           COPY --from=builder /artifacts /
