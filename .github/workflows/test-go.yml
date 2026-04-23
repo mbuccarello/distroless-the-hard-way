@@ -1,0 +1,22 @@
+name: "Layer 3: Validation (E2E Go Test)"
+
+on:
+  workflow_run:
+    workflows: ["Layer 2: Assembly (Image Construction)"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  test-go:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Authenticate to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Execute Go E2E Verification
+        run: |
+          docker run --rm ghcr.io/${{ github.repository_owner }}/go:latest | tee test_output.log
+          grep "SUCCESS ✅" test_output.log
+          grep "User ID: 65532" test_output.log

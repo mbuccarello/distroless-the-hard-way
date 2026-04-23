@@ -1,0 +1,53 @@
+name: Opensource Distroless Assembler - go
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  assemble:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        
+      - name: Set up Go
+        uses: actions/setup-go@f111f320738031d87c8bb5046266133959141f21 # v5.1.0
+        with:
+          go-version: '1.22'
+          
+      - name: Build Sovereign Go Binary (Static)
+        run: |
+          mkdir -p payload
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o payload/app-go app/test.go
+          
+      - name: Authenticate to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        
+      - name: Construct Go Execution Environment
+        id: push
+        run: |
+          cat <<EOF > Dockerfile
+          FROM ghcr.io/${{ github.repository_owner }}/static:latest
+          COPY payload/app-go /usr/bin/app-go
+          USER 65532:65532
+          ENTRYPOINT ["/usr/bin/app-go"]
+          EOF
+          
+          docker build -t ghcr.io/${{ github.repository_owner }}/go:latest .
+          docker push ghcr.io/${{ github.repository_owner }}/go:latest
+          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "ghcr.io/${{ github.repository_owner }}/go:latest" | cut -d'@' -f2)
+          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
+
+      - name: Generate SLSA Build Provenance (Level 3)
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ghcr.io/${{ github.repository_owner }}/go
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true

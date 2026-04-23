@@ -54,6 +54,11 @@ jobs:
     uses: ./.github/workflows/assemble-perl.yml
     secrets: inherit
 
+  go:
+    needs: [static]
+    uses: ./.github/workflows/assemble-go.yml
+    secrets: inherit
+
   dotnet:
     needs: [cc]
     uses: ./.github/workflows/assemble-dotnet.yml
