@@ -78,42 +78,32 @@ distroless-the-hard-way/
 ## Consumption and Verification
 
 ### 1. Authenticate to GHCR
-To pull images, you must authenticate using a [GitHub Personal Access Token (PAT)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) with `read:packages` scope.
-
 ```bash
 echo "YOUR_PAT" | docker login ghcr.io -u YOUR_USERNAME --password-stdin
 ```
 
-You can pull the distroless images using standard Docker commands:
-
+### 2. Pull and Run Runtimes
 ```bash
-# Pull PHP
-docker pull ghcr.io/mbuccarello/php:latest
-
-# Run a smoke test
+# Pull and run a smoke test
 docker run --rm ghcr.io/mbuccarello/php:latest --version
 ```
 
 ### 3. Verify Cryptographic Signatures
-We use **Sigstore/Cosign** for keyless signing. You can verify the identity of any image:
-
 ```bash
 cosign verify --certificate-identity-regexp ".*" \
   --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
-  ghcr.io/mbuccarello/php:latest
+  ghcr.io/mbuccarello/base:latest
 ```
 
 ---
 
-## 🚀 Execution Matrix
+## Credits and Inspiration
 
-| Runtime | Base Layer | Status | Upstream Source |
-| :--- | :--- | :--- | :--- |
-| **Go (Static)** | `static` | ✅ OK | Native Static Binary |
-| **Go (Cgo)** | `base` | ✅ OK | Dynamic Binary |
-| **PHP** | `base` | ✅ OK | Fedora PHP 8.3 |
-| **Perl** | `base` | ✅ OK | Fedora Perl 5.38 |
-| **Java** | `cc` | ✅ OK | Eclipse Temurin 21 |
-| **Node.js** | `cc` | ✅ OK | Node.js 20 LTS |
-| **.NET** | `cc` | ✅ OK | .NET Runtime 8.0 |
-| **Python 3** | `cc` | ✅ OK | Fedora Python 3.12 |
+This project is a synthesis of foundational initiatives in the cloud-native and security ecosystems:
+
+- **Kubernetes The Hard Way**: The educational blueprint for understanding complex systems through manual deconstruction.
+- **Chainguard "This Shit is Hard"**: Inspiration for maintaining lean, secure, and current container operating systems. [Read the series](https://www.chainguard.dev/unchained/this-shit-is-hard-keeping-chainguard-os-lean-current-and-secure-the-power-of-garbage-collection).
+- **Google Distroless**: The architectural gold standard for minimal OCI images. This project implements the canonical hierarchy defined in their Bazel specifications:
+    - [Distroless Static BUILD](https://github.com/GoogleContainerTools/distroless/blob/main/static/BUILD)
+    - [Distroless Base README](https://github.com/GoogleContainerTools/distroless/blob/main/base/README.md)
+    - [Distroless CC README](https://github.com/GoogleContainerTools/distroless/blob/main/cc/README.md)
