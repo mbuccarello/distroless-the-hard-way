@@ -70,10 +70,10 @@ jobs:
           EOF
           
           IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/php:latest
-          docker build -t \$IMAGE_NAME .
-          docker push \$IMAGE_NAME
-          DIGEST=\$(docker inspect --format='{{index .RepoDigests 0}}' "\$IMAGE_NAME" | cut -d'@' -f2)
-          echo "digest=\$DIGEST" >> \$GITHUB_OUTPUT
+          docker build -t $IMAGE_NAME .
+          docker push $IMAGE_NAME
+          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "$IMAGE_NAME" | cut -d'@' -f2)
+          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
 
       - name: Functional Smoke Test (Verification)
         run: |

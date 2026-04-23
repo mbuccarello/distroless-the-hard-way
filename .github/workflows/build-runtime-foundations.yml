@@ -82,10 +82,10 @@ jobs:
           EOF
           
           IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/foundation-${{ matrix.name }}:latest
-          docker build -t \$IMAGE_NAME .
-          docker push \$IMAGE_NAME
-          DIGEST=\$(docker inspect --format='{{index .RepoDigests 0}}' "\$IMAGE_NAME" | cut -d'@' -f2)
-          echo "digest=\$DIGEST" >> \$GITHUB_OUTPUT
+          docker build -t $IMAGE_NAME .
+          docker push $IMAGE_NAME
+          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "$IMAGE_NAME" | cut -d'@' -f2)
+          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
           
       - name: Generate SLSA Build Provenance
         uses: actions/attest-build-provenance@v2
