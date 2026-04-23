@@ -24,16 +24,18 @@ Foundational payloads are merged into the final OCI root filesystems.
 
 ---
 
-## 2. OCI-Native Packaging Strategy (Registry as a Database)
+## 2. OCI-Native Dependency Tracking (Pragmatic Traceability)
 
-Distroless The Hard Way eliminates the need for traditional package managers (`dnf`, `apt`, `apk`) and their associated local databases (`/var/lib/rpm`, etc.) by utilizing the OCI Registry as a distributed package management system.
+Rather than reimplementing a complete package manager and local database (an immense technical undertaking), Distroless The Hard Way leverages the **OCI Specification** as a pragmatic alternative for dependency tracking and security.
 
-### 4.1 OCI Artifacts as Packages
+By utilizing the OCI Registry as a distributed metadata layer, we achieve high-assurance traceability without the overhead of a runtime package database (`/var/lib/rpm`, etc.).
+
+### 2.1 OCI Artifacts as Packages
 Each foundational component (e.g., `glibc`, `openssl`) is compiled and packaged as an independent OCI image. This replaces traditional formats like `.rpm` or `.deb`.
 *   **Version Control**: Handled via OCI image tags and immutable SHA-256 digests.
 *   **Metadata Storage**: Provenance (SLSA), signatures (Cosign), and bill-of-materials (SBOM) are attached to the OCI artifact in the registry rather than stored inside the image filesystem.
 
-### 4.2 Zero-Footprint Runtime
+### 2.2 Zero-Footprint Runtime
 By abstracting package management to the OCI layer, the final runtime images achieve absolute minimalism:
 *   **No Database**: The final image contains zero package manager metadata.
 *   **Atomic Assembly**: The Layer 2 orchestrator pulls these "OCI packages" and merges them into the final rootfs. 
