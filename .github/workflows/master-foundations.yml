@@ -57,3 +57,8 @@ jobs:
     needs: [glibc]
     uses: ./.github/workflows/build-gcc.yml
     secrets: inherit
+
+  runtime-foundations:
+    needs: [gcc, openssl, zlib, cacerts, tzdata]
+    uses: ./.github/workflows/build-runtime-foundations.yml
+    secrets: inherit

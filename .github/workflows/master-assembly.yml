@@ -6,7 +6,7 @@ name: "Layer 2: Assembly (Image Construction)"
 
 on:
   workflow_run:
-    workflows: ["Layer 1: Foundations (GNU-Native Builders)"]
+    workflows: ["Layer 1.5: Runtime Foundations (Shared Libs)"]
     types:
       - completed
   workflow_dispatch:

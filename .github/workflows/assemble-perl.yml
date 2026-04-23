@@ -17,49 +17,52 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         
-      - name: Download Official Fedora Perl Packages
-        run: |
-          mkdir -p payload/rpm
-          # Use our trusted Fedora sandbox to download official packages
-          docker run --rm -v $(pwd)/payload/rpm:/payload ghcr.io/${{ github.repository_owner }}/base-fedora:latest \
-            /bin/sh -c "dnf install -y 'dnf-command(download)' && \
-            mkdir -p /tmp/cleanroot && \
-            dnf download --arch x86_64 --resolve --destdir=/payload --installroot=/tmp/cleanroot --releasever=40 \
-            perl-interpreter perl-libs libxcrypt xz-libs curl && \
-            rm -f /payload/glibc* /payload/openssl* /payload/zlib* /payload/gcc*"
-
       - name: Authenticate to GitHub Container Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-        
-      - name: Construct Perl Application Runtime
+
+      - name: Construct Perl Application Runtime (Source Build)
         id: push
         run: |
           cat <<EOF > Dockerfile
-          FROM fedora:40 as extractor
-          RUN dnf install -y cpio
-          RUN mkdir -p /rootfs
-          COPY --from=ghcr.io/${{ github.repository_owner }}/base:latest / /rootfs/
-          COPY payload/rpm /payload
+          FROM ghcr.io/${{ github.repository_owner }}/base-fedora:latest as builder
+          RUN dnf install -y gcc make autoconf
           
-          # Extract RPM dependencies directly into rootfs
-          RUN cd /payload && \
-              for f in *.rpm; do rpm2cpio \$f | cpio -idmv; done && \
-              cp -a usr/* /rootfs/usr/
+          # Inject Sovereign Foundations
+          COPY --from=ghcr.io/${{ github.repository_owner }}/base:latest / /artifacts/
+          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libxml2:latest / /artifacts/
           
-          # Regenerate library cache
-          RUN ldconfig -r /rootfs
+          WORKDIR /build
+          RUN curl -L -o perl.tar.gz https://www.cpan.org/src/5.0/perl-5.38.2.tar.gz
+          RUN tar -xzf perl.tar.gz --strip-components=1
           
+          # Configure and Build
+          # We use -Duseshrplib to ensure shared library support
+          RUN sh Configure -des \
+              -Dprefix=/usr/local \
+              -Duseshrplib \
+              -Dusethreads \
+              -Dldflags="-L/artifacts/lib -L/artifacts/lib64" \
+              -Dccflags="-I/artifacts/include" && \
+              make -j\$(nproc) && \
+              make install DESTDIR=/rootfs
+          
+          # Construct Final Distroless Image
           FROM scratch
-          COPY --from=extractor /rootfs /
+          COPY --from=ghcr.io/${{ github.repository_owner }}/base:latest / /
+          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libxml2:latest / /
+          COPY --from=builder /rootfs/usr/local /usr/local/
+          
           ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-          ENTRYPOINT ["/usr/bin/perl"]
+          ENV LANG=C.UTF-8
+          ENTRYPOINT ["/usr/local/bin/perl"]
           CMD ["-v"]
           EOF
           
-          docker build -t ghcr.io/${{ github.repository_owner }}/perl:latest .
-          docker push ghcr.io/${{ github.repository_owner }}/perl:latest
-          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "ghcr.io/${{ github.repository_owner }}/perl:latest" | cut -d'@' -f2)
-          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
+          IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/perl:latest
+          docker build -t \$IMAGE_NAME .
+          docker push \$IMAGE_NAME
+          DIGEST=\$(docker inspect --format='{{index .RepoDigests 0}}' "\$IMAGE_NAME" | cut -d'@' -f2)
+          echo "digest=\$DIGEST" >> \$GITHUB_OUTPUT
 
       - name: Functional Smoke Test (Verification)
         run: |

@@ -17,44 +17,63 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         
-      - name: Download Official Fedora Python 3 Packages
-        run: |
-          mkdir -p payload/rpm
-          # Use our trusted Fedora sandbox to download official packages
-          docker run --rm -v $(pwd)/payload/rpm:/payload ghcr.io/${{ github.repository_owner }}/base-fedora:latest \
-            /bin/sh -c "dnf install -y 'dnf-command(download)' && dnf download --arch x86_64 --resolve --destdir=/payload python3 python3-libs libxcrypt openssl-libs zlib xz-libs libxml2 bzip2-libs readline"
-
       - name: Authenticate to GitHub Container Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-        
-      - name: Construct Python 3 Application Runtime
+
+      - name: Construct Python 3 Application Runtime (Source Build)
         id: push
         run: |
           cat <<EOF > Dockerfile
-          FROM fedora:40 as extractor
-          RUN dnf install -y cpio
-          RUN mkdir -p /rootfs
-          COPY --from=ghcr.io/${{ github.repository_owner }}/cc:latest / /rootfs/
-          COPY payload/rpm /payload
+          FROM ghcr.io/${{ github.repository_owner }}/base-fedora:latest as builder
+          RUN dnf install -y gcc make autoconf pkg-config
           
-          # Extract RPM dependencies directly into rootfs
-          RUN cd /payload && \
-              for f in *.rpm; do rpm2cpio \$f | cpio -idmv; done && \
-              cp -a usr/* /rootfs/usr/
+          # Inject Sovereign Foundations
+          COPY --from=ghcr.io/${{ github.repository_owner }}/cc:latest / /artifacts/
+          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libffi:latest / /artifacts/
+          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-readline:latest / /artifacts/
+          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-bzip2:latest / /artifacts/
+          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-liblzma:latest / /artifacts/
+          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-sqlite:latest / /artifacts/
           
-          # Regenerate library cache
-          RUN ldconfig -r /rootfs
+          WORKDIR /build
+          RUN curl -L -o python.tar.gz https://www.python.org/ftp/python/3.12.5/Python-3.12.5.tgz
+          RUN tar -xzf python.tar.gz --strip-components=1
           
+          # Configure and Build
+          ENV PKG_CONFIG_PATH=/artifacts/lib/pkgconfig:/artifacts/lib64/pkgconfig
+          ENV LDFLAGS="-L/artifacts/lib -L/artifacts/lib64"
+          ENV CPPFLAGS="-I/artifacts/include"
+          
+          RUN ./configure --prefix=/usr/local \
+              --enable-optimizations \
+              --with-system-ffi \
+              --with-openssl=/artifacts \
+              --with-zlib=/artifacts \
+              --enable-shared && \
+              make -j\$(nproc) && \
+              make install DESTDIR=/rootfs
+          
+          # Construct Final Distroless Image
           FROM scratch
-          COPY --from=extractor /rootfs /
+          COPY --from=ghcr.io/${{ github.repository_owner }}/cc:latest / /
+          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libffi:latest / /
+          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-readline:latest / /
+          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-bzip2:latest / /
+          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-liblzma:latest / /
+          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-sqlite:latest / /
+          COPY --from=builder /rootfs/usr/local /usr/local/
+          
           ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-          ENTRYPOINT ["/usr/bin/python3"]
+          ENV LANG=C.UTF-8
+          ENTRYPOINT ["/usr/local/bin/python3"]
+          CMD ["--version"]
           EOF
           
-          docker build -t ghcr.io/${{ github.repository_owner }}/python3:latest .
-          docker push ghcr.io/${{ github.repository_owner }}/python3:latest
-          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "ghcr.io/${{ github.repository_owner }}/python3:latest" | cut -d'@' -f2)
-          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
+          IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/python3:latest
+          docker build -t \$IMAGE_NAME .
+          docker push \$IMAGE_NAME
+          DIGEST=\$(docker inspect --format='{{index .RepoDigests 0}}' "\$IMAGE_NAME" | cut -d'@' -f2)
+          echo "digest=\$DIGEST" >> \$GITHUB_OUTPUT
 
       - name: Functional Smoke Test (Verification)
         run: |
