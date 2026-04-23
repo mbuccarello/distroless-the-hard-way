@@ -87,6 +87,9 @@ jobs:
           COPY --from=builder /artifacts /
           EOF
           
+          echo "DEBUG: Generated Dockerfile for ${{ matrix.name }}:"
+          cat Dockerfile
+          
           IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/foundation-${{ matrix.name }}:latest
           docker build -t $IMAGE_NAME .
           docker push $IMAGE_NAME
