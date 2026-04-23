@@ -4,16 +4,20 @@ The Base OS Assembler is responsible for merging the atomic Stage 2 payloads int
 
 ---
 
-## 1. Assembly Logic
+## 🏗️ Assembly Process: The Canonical Chain
 
-The process follows a strict zero-trust sequence using the Stage 1 Static Bootstrap utility.
+The `base` image is no longer built from scratch. It follows a strictly additive model:
 
-### Prerequisite Checklist
-1. **Verification**: Intermediate artifacts (`glibc`, `openssl`, `zlib`, `tzdata`) must be verified for Cosign signatures (Manual Binary v2.4.1) and SLSA v2 provenance.
-2. **Environment**: The assembly occurs within a `FROM scratch` context to ensure the absence of host-OS artifacts.
+1.  **Inheritance**: `FROM ghcr.io/[owner]/static:latest`.
+2.  **Payload Injection**: The dynamic foundation tarballs (`glibc`, `openssl`, `zlib`) are extracted into the rootfs.
+3.  **Library Discovery**: `ldconfig` is executed to generate the binary runtime cache (`/etc/ld.so.cache`).
+4.  **Metadata Update**: `/etc/os-release` is updated to reflect the `Base` variant.
 
-### Operational Sequence
-- **Filesystem Creation**: The Stage 1 Bootstrap utility initializes the `/rootfs` hierarchy.
+## 📦 Key Components
+- **glibc**: GNU C Library (Source-built).
+- **openssl**: Crypto engine (Source-built).
+- **zlib**: Compression (Source-built).
+- **Everything from `static`**: Certs, tzdata, users, netbase.
 - **Payload Extraction**: Each foundation tarball is extracted independently into the rootfs.
 - **System Configuration**: Essential files (`/etc/passwd`, `/etc/group`) are generated with minimal, unprivileged defaults.
 - **Final Packaging**: The resulting rootfs is promoted to the final `base:latest` image.

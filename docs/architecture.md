@@ -4,30 +4,26 @@ Distroless The Hard Way implements a modular, Decoupled Component Architecture (
 
 ---
 
-## 1. Pipeline Lifecycle Specification (Layered Master Model)
+## 1. Pipeline Lifecycle Specification (The 3-Tier Master Model)
 
-The build process is managed by a three-tier Master Orchestration system. This structure eliminates race conditions by enforcing strict sequentiality between architectural layers.
+The build process is managed by a three-tier Master Orchestration system. This structure ensures absolute sequentiality and cryptographic provenance from raw source to final runtime.
 
 ![Layered Master Architecture](images/layered-architecture.png)
 
-### Stage 0: Mirror Registry Isolation
-To ensure absolute infrastructure resilience and prevent upstream rate-limiting, the system utilizes a local caching tier.
-*   **Mandate**: No build environment (Alpine, Fedora) is pulled directly from external registries during library compilation.
-*   **Standard**: All build sandboxes must originate from the internal `ghcr.io` mirror.
+### Stage 1: Foundations (Source Compilation)
+Raw source code archives are verified, audited via Semgrep, and compiled within Glibc-native sandboxes.
+*   **Sovereign Trust**: cacerts are built directly from Mozilla NSS certdata.txt.
+*   **Minimalism**: Only the essential shared objects are packaged as OCI artifacts.
 
-### Stage 1: Zero-Trust Bootstrap Utility
-Assembly of a root filesystem within a `FROM scratch` container requires a self-contained execution toolkit.
-*   **Decoupled Requirement**: The system prohibits the use of host-provided `tar`, `sh`, or `mkdir` utilities during image construction.
-*   **Specification**: A 100% static, GNU-based BusyBox binary is compiled from source. This utility provides the minimal syscall interface needed for layer extraction and configuration (e.g., `/etc/passwd` generation).
-
-### Stage 2: The GNU-Native Build Strategy
-The system enforces strict library compatibility by aligning the build host with the target C implementation.
-*   **Glibc Requirement**: Foundational components dependent on the GNU C Library (Glibc, OpenSSL, Zlib) are compiled within a Glibc-native sandbox (Fedora).
-*   **Linkage Standard**: Static libraries are utilized where possible, and dynamic libraries are packaged as atomic OCI artifacts to maintain layer integrity.
+### Stage 2: Core Assembly (OCI Roots)
+Foundational payloads are merged into the final OCI root filesystems.
+*   **Static Layer**: The zero-dependency root. Implements sovereign netbase (/etc/services, /etc/protocols) and canonical identity files.
+*   **Base Layer**: Adds the dynamic C runtime and OpenSSL.
+*   **CC Layer**: Adds the C++ runtime and OpenMP support.
 
 ---
 
-## 2. Security Gateways & Controls
+## 2. Security Gateways and Controls
 
 Each component must pass a sequential set of security checkpoints before promotion to the intermediate registry:
 

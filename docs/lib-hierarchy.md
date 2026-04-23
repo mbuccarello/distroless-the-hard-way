@@ -8,20 +8,19 @@ This document maps the shared libraries across the Opensource Distroless hierarc
 
 ---
 
-## 2. Library Status Matrix
-
 | Component | Status | Origin | Category |
 |-----------|--------|--------|----------|
-| `libc.so.6` | ✅ **Source** | GNU Source | Foundation |
-| `libssl.so.3` | ✅ **Source** | OpenSSL Source | Foundation |
-| `libz.so.1` | ✅ **Source** | Zlib Source | Foundation |
-| `libstdc++.so.6` | ✅ **Source** | GCC Source | C++ Layer |
-| `libgcc_s.so.1` | ✅ **Source** | GCC Source | C++ Layer |
-| `ca-certificates` | ⚠️ **Fedora Extract** | Fedora 40 | Security |
-| `libicu*.so` | ⚠️ **Fedora Extract** | Fedora 40 | Dotnet Runtime |
-| `libkrb5.so` | ⚠️ **Fedora Extract** | Fedora 40 | Networking |
-| `libffi.so` | ⚠️ **Fedora Extract** | Fedora 40 | Python Runtime |
-| `libxml2.so` | ⚠️ **Fedora Extract** | Fedora 40 | PHP Runtime |
+| `libc.so.6` | Source | GNU Source | Foundation |
+| `libssl.so.3` | Source | OpenSSL Source | Foundation |
+| `libz.so.1` | Source | Zlib Source | Foundation |
+| `libstdc++.so.6` | Source | GCC Source | C++ Layer |
+| `libgcc_s.so.1` | Source | GCC Source | C++ Layer |
+| `libgomp.so.1` | Source | GCC Source | C++ Layer |
+| `ca-certificates` | Source | Mozilla NSS (Sovereign) | Security |
+| `libicu*.so` | Fedora Extract | Fedora 40 | Dotnet Runtime |
+| `libkrb5.so` | Fedora Extract | Fedora 40 | Networking |
+| `libffi.so` | Fedora Extract | Fedora 40 | Python Runtime |
+| `libxml2.so` | Fedora Extract | Fedora 40 | PHP Runtime |
 
 ---
 
@@ -30,8 +29,8 @@ This document maps the shared libraries across the Opensource Distroless hierarc
 The following components are currently extracted from Fedora for convenience and are candidates for future "Hard Way" native compilation pipelines.
 
 ### Priority 1: Core System Utilities
-- [ ] **ca-certificates**: Implement a native build from the Mozilla NSS trust store instead of extracting the Fedora bundle.
 - [ ] **libicu**: Compile Unicode components from source to remove Dotnet's dependency on Fedora RPMs.
+- [ ] **libkrb5 (GSSAPI)**: Native compilation of Kerberos libraries to support advanced networking.
 
 ### Priority 2: Runtime Dependencies
 - [ ] **libkrb5 (GSSAPI)**: Native compilation of Kerberos libraries.

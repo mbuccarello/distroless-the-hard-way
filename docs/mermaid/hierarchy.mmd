@@ -1,0 +1,30 @@
+graph TD
+    subgraph L1 [Layer 1: Foundations]
+        direction TB
+        F1[glibc]
+        F2[openssl]
+        F3[cacerts]
+        F4[tzdata]
+        F5[gcc/libgomp]
+    end
+
+    subgraph L2 [Layer 2: Core Images]
+        direction TB
+        S[static] --> B[base]
+        B --> C[cc]
+    end
+
+    subgraph L3 [Layer 3: Runtimes]
+        direction LR
+        S --> GO[Go-Static]
+        B --> PHP[PHP]
+        B --> PERL[Perl]
+        B --> GOC[Go-Cgo]
+        C --> JAVA[Java]
+        C --> DOT[Dotnet]
+        C --> PY[Python]
+        C --> NODE[Node.js]
+    end
+
+    L1 -.-> L2
+    L2 -.-> L3

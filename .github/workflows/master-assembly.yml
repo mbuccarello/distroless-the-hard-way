@@ -1,5 +1,9 @@
 name: "Layer 2: Assembly (Image Construction)"
 
+# Technical Specification: Assembly Layer
+# This workflow orchestrates the construction of static, base, and cc images.
+# Diagram: docs/images/lib-hierarchy.png
+
 on:
   workflow_run:
     workflows: ["Layer 1: Foundations (GNU-Native Builders)"]

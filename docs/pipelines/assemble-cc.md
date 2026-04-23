@@ -2,14 +2,20 @@
 
 The `assemble-cc` pipeline extends the `base` image with the natively compiled GNU C++ Runtimes. This creates a foundational execution environment for any application requiring `libstdc++`, `libgcc_s`, or `libgomp` (Java, Node.js, Python, Dotnet, PHP).
 
-## Distroless The Hard Way Composition Strategy
+## 🏗️ Assembly Process: Additive Layering
 
-This pipeline follows the **Linear Cascading Hierarchy** of the architecture:
-1.  **Stage 2: Ancestry Verification**: Fetches and cryptographically verifies the `base` image and the atomic `gcc` runtime artifacts using Cosign (Manual Binary v2.4.1).
-2.  **Stage 3: Layered Integration**: 
-    -   Starts from the `base:latest` image.
-    -   Unpacks and overlays the verified C++ shared objects into the system's library paths (`/usr/lib`).
-    -   Ensures that only the dynamic runtime libraries are included, keeping the image size and attack surface at the absolute minimum.
+The `cc` image extends the `base` environment by adding the GNU C++ runtime:
+
+1.  **Inheritance**: `FROM ghcr.io/[owner]/base:latest`.
+2.  **Payload Injection**: The `gcc` foundation tarball is extracted.
+3.  **Components**:
+    - `libstdc++`: The standard C++ library.
+    - `libgcc_s`: GCC support library.
+    - `libgomp`: GNU OpenMP runtime (Added for Parity with Google).
+4.  **Library Discovery**: `ldconfig` is re-run to index the new C++ libraries.
+
+## 📦 Dependency Chain
+`static` -> `base` -> `cc`
 
 ## Zero-Trust Proof Points
 

@@ -1,72 +1,81 @@
 # Distroless The Hard Way
 
-[![E2E Orchestrator](https://github.com/mbuccarello/distroless-the-hard-way/actions/workflows/e2e-orchestrator.yml/badge.svg)](https://github.com/mbuccarello/distroless-the-hard-way/actions/workflows/e2e-orchestrator.yml)
-<!-- Audit v48: Runtime Stabilization Verified -->
+[![Foundations](https://github.com/mbuccarello/distroless-the-hard-way/actions/workflows/master-foundations.yml/badge.svg)](https://github.com/mbuccarello/distroless-the-hard-way/actions/workflows/master-foundations.yml)
+[![Assembly](https://github.com/mbuccarello/distroless-the-hard-way/actions/workflows/master-assembly.yml/badge.svg)](https://github.com/mbuccarello/distroless-the-hard-way/actions/workflows/master-assembly.yml)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/mbuccarello/distroless-the-hard-way/badge)](https://securityscorecards.dev/viewer/?uri=github.com/mbuccarello/distroless-the-hard-way)
 
 Distroless The Hard Way is a technical implementation and educational curriculum for constructing secure, minimal OCI container images from upstream source code. The project implements a zero-trust supply chain architecture that eliminates reliance on pre-compiled distributions.
 
 ---
 
-## 🏗️ System Architecture
+## System Architecture: The 4-Layer Hierarchy
 
-The build infrastructure is organized into five functional stages, ensuring absolute isolation between source acquisition, compilation, and image assembly. For a detailed view of how shared libraries are inherited across images, see the [Library Hierarchy & Roadmap](docs/lib-hierarchy.md).
+The project implements a canonical, layered inheritance model inspired by Google Distroless, ensuring maximum minimalism for every workload. For detailed technical specifications, refer to the [System Architecture](docs/architecture.md) and [Library Hierarchy](docs/lib-hierarchy.md).
 
-### Stage 0: Mirror Isolation (Registry Hygiene)
-To prevent upstream rate-limiting and ensure infrastructure resilience, foundational build-time images (e.g., Alpine, Fedora) are cached within an internal registry.
-*   [`mirror-base`](.github/workflows/mirror-base.yml): Automated caching of trusted build-time sandboxes.
+### Layer 1: Foundations (The Build Payloads)
+Independent source-built artifacts containing the raw DNA of the system. Detailed documentation available in [Pipeline Orchestration](docs/pipelines.md).
+*   **cacerts**: Sovereign Root Trust Store derived directly from Mozilla NSS source.
+*   **glibc**: Core C runtime compiled from GNU source.
+*   **openssl**: Cryptography engine.
+*   **tzdata**: Timezone database.
+*   **gcc/libgomp**: C++ runtime and OpenMP support.
 
-### Stage 1: The Static Bootstrap (Zero-Trust Assembly)
-Image assembly within a `FROM scratch` environment requires a self-contained execution tool. This stage compiles a 100% static GNU-based BusyBox utility from pristine source.
-*   [`build-bootstrap`](docs/pipelines/build-bootstrap.md): The zero-trust static extraction and configuration binary.
+### Layer 2: Core Images (The OCI Roots)
+Atomic images constructed from Layer 1 payloads.
+*   **static**: The Zero-Layer for pure static binaries (Go, Rust). Contains only certs, tzdata, and sovereign configuration files (passwd, group, netbase).
+*   **base**: Inherits from static. Adds glibc and openssl for dynamic C applications.
+*   **cc**: Inherits from base. Adds the C++ runtime for complex native extensions.
 
-### Stage 2: Atomic Foundation (GNU-Native Compilation)
-Foundational libraries are compiled from raw source code archives verified via SHA-256 signatures. To prevent musl/glibc header conflicts, all GNU components are built within Glibc-native sandboxes (Fedora).
-*   [`build-glibc`](docs/pipelines/build-glibc.md): The core C runtime.
-*   [`build-openssl`](docs/pipelines/build-openssl.md): Cryptography engine.
-*   [`build-zlib`](docs/pipelines/build-zlib.md): Compression library.
-*   [`build-tzdata`](docs/pipelines/build-tzdata.md): Dual-source (code + data) timezone database.
+### Layer 3: Language Runtimes
+Language-specific environments built on top of the Core layers.
+*   **Interpreted**: PHP, Python, Node.js, Perl.
+*   **Compiled/VM**: Java (OpenJDK), .NET (CoreCLR).
 
-### Stage 3: OS Core Assembly
-Intermediate signed payloads from Stage 2 are logically merged into the final OCI root filesystem using the Stage 1 Bootstrap utility.
-*   [`assemble-base`](docs/pipelines/assemble-base.md): Construction of the minimal `base` image.
-*   [`assemble-cc`](docs/pipelines/assemble-cc.md): Layering of the C++ runtime libraries.
-
-### Stage 4: End-to-End Verification
-Automated functional assertions confirm the runtime integrity of the assembled images.
-*   [Runtime Verification Framework](docs/e2e-framework.md)
+### Layer 4: Verification (E2E)
+Automated functional assertions that confirm the integrity of the entire stack. Refer to the [E2E Framework](docs/e2e-framework.md) for validation logic.
 
 ---
 
-## 🛡️ Security Implementation
+## Execution Matrix
 
-The project enforces high-assurance supply chain controls at every lifecycle point:
-
-- **SLSA Level 3 Provenance**: Automated build attestations link OCI images to immutable source commits.
-- **Keyless Signing**: Continuous cryptographic identity via Sigstore/Cosign OIDC mechanisms.
-- **Static Analysis**: Source-code auditing via Semgrep before compilation.
-- **Binary Capability Analysis**: Capability and malware inspection via Chainguard Malcontent.
+| Runtime | Base Layer | Status | Upstream Source |
+| :--- | :--- | :--- | :--- |
+| **Go (Static)** | static | OK | Native Static Binary |
+| **Go (Cgo)** | base | OK | Dynamic Binary |
+| **PHP** | base | OK | Fedora PHP 8.3 |
+| **Perl** | base | OK | Fedora Perl 5.38 |
+| **Java** | cc | OK | Eclipse Temurin 21 |
+| **Node.js** | cc | OK | Node.js 20 LTS |
+| **.NET** | cc | OK | .NET Runtime 8.0 |
+| **Python 3** | cc | OK | Fedora Python 3.12 |
 
 ---
 
-## 📂 Repository Structure
+## Security Implementation: The "Hard Way" Principles
+
+- **Sovereign Root Trust**: No reliance on OS vendor CA bundles. Certificates are extracted and built from Mozilla NSS source.
+- **Sovereign Netbase**: Manual construction of /etc/services and /etc/protocols to eliminate RPM dependencies.
+- **SLSA Level 3 Provenance**: Automated build attestations for every layer. See [SLSA Implementation](docs/SLSA-Level-3.md).
+- **Keyless Signing**: Full Sigstore integration for image verification. See [Signing Documentation](docs/Signing.md).
+- **Static Analysis**: Source-code auditing via [Semgrep](docs/Semgrep.md).
+
+---
+
+## Repository Structure
 
 ```text
 distroless-the-hard-way/
-├── .github/workflows/         # Automated multi-stage pipelines
-├── E2E/                       # Runtime verification test cases
-├── AGENT.md                   # AI Agent Guardrails & Technical Mandates
+├── .github/workflows/         # Layered Orchestration (L1, L2, L3)
+├── app/                       # Verification applications (Go, PHP, etc.)
 ├── docs/                      
 │   ├── architecture.md        # Technical System Specification
-│   ├── pipelines/             # Implementation tutorials
-│   └── operations/            # Day 2 maintenance and constraints
+│   ├── pipelines.md           # Detailed pipeline documentation
+│   └── gap-analysis.md        # Roadmap and Google Parity tracking
 ```
 
 ---
 
-## 📦 Consumption & Verification
-
-All images are hosted on the **GitHub Container Registry (GHCR)** and are crytographically signed to ensure supply chain integrity.
+## Consumption and Verification
 
 ### 1. Authenticate to GHCR
 To pull images, you must authenticate using a [GitHub Personal Access Token (PAT)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) with `read:packages` scope.
@@ -75,7 +84,6 @@ To pull images, you must authenticate using a [GitHub Personal Access Token (PAT
 echo "YOUR_PAT" | docker login ghcr.io -u YOUR_USERNAME --password-stdin
 ```
 
-### 2. Pull and Run Runtimes
 You can pull the distroless images using standard Docker commands:
 
 ```bash
@@ -101,10 +109,11 @@ cosign verify --certificate-identity-regexp ".*" \
 
 | Runtime | Base Layer | Status | Upstream Source |
 | :--- | :--- | :--- | :--- |
+| **Go (Static)** | `static` | ✅ OK | Native Static Binary |
+| **Go (Cgo)** | `base` | ✅ OK | Dynamic Binary |
+| **PHP** | `base` | ✅ OK | Fedora PHP 8.3 |
+| **Perl** | `base` | ✅ OK | Fedora Perl 5.38 |
 | **Java** | `cc` | ✅ OK | Eclipse Temurin 21 |
 | **Node.js** | `cc` | ✅ OK | Node.js 20 LTS |
 | **.NET** | `cc` | ✅ OK | .NET Runtime 8.0 |
 | **Python 3** | `cc` | ✅ OK | Fedora Python 3.12 |
-| **PHP** | `cc` | ✅ OK | Fedora PHP 8.3 |
-| **Perl** | `cc` | ✅ OK | Fedora Perl 5.38 |
-| **Go / Rust** | `base` | ✅ OK | Native Binaries |

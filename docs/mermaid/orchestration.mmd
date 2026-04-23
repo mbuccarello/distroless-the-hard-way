@@ -1,0 +1,31 @@
+graph LR
+    subgraph L1 [Layer 1: Foundations]
+        direction TB
+        B1[build-glibc]
+        B2[build-openssl]
+        B3[build-cacerts]
+        B4[build-gcc]
+    end
+
+    subgraph L2 [Layer 2: Assembly]
+        direction TB
+        A1[assemble-static]
+        A2[assemble-base]
+        A3[assemble-cc]
+        A1 --> A2
+        A2 --> A3
+    end
+
+    subgraph L3 [Layer 3: Runtimes]
+        direction TB
+        R1[assemble-php]
+        R2[assemble-java]
+        R3[assemble-python]
+    end
+
+    L1 --> L2
+    L2 --> L3
+    
+    style L1 fill:#f9f,stroke:#333,stroke-width:2px
+    style L2 fill:#bbf,stroke:#333,stroke-width:2px
+    style L3 fill:#bfb,stroke:#333,stroke-width:2px

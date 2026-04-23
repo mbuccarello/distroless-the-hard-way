@@ -1,5 +1,9 @@
 name: "Layer 1: Foundations (GNU-Native Builders)"
 
+# Technical Specification: Foundations Layer
+# This workflow orchestrates the source-to-payload compilation.
+# Diagram: docs/images/layered-architecture.png
+
 on:
   push:
     branches:

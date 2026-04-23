@@ -1,4 +1,8 @@
-name: "Layer 3: Validation (E2E Functional Tests)"
+name: "Layer 3: Validation (E2E Test Suite)"
+
+# Technical Specification: Validation Layer
+# This workflow orchestrates the end-to-end functional assertions.
+# Diagram: docs/images/layered-architecture.png
 
 on:
   workflow_run:
