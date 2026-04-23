@@ -1,4 +1,8 @@
 graph TD
+    %% Custom Styling
+    classDef default fill:#2d3436,stroke:#dfe6e9,stroke-width:2px,color:#fff;
+    classDef layer fill:#636e72,stroke:#b2bec3,stroke-width:2px,color:#fff,stroke-dasharray: 5 5;
+    
     subgraph L1 [Layer 1: Foundations]
         direction TB
         F1[glibc]
@@ -28,3 +32,10 @@ graph TD
 
     L1 -.-> L2
     L2 -.-> L3
+
+    %% Apply Styles
+    style L1 fill:#2d3436,stroke:#636e72,color:#fff
+    style L2 fill:#2d3436,stroke:#636e72,color:#fff
+    style L3 fill:#2d3436,stroke:#636e72,color:#fff
+    
+    linkStyle default stroke:#dfe6e9,stroke-width:2px;

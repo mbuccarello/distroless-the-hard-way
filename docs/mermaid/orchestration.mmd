@@ -1,4 +1,7 @@
 graph LR
+    %% Custom Styling
+    classDef default fill:#2d3436,stroke:#dfe6e9,stroke-width:2px,color:#fff;
+    
     subgraph L1 [Layer 1: Foundations]
         direction TB
         B1[build-glibc]
@@ -26,6 +29,9 @@ graph LR
     L1 --> L2
     L2 --> L3
     
-    style L1 fill:#f9f,stroke:#333,stroke-width:2px
-    style L2 fill:#bbf,stroke:#333,stroke-width:2px
-    style L3 fill:#bfb,stroke:#333,stroke-width:2px
+    %% Apply Styles
+    style L1 fill:#2d3436,stroke:#0984e3,stroke-width:2px,color:#fff
+    style L2 fill:#2d3436,stroke:#00cec9,stroke-width:2px,color:#fff
+    style L3 fill:#2d3436,stroke:#6c5ce7,stroke-width:2px,color:#fff
+    
+    linkStyle default stroke:#dfe6e9,stroke-width:2px;
