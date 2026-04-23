@@ -49,6 +49,10 @@ jobs:
             url: https://github.com/tukaani-project/xz/releases/download/v5.6.2/xz-5.6.2.tar.gz
             sha: 8bfd20c0e1d86f0402f2497cfa71c6ab62d4cd35fd704276e3140bfb71414519
             config: ""
+          - name: libxcrypt
+            url: https://github.com/besser82/libxcrypt/releases/download/v4.4.36/libxcrypt-4.4.36.tar.xz
+            sha: e5e1f4ca9919f6a32506da36f069134b3f88636e78809f30206dfec06e6df615
+            config: "--enable-hashes=all --enable-obsolete-api=glibc"
 
     steps:
       - name: Checkout Repository

@@ -40,18 +40,19 @@ jobs:
           
           # Configure and Build
           # We use PKG_CONFIG_PATH to point to our sovereign artifacts
-          ENV PKG_CONFIG_PATH=/artifacts/lib/pkgconfig:/artifacts/lib64/pkgconfig
+          # Note: Base libs (openssl) are in /usr, runtime foundations are in root of /artifacts
+          ENV PKG_CONFIG_PATH=/artifacts/lib/pkgconfig:/artifacts/lib64/pkgconfig:/artifacts/usr/lib64/pkgconfig:/artifacts/usr/lib/pkgconfig
           RUN ./configure --prefix=/usr/local \
               --with-config-file-path=/etc/php \
               --enable-fpm \
               --enable-mbstring \
-              --with-openssl=/artifacts \
-              --with-zlib=/artifacts \
+              --with-openssl=/artifacts/usr \
+              --with-zlib=/artifacts/usr \
               --with-libxml-dir=/artifacts \
               --with-ffi=/artifacts \
               --with-sqlite3=/artifacts \
               --disable-cgi && \
-              make -j\$(nproc) && \
+              make -j$(nproc) && \
               make install DESTDIR=/rootfs
           
           # Construct Final Distroless Image
@@ -61,6 +62,7 @@ jobs:
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libffi:latest / /
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-oniguruma:latest / /
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-sqlite:latest / /
+          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libxcrypt:latest / /
           COPY --from=builder /rootfs/usr/local /usr/local/
           
           ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
