@@ -6,21 +6,26 @@ This document maps the shared libraries across the Opensource Distroless hierarc
 
 ![Library Hierarchy](images/lib-hierarchy.png)
 
----
+## 2. Transparency Note: Transitional Components
 
-| Component | Status | Origin | Category |
-|-----------|--------|--------|----------|
-| `libc.so.6` | Source | GNU Source | Foundation |
-| `libssl.so.3` | Source | OpenSSL Source | Foundation |
-| `libz.so.1` | Source | Zlib Source | Foundation |
-| `libstdc++.so.6` | Source | GCC Source | C++ Layer |
-| `libgcc_s.so.1` | Source | GCC Source | C++ Layer |
-| `libgomp.so.1` | Source | GCC Source | C++ Layer |
-| `ca-certificates` | Source | Mozilla NSS (Sovereign) | Security |
-| `libicu*.so` | Fedora Extract | Fedora 40 | Dotnet Runtime |
-| `libkrb5.so` | Fedora Extract | Fedora 40 | Networking |
-| `libffi.so` | Fedora Extract | Fedora 40 | Python Runtime |
-| `libxml2.so` | Fedora Extract | Fedora 40 | PHP Runtime |
+The status **Fedora Extract** indicates a **transitional state**. These components are currently extracted from official Fedora repositories to ensure ABI compatibility while native "Hard Way" compilation pipelines are developed. The project objective is to transition every "Fedora Extract" component to "Source" status.
+
+## 3. Library Status Matrix
+
+| Component | Status | Origin | Image | Category |
+|-----------|--------|--------|-------|----------|
+| `libc.so.6` | Source | GNU Source | `base` | Foundation |
+| `libssl.so.3` | Source | OpenSSL Source | `base` | Foundation |
+| `libz.so.1` | Source | Zlib Source | `base` | Foundation |
+| `libstdc++.so.6` | Source | GCC Source | `cc` | C++ Layer |
+| `libgcc_s.so.1` | Source | GCC Source | `cc` | C++ Layer |
+| `libgomp.so.1` | Source | GCC Source | `cc` | C++ Layer |
+| `ca-certificates` | Source | Mozilla NSS | `static` | Security |
+| `tzdata` | Source | IANA Source | `static` | Configuration |
+| `libicu*.so` | Fedora Extract | Fedora 40 | `dotnet` | Dotnet Runtime |
+| `libkrb5.so` | Fedora Extract | Fedora 40 | `dotnet` | Networking |
+| `libffi.so` | Fedora Extract | Fedora 40 | `python` | Python Runtime |
+| `libxml2.so` | Fedora Extract | Fedora 40 | `php` | PHP Runtime |
 
 ---
 
