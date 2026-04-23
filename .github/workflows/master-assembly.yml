@@ -59,6 +59,11 @@ jobs:
     uses: ./.github/workflows/assemble-go.yml
     secrets: inherit
 
+  go-cgo:
+    needs: [base]
+    uses: ./.github/workflows/assemble-go-cgo.yml
+    secrets: inherit
+
   dotnet:
     needs: [cc]
     uses: ./.github/workflows/assemble-dotnet.yml

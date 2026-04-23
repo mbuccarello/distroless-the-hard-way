@@ -15,8 +15,14 @@ jobs:
       - name: Authenticate to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Execute Go E2E Verification
+      - name: Execute Go E2E Verification (Static)
         run: |
-          docker run --rm ghcr.io/${{ github.repository_owner }}/go:latest | tee test_output.log
-          grep "SUCCESS ✅" test_output.log
-          grep "User ID: 65532" test_output.log
+          docker run --rm ghcr.io/${{ github.repository_owner }}/go:latest | tee test_static.log
+          grep "SUCCESS ✅" test_static.log
+          grep "User ID: 65532" test_static.log
+
+      - name: Execute Go E2E Verification (Cgo/Base)
+        run: |
+          docker run --rm ghcr.io/${{ github.repository_owner }}/go-cgo:latest | tee test_cgo.log
+          grep "SUCCESS ✅" test_cgo.log
+          grep "Hello from C code" test_cgo.log
