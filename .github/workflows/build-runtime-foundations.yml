@@ -68,13 +68,15 @@ jobs:
               echo "${{ matrix.sha }}  source.tar.gz" | sha256sum -c -
           RUN tar -xzf source.tar.gz --strip-components=1 || tar -xJf source.tar.gz --strip-components=1
           
-          # Build Logic: Check for ./configure, otherwise use make directly (for bzip2)
-          RUN if [ -f "./configure" ]; then \
+          # Build Logic: Force -fPIC for all static libs to allow linking into shared modules
+          RUN export CFLAGS="-O2 -fPIC" && \
+              export CXXFLAGS="-O2 -fPIC" && \
+              if [ -f "./configure" ]; then \
                 ./configure --prefix=/artifacts ${{ matrix.config }} && \
                 make -j\$(nproc) && \
                 make install; \
               else \
-                make install PREFIX=/artifacts; \
+                make install PREFIX=/artifacts CFLAGS="$CFLAGS"; \
               fi
           
           FROM scratch
