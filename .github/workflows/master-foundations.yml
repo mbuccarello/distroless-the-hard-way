@@ -59,6 +59,7 @@ jobs:
     secrets: inherit
 
   runtime-foundations:
+    if: ${{ always() && (github.event_name == 'workflow_dispatch' || (needs.gcc.result == 'success' && needs.openssl.result == 'success')) }}
     needs: [gcc, openssl, zlib, cacerts, tzdata]
     uses: ./.github/workflows/build-runtime-foundations.yml
     secrets: inherit
