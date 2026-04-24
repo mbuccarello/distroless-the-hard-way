@@ -38,17 +38,19 @@ jobs:
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libxcrypt:latest / /artifacts/
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libxml2:latest / /artifacts/
           
+          COPY scripts/assemble.sh /usr/local/bin/assemble
+          RUN chmod +x /usr/local/bin/assemble
+          
           # Documentation-driven Configure for relocatable Perl
-          RUN sh Configure -des \
+          RUN assemble perl "sh Configure -des \
               -Dprefix=/usr/local \
               -Duseshrplib \
               -Dusethreads \
-              -Dlibpth="/artifacts/lib /usr/lib64 /lib64" \
-              -Accflags="-I/artifacts/include" \
-              -Aldflags="-Wl,-rpath,/artifacts/lib -L/artifacts/lib" || (cat config.sh && exit 1) && \
-              make -j\$(nproc) && \
-              make install DESTDIR=/rootfs && \
-              ldd /rootfs/usr/local/bin/perl
+              -Dlibpth='/artifacts/lib /usr/lib64 /lib64' \
+              -Accflags='-I/artifacts/include' \
+              -Aldflags='-Wl,-rpath,/artifacts/lib -L/artifacts/lib'" && \
+              make -j$(nproc) && \
+              make install DESTDIR=/rootfs
           
           FROM scratch
           COPY --from=ghcr.io/${{ github.repository_owner }}/base:latest / /

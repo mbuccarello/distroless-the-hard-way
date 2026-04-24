@@ -95,7 +95,16 @@ jobs:
           
           IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/foundation-${{ matrix.name }}:latest
           docker build -t $IMAGE_NAME .
-          docker push $IMAGE_NAME
+          
+          # Retry logic for docker push (max 3 attempts)
+          for i in {1..3}; do
+            docker push $IMAGE_NAME && break || {
+              echo "Push failed, attempt $i of 3..."
+              [ $i -eq 3 ] && exit 1
+              sleep 5
+            }
+          done
+          
           DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "$IMAGE_NAME" | cut -d'@' -f2)
           echo "digest=$DIGEST" >> $GITHUB_OUTPUT
           

@@ -47,9 +47,12 @@ jobs:
           ENV CPPFLAGS="-I/artifacts/include"
           ENV LDFLAGS="-L/artifacts/lib -L/artifacts/lib64"
 
+          COPY scripts/assemble.sh /usr/local/bin/assemble
+          RUN chmod +x /usr/local/bin/assemble
+
           RUN mkdir -p /tmp/php-diag && \
               export PHP_RPATHS="/usr/local/lib /artifacts/lib" && \
-              ./configure --prefix=/usr/local \
+              assemble php "./configure --prefix=/usr/local \
               --with-config-file-path=/etc/php \
               --enable-fpm \
               --enable-mbstring \
@@ -59,10 +62,9 @@ jobs:
               --with-ffi \
               --with-sqlite3 \
               --with-iconv \
-              --disable-cgi || (cat config.log && cp config.log /tmp/php-diag/ && exit 1) && \
+              --disable-cgi" && \
               make -j$(nproc) && \
-              make install DESTDIR=/rootfs && \
-              ldd /rootfs/usr/local/bin/php
+              make install DESTDIR=/rootfs
           
           FROM scratch
           COPY --from=builder /tmp/php-diag /tmp/php-diag
