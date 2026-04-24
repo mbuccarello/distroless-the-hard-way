@@ -34,6 +34,7 @@ jobs:
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-bzip2:latest / /artifacts/
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-liblzma:latest / /artifacts/
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-sqlite:latest / /artifacts/
+          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libxcrypt:latest / /artifacts/
           
           WORKDIR /build
           RUN curl -L -o python.tar.gz https://www.python.org/ftp/python/3.12.5/Python-3.12.5.tgz
@@ -45,7 +46,8 @@ jobs:
           ENV LDFLAGS="-L/artifacts/lib -L/artifacts/lib64 -L/artifacts/usr/lib64 -L/artifacts/usr/lib"
           ENV CPPFLAGS="-I/artifacts/include -I/artifacts/usr/include"
           
-          RUN ./configure --prefix=/usr/local \
+          RUN export LD_LIBRARY_PATH=/artifacts/lib:/artifacts/lib64:/artifacts/usr/lib64:/artifacts/usr/lib:$LD_LIBRARY_PATH && \
+              ./configure --prefix=/usr/local \
               --enable-optimizations \
               --with-system-ffi \
               --with-openssl=/artifacts/usr \

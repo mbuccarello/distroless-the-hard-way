@@ -85,7 +85,8 @@ jobs:
                 make -j\$(nproc) && \
                 make install; \
               else \
-                make install PREFIX=/artifacts CFLAGS="$CFLAGS"; \
+                make -j\$(nproc) PREFIX=/artifacts CFLAGS="-O2 -fPIC" && \
+                make install PREFIX=/artifacts CFLAGS="-O2 -fPIC"; \
               fi
           
           FROM scratch

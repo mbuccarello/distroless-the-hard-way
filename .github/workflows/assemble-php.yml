@@ -25,7 +25,7 @@ jobs:
         run: |
           cat <<EOF > Dockerfile
           FROM ghcr.io/${{ github.repository_owner }}/base-fedora:latest as builder
-          RUN dnf install -y gcc make autoconf bison re2c pkg-config
+          RUN dnf install -y gcc make autoconf bison re2c pkg-config glibc-devel
           
           # Inject Sovereign Foundations
           COPY --from=ghcr.io/${{ github.repository_owner }}/base:latest / /artifacts/
@@ -33,6 +33,7 @@ jobs:
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libffi:latest / /artifacts/
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-oniguruma:latest / /artifacts/
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-sqlite:latest / /artifacts/
+          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libxcrypt:latest / /artifacts/
           
           WORKDIR /build
           RUN curl -L -o php.tar.gz https://www.php.net/distributions/php-8.3.10.tar.gz
@@ -42,7 +43,8 @@ jobs:
           # We use PKG_CONFIG_PATH to point to our sovereign artifacts
           # Note: Base libs (openssl) are in /usr, runtime foundations are in root of /artifacts
           ENV PKG_CONFIG_PATH=/artifacts/lib/pkgconfig:/artifacts/lib64/pkgconfig:/artifacts/usr/lib64/pkgconfig:/artifacts/usr/lib/pkgconfig
-          RUN ./configure --prefix=/usr/local \
+          RUN export LD_LIBRARY_PATH=/artifacts/lib:/artifacts/lib64:/artifacts/usr/lib64:/artifacts/usr/lib:$LD_LIBRARY_PATH && \
+              ./configure --prefix=/usr/local \
               --with-config-file-path=/etc/php \
               --enable-fpm \
               --enable-mbstring \
