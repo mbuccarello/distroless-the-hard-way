@@ -81,11 +81,11 @@ jobs:
           RUN export CFLAGS="-O2 -fPIC" && \
               export CXXFLAGS="-O2 -fPIC" && \
               if [ -f "./configure" ]; then \
-                ./configure --prefix=/artifacts ${{ matrix.config }} && \
-                make -j\$(nproc) && \
+                ./configure --prefix=/artifacts ${{ matrix.config }} || (cat config.log && exit 1) && \
+                make -j\$(nproc) || (make V=1 && exit 1) && \
                 make install; \
               else \
-                make -j\$(nproc) PREFIX=/artifacts CFLAGS="-O2 -fPIC" && \
+                make -j\$(nproc) PREFIX=/artifacts CFLAGS="-O2 -fPIC" || (make V=1 PREFIX=/artifacts CFLAGS="-O2 -fPIC" && exit 1) && \
                 make install PREFIX=/artifacts CFLAGS="-O2 -fPIC"; \
               fi
           

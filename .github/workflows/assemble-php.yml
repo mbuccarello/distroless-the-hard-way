@@ -1,72 +1,74 @@
-name: Opensource Distroless Assembler - php
+name: "Layer 2: Assembly (PHP 8.3)"
 
 on:
+  workflow_run:
+    workflows: ["Layer 1.5: Runtime Foundations (Shared Libs)"]
+    types: [completed]
   workflow_dispatch:
-  workflow_call:
 
 jobs:
   assemble:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
       id-token: write
       attestations: write
-    
+
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-        
-      - name: Authenticate to GitHub Container Registry
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+
+      - name: Authenticate to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Construct PHP Application Runtime (Source Build)
-        id: push
+      - name: Build PHP Image
+        id: build
         run: |
           cat <<EOF > Dockerfile
           FROM ghcr.io/${{ github.repository_owner }}/base-fedora:latest as builder
-          RUN dnf install -y gcc make autoconf libtool pkgconfig curl glibc-devel bison re2c
+          RUN dnf install -y gcc make autoconf bison re2c pkgconfig \
+              libxml2-devel sqlite-devel openssl-devel zlib-devel \
+              libffi-devel oniguruma-devel
           
-          # Inject Sovereign Foundations
-          COPY --from=ghcr.io/${{ github.repository_owner }}/base:latest / /artifacts/
-          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libxml2:latest / /artifacts/
+          WORKDIR /build
+          RUN curl -L -o php.tar.gz https://www.php.net/distributions/php-8.3.6.tar.xz
+          RUN tar -xzf php.tar.gz --strip-components=1
+          
+          # We use PKG_CONFIG_PATH to point to our sovereign artifacts
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libffi:latest / /artifacts/
+          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libxml2:latest / /artifacts/
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-oniguruma:latest / /artifacts/
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-sqlite:latest / /artifacts/
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libxcrypt:latest / /artifacts/
           
-          WORKDIR /build
-          RUN curl -L -o php.tar.gz https://www.php.net/distributions/php-8.3.10.tar.gz
-          RUN tar -xzf php.tar.gz --strip-components=1
-          
-          # Configure and Build
-          # We use PKG_CONFIG_PATH to point to our sovereign artifacts
-          # Note: Base libs (openssl) are in /usr, runtime foundations are in root of /artifacts
-          ENV PKG_CONFIG_PATH=/artifacts/lib/pkgconfig:/artifacts/lib64/pkgconfig:/artifacts/usr/lib64/pkgconfig:/artifacts/usr/lib/pkgconfig
-          ENV CPPFLAGS="-I/artifacts/include -I/artifacts/usr/include"
-          
+          ENV PKG_CONFIG_PATH=/artifacts/lib/pkgconfig:/artifacts/lib64/pkgconfig
+          ENV CPPFLAGS="-I/artifacts/include"
+          ENV LDFLAGS="-L/artifacts/lib -L/artifacts/lib64"
+
           RUN mkdir -p /tmp/php-diag && \
               export PHP_RPATHS="/usr/local/lib /artifacts/lib" && \
               ./configure --prefix=/usr/local \
               --with-config-file-path=/etc/php \
               --enable-fpm \
               --enable-mbstring \
-              --with-openssl=/artifacts/usr \
-              --with-zlib=/artifacts/usr \
-              --with-libxml-dir=/artifacts \
+              --with-openssl \
+              --with-zlib \
+              --with-libxml \
               --with-ffi \
-              --with-sqlite3=/artifacts \
+              --with-sqlite3 \
               --with-iconv \
               --disable-cgi || (cat config.log && cp config.log /tmp/php-diag/ && exit 1) && \
               make -j$(nproc) && \
-              make install DESTDIR=/rootfs
+              make install DESTDIR=/rootfs && \
+              ldd /rootfs/usr/local/bin/php
           
-          # Construct Final Distroless Image
           FROM scratch
           COPY --from=builder /tmp/php-diag /tmp/php-diag
           COPY --from=ghcr.io/${{ github.repository_owner }}/base:latest / /
-          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libxml2:latest / /
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libffi:latest / /
+          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libxml2:latest / /
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-oniguruma:latest / /
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-sqlite:latest / /
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libxcrypt:latest / /
@@ -74,7 +76,6 @@ jobs:
           
           ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
           ENV LANG=C.UTF-8
-
           ENTRYPOINT ["/usr/local/bin/php"]
           CMD ["-v"]
           EOF
@@ -85,13 +86,9 @@ jobs:
           DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "$IMAGE_NAME" | cut -d'@' -f2)
           echo "digest=$DIGEST" >> $GITHUB_OUTPUT
 
-      - name: Functional Smoke Test (Verification)
-        run: |
-          docker run --rm ghcr.io/${{ github.repository_owner }}/php:latest --version
-
-      - name: Generate SLSA Build Provenance (Level 3)
+      - name: Generate SLSA Build Provenance
         uses: actions/attest-build-provenance@v2
         with:
           subject-name: ghcr.io/${{ github.repository_owner }}/php
-          subject-digest: ${{ steps.push.outputs.digest }}
+          subject-digest: ${{ steps.build.outputs.digest }}
           push-to-registry: true

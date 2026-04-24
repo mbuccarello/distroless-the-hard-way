@@ -1,57 +1,61 @@
-name: Opensource Distroless Assembler - perl
+name: "Layer 2: Assembly (Perl 5.38)"
 
 on:
+  workflow_run:
+    workflows: ["Layer 1.5: Runtime Foundations (Shared Libs)"]
+    types: [completed]
   workflow_dispatch:
-  workflow_call:
 
 jobs:
   assemble:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
       id-token: write
       attestations: write
-    
+
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-        
-      - name: Authenticate to GitHub Container Registry
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+
+      - name: Authenticate to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Construct Perl Application Runtime (Source Build)
-        id: push
+      - name: Build Perl Image
+        id: build
         run: |
           cat <<EOF > Dockerfile
           FROM ghcr.io/${{ github.repository_owner }}/base-fedora:latest as builder
-          RUN dnf install -y gcc make autoconf
-          
-          # Inject Sovereign Foundations
-          COPY --from=ghcr.io/${{ github.repository_owner }}/base:latest / /artifacts/
-          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libxml2:latest / /artifacts/
-          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libxcrypt:latest / /artifacts/
+          RUN dnf install -y gcc make curl tar xz perl-devel
           
           WORKDIR /build
           RUN curl -L -o perl.tar.gz https://www.cpan.org/src/5.0/perl-5.38.2.tar.gz
           RUN tar -xzf perl.tar.gz --strip-components=1
           
-          # Configure and Build
-          # We use -Duseshrplib to ensure shared library support
+          # Inject Shared Libraries for linking
+          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libxcrypt:latest / /artifacts/
+          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libxml2:latest / /artifacts/
+          
+          # Documentation-driven Configure for relocatable Perl
           RUN sh Configure -des \
               -Dprefix=/usr/local \
               -Duseshrplib \
               -Dusethreads \
-              -Dldflags="-Wl,-rpath,/usr/local/lib -Wl,-rpath,/artifacts/lib" && \
-              make -j$(nproc) && \
-              make install DESTDIR=/rootfs
+              -Dlibpth="/artifacts/lib /usr/lib64 /lib64" \
+              -Accflags="-I/artifacts/include" \
+              -Aldflags="-Wl,-rpath,/artifacts/lib -L/artifacts/lib" || (cat config.sh && exit 1) && \
+              make -j\$(nproc) && \
+              make install DESTDIR=/rootfs && \
+              ldd /rootfs/usr/local/bin/perl
           
-          # Construct Final Distroless Image
           FROM scratch
           COPY --from=ghcr.io/${{ github.repository_owner }}/base:latest / /
-          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libxml2:latest / /
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libxcrypt:latest / /
+          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libxml2:latest / /
           COPY --from=builder /rootfs/usr/local /usr/local/
+          
           ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
           ENV LANG=C.UTF-8
           ENTRYPOINT ["/usr/local/bin/perl"]
@@ -68,9 +72,9 @@ jobs:
         run: |
           docker run --rm ghcr.io/${{ github.repository_owner }}/perl:latest --version
 
-      - name: Generate SLSA Build Provenance (Level 3)
+      - name: Generate SLSA Build Provenance
         uses: actions/attest-build-provenance@v2
         with:
           subject-name: ghcr.io/${{ github.repository_owner }}/perl
-          subject-digest: ${{ steps.push.outputs.digest }}
+          subject-digest: ${{ steps.build.outputs.digest }}
           push-to-registry: true
