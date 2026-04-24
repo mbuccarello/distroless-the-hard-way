@@ -45,7 +45,7 @@ jobs:
           ENV PKG_CONFIG_PATH=/artifacts/lib/pkgconfig:/artifacts/lib64/pkgconfig:/artifacts/usr/lib64/pkgconfig:/artifacts/usr/lib/pkgconfig
           ENV CPPFLAGS="-I/artifacts/include -I/artifacts/usr/include"
           
-          RUN export LDFLAGS="-L/artifacts/lib -L/artifacts/lib64 -L/artifacts/usr/lib64 -L/artifacts/usr/lib -Wl,-rpath,'\$\$ORIGIN/../lib' -Wl,-rpath,/artifacts/lib -Wl,--disable-new-dtags" && \
+          RUN export LDFLAGS="-L/artifacts/lib -L/artifacts/lib64 -L/artifacts/usr/lib64 -L/artifacts/usr/lib -Wl,-rpath,/usr/local/lib -Wl,-rpath,/artifacts/lib" && \
               ./configure --prefix=/usr/local \
               --enable-optimizations \
               --with-system-ffi \
@@ -53,7 +53,7 @@ jobs:
               --with-zlib=/artifacts/usr \
               --enable-shared && \
               make -j$(nproc) && \
-              LD_LIBRARY_PATH="/artifacts/lib:/artifacts/lib64:/usr/local/lib" make install DESTDIR=/rootfs
+              make install DESTDIR=/rootfs
           
           # Construct Final Distroless Image
           FROM scratch
