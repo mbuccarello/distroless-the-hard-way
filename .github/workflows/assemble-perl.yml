@@ -38,15 +38,16 @@ jobs:
           
           # Configure and Build
           # We use -Duseshrplib to ensure shared library support
-          RUN sh Configure -des \
+          RUN export LDFLAGS="-L/artifacts/lib -L/artifacts/lib64 -Wl,-rpath,/artifacts/lib -Wl,-rpath,/usr/local/lib" && \
+              sh Configure -des \
               -Dprefix=/usr/local \
               -Duseshrplib \
               -Dusethreads \
-              -Dloclibpth="/artifacts/lib /artifacts/lib64 /artifacts/usr/lib64 /artifacts/usr/lib" \
-              -Dlocincpth="/artifacts/include /artifacts/usr/include" \
-              -Dldflags="-L/artifacts/lib -L/artifacts/lib64 -Wl,-rpath,/artifacts/lib -Wl,-rpath,/usr/local/lib" && \
+              -Dlibpth="/artifacts/lib /artifacts/lib64 /usr/lib64 /usr/lib" \
+              -Dincpth="/artifacts/include /usr/include" \
+              -Dldflags="$LDFLAGS" && \
               make -j$(nproc) && \
-              make install DESTDIR=/rootfs
+              LD_LIBRARY_PATH="/artifacts/lib:/artifacts/lib64:/usr/local/lib" make install DESTDIR=/rootfs
           
           # Construct Final Distroless Image
           FROM scratch
