@@ -42,8 +42,9 @@ jobs:
               -Dprefix=/usr/local \
               -Duseshrplib \
               -Dusethreads \
-              -Dldflags="-L/artifacts/lib -L/artifacts/lib64 -L/artifacts/usr/lib64 -L/artifacts/usr/lib -Wl,-rpath,/artifacts/lib -Wl,-rpath,/artifacts/usr/lib64" \
-              -Dccflags="-I/artifacts/include -I/artifacts/usr/include" && \
+              -Dloclibpth="/artifacts/lib /artifacts/lib64 /artifacts/usr/lib64 /artifacts/usr/lib" \
+              -Dlocincpth="/artifacts/include /artifacts/usr/include" \
+              -Dldflags="-L/artifacts/lib -L/artifacts/lib64 -Wl,-rpath,/artifacts/lib -Wl,-rpath,/usr/local/lib" && \
               make -j$(nproc) && \
               make install DESTDIR=/rootfs
           

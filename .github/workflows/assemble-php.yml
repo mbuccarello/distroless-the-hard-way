@@ -43,7 +43,9 @@ jobs:
           # We use PKG_CONFIG_PATH to point to our sovereign artifacts
           # Note: Base libs (openssl) are in /usr, runtime foundations are in root of /artifacts
           ENV PKG_CONFIG_PATH=/artifacts/lib/pkgconfig:/artifacts/lib64/pkgconfig:/artifacts/usr/lib64/pkgconfig:/artifacts/usr/lib/pkgconfig
-          ENV LDFLAGS="-L/artifacts/lib -L/artifacts/lib64 -L/artifacts/usr/lib64 -L/artifacts/usr/lib -Wl,-rpath,/artifacts/lib -Wl,-rpath,/artifacts/usr/lib64"
+          ENV LDFLAGS="-L/artifacts/lib -L/artifacts/lib64 -L/artifacts/usr/lib64 -L/artifacts/usr/lib"
+          ENV PHP_RPATHS="/artifacts/lib /artifacts/usr/lib64 /usr/local/lib"
+          
           RUN ./configure --prefix=/usr/local \
               --with-config-file-path=/etc/php \
               --enable-fpm \
@@ -53,6 +55,7 @@ jobs:
               --with-libxml-dir=/artifacts \
               --with-ffi=/artifacts \
               --with-sqlite3=/artifacts \
+              --with-iconv=/usr \
               --disable-cgi && \
               make -j$(nproc) && \
               make install DESTDIR=/rootfs
