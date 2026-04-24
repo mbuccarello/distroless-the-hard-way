@@ -43,11 +43,10 @@ jobs:
           # Configure and Build
           # Base libs (openssl) are in /artifacts/usr, runtime foundations in root of /artifacts
           ENV PKG_CONFIG_PATH=/artifacts/lib/pkgconfig:/artifacts/lib64/pkgconfig:/artifacts/usr/lib64/pkgconfig:/artifacts/usr/lib/pkgconfig
-          ENV LDFLAGS="-L/artifacts/lib -L/artifacts/lib64 -L/artifacts/usr/lib64 -L/artifacts/usr/lib"
+          ENV LDFLAGS="-L/artifacts/lib -L/artifacts/lib64 -L/artifacts/usr/lib64 -L/artifacts/usr/lib -Wl,-rpath,/artifacts/lib -Wl,-rpath,/artifacts/usr/lib64"
           ENV CPPFLAGS="-I/artifacts/include -I/artifacts/usr/include"
           
-          RUN export LD_LIBRARY_PATH=/artifacts/lib:/artifacts/lib64:/artifacts/usr/lib64:/artifacts/usr/lib:$LD_LIBRARY_PATH && \
-              ./configure --prefix=/usr/local \
+          RUN ./configure --prefix=/usr/local \
               --enable-optimizations \
               --with-system-ffi \
               --with-openssl=/artifacts/usr \

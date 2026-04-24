@@ -38,12 +38,11 @@ jobs:
           
           # Configure and Build
           # We use -Duseshrplib to ensure shared library support
-          RUN export LD_LIBRARY_PATH=/artifacts/lib:/artifacts/usr/lib64:/artifacts/usr/lib:$LD_LIBRARY_PATH && \
-              sh Configure -des \
+          RUN sh Configure -des \
               -Dprefix=/usr/local \
               -Duseshrplib \
               -Dusethreads \
-              -Dldflags="-L/artifacts/lib -L/artifacts/lib64 -L/artifacts/usr/lib64 -L/artifacts/usr/lib" \
+              -Dldflags="-L/artifacts/lib -L/artifacts/lib64 -L/artifacts/usr/lib64 -L/artifacts/usr/lib -Wl,-rpath,/artifacts/lib -Wl,-rpath,/artifacts/usr/lib64" \
               -Dccflags="-I/artifacts/include -I/artifacts/usr/include" && \
               make -j$(nproc) && \
               make install DESTDIR=/rootfs
