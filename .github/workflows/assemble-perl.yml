@@ -5,10 +5,11 @@ on:
     workflows: ["Layer 1.5: Runtime Foundations (Shared Libs)"]
     types: [completed]
   workflow_dispatch:
+  workflow_call:
 
 jobs:
   assemble:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_call' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
