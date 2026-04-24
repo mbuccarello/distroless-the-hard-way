@@ -71,7 +71,7 @@ jobs:
         run: |
           cat <<EOF > Dockerfile
           FROM ghcr.io/${{ github.repository_owner }}/base-fedora:latest as builder
-          RUN dnf install -y gcc make autoconf automake libtool perl perl-open
+          RUN dnf install -y gcc make autoconf automake libtool perl perl-open diffutils
           WORKDIR /build
           RUN curl -L -o source.tar.gz ${{ matrix.url }} && \
               echo "${{ matrix.sha }}  source.tar.gz" | sha256sum -c -
