@@ -1,6 +1,11 @@
 name: "Layer 1.5: Runtime Foundations (Shared Libs)"
 
 on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/build-runtime-foundations.yml"
+      - "docs/lib-hierarchy.md"
   workflow_run:
     workflows: ["Layer 1: Foundations (GNU-Native Builders)"]
     types:
@@ -86,9 +91,6 @@ jobs:
           FROM scratch
           COPY --from=builder /artifacts /
           EOF
-          
-          echo "DEBUG: Generated Dockerfile for ${{ matrix.name }}:"
-          cat Dockerfile
           
           IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/foundation-${{ matrix.name }}:latest
           docker build -t $IMAGE_NAME .
