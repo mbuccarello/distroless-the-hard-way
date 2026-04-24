@@ -42,14 +42,12 @@ jobs:
               -Dprefix=/usr/local \
               -Duseshrplib \
               -Dusethreads \
-              -Dldflags="-Wl,-rpath,/usr/local/lib -Wl,-rpath,/artifacts/lib" || (cat config.sh && exit 1) && \
+              -Dldflags="-Wl,-rpath,/usr/local/lib -Wl,-rpath,/artifacts/lib" && \
               make -j$(nproc) && \
-              make install DESTDIR=/rootfs && \
-              ldd /rootfs/usr/local/bin/perl
+              make install DESTDIR=/rootfs
           
           # Construct Final Distroless Image
           FROM scratch
-          COPY --from=builder /tmp/perl-diag /tmp/perl-diag
           COPY --from=ghcr.io/${{ github.repository_owner }}/base:latest / /
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libxml2:latest / /
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libxcrypt:latest / /
