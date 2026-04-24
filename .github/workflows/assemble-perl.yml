@@ -42,7 +42,7 @@ jobs:
               -Dprefix=/usr/local \
               -Duseshrplib \
               -Dusethreads \
-              -Dldflags="-Wl,-rpath,/usr/local/lib -Wl,-rpath,/artifacts/lib" || (mkdir -p /tmp/perl-diag && cp config.sh /tmp/perl-diag/ && exit 1) && \
+              -Dldflags="-Wl,-rpath,/usr/local/lib -Wl,-rpath,/artifacts/lib" || (cat config.sh && exit 1) && \
               make -j$(nproc) && \
               make install DESTDIR=/rootfs && \
               ldd /rootfs/usr/local/bin/perl
@@ -54,23 +54,8 @@ jobs:
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libxml2:latest / /
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libxcrypt:latest / /
           COPY --from=builder /rootfs/usr/local /usr/local/
-          
           ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
           ENV LANG=C.UTF-8
-
-      - name: Extract Diagnostics
-        if: failure()
-        run: |
-          docker create --name diag ghcr.io/${{ github.repository_owner }}/perl:latest
-          docker cp diag:/tmp/perl-diag ./perl-diag || true
-          docker rm diag
-          
-      - name: Upload Config Sh
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: perl-config-sh
-          path: ./perl-diag/config.sh
           ENTRYPOINT ["/usr/local/bin/perl"]
           CMD ["-v"]
           EOF

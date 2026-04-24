@@ -55,7 +55,7 @@ jobs:
               --with-ffi=/artifacts \
               --with-sqlite3=/artifacts \
               --with-iconv \
-              --disable-cgi || (mkdir -p /tmp/php-diag && cp config.log /tmp/php-diag/ && exit 1) && \
+              --disable-cgi || (cat config.log && exit 1) && \
               make -j$(nproc) && \
               make install DESTDIR=/rootfs && \
               ldd /rootfs/usr/local/bin/php
@@ -74,19 +74,6 @@ jobs:
           ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
           ENV LANG=C.UTF-8
 
-      - name: Extract Diagnostics
-        if: failure()
-        run: |
-          docker create --name diag ghcr.io/${{ github.repository_owner }}/php:latest
-          docker cp diag:/tmp/php-diag ./php-diag || true
-          docker rm diag
-          
-      - name: Upload Config Log
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: php-config-log
-          path: ./php-diag/config.log
           ENTRYPOINT ["/usr/local/bin/php"]
           CMD ["-v"]
           EOF
