@@ -7,5 +7,5 @@ This pipeline performs automated functional assertions on the [php Distroless im
 ## 1. Verification Objectives
 - **Runtime Integrity**: Confirm the php engine initializes within the shell-less environment.
 - **Linkage Validation**: Ensure binary compatibility with the project-native Glibc and OpenSSL libraries.
-- **Functional Check**: Execute a standardized test application and verify the output.
+- **Functional Check**: Execute `app/test.php` to verify core modules (XML, SQLite, SSL).
 

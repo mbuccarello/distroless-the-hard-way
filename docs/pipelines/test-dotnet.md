@@ -7,5 +7,5 @@ This pipeline performs automated functional assertions on the [dotnet Distroless
 ## 1. Verification Objectives
 - **Runtime Integrity**: Confirm the dotnet engine initializes within the shell-less environment.
 - **Linkage Validation**: Ensure binary compatibility with the project-native Glibc and OpenSSL libraries.
-- **Functional Check**: Execute a standardized test application and verify the output.
+- **Functional Check**: Execute `app/test-dotnet.cs` (published as binary) to verify CoreCLR and SSL connectivity.
 

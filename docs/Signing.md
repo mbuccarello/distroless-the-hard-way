@@ -12,7 +12,12 @@ The project utilizes OIDC-based keyless signing to eliminate the risks associate
 - **Identity**: GitHub Actions OIDC tokens (`id-token: write`).
 - **Validation**: Signatures are verifiable via `cosign verify` using the project's OIDC issuer and repository identity.
 
-## 2. Verification Gateways
+## 2. Cryptographic Bundle
+Every image is accompanied by a cryptographic bundle that includes:
+- **OCI Signature**: Proves the origin and integrity of the image bits.
+- **SLSA Provenance**: Proves the integrity of the build process and environment.
+- **SPDX SBOM**: Provides a verified bill-of-materials attached via `cosign attach sbom`.
 
-Downstream assemblers are configured to verify the signatures of all intermediate Stage 2 payloads before ingestion, ensuring that only vetted and signed libraries enter the final OS product.
+## 3. Verification Gateways
+Downstream assemblers verify the signatures of all intermediate Stage 2 payloads before ingestion, ensuring that only vetted and signed components enter the final product.
 

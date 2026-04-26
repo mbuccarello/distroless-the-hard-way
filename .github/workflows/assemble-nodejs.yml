@@ -20,13 +20,13 @@ jobs:
       - name: Download and Strip Official Node.js Binary
         run: |
           mkdir -p payload/raw payload/stripped
-          # Fetch Official Node.js 20 LTS (Glibc-native)
-          curl -L "https://nodejs.org/dist/v20.12.2/node-v20.12.2-linux-x64.tar.gz" -o payload/raw/node.tar.gz
+          # Fetch Official Node.js 22 LTS (Glibc-native)
+          curl -L "https://nodejs.org/dist/v22.22.2/node-v22.22.2-linux-x64.tar.xz" -o payload/raw/node.tar.xz
           # Strict verification (Official SHA256)
-          echo "f8f9b6877778ed2d5f920a5bd853f0f8a8be1c42f6d448c763a95625cbbb4b0d payload/raw/node.tar.gz" | sha256sum -c -
+          echo "88fd1ce767091fd8d4a99fdb2356e98c819f93f3b1f8663853a2dee9b438068a payload/raw/node.tar.xz" | sha256sum -c -
           
           # Strip components using full GNU tar in the runner
-          tar -xzf payload/raw/node.tar.gz -C payload/stripped --strip-components=1
+          tar -xJf payload/raw/node.tar.xz -C payload/stripped --strip-components=1
           # Repack clean tarball
           tar -czf payload/node.tar.gz -C payload/stripped .
           
@@ -60,10 +60,28 @@ jobs:
           docker push ghcr.io/${{ github.repository_owner }}/nodejs:latest
           DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "ghcr.io/${{ github.repository_owner }}/nodejs:latest" | cut -d'@' -f2)
           echo "digest=$DIGEST" >> $GITHUB_OUTPUT
+          echo "image_name=ghcr.io/${{ github.repository_owner }}/nodejs:latest" >> $GITHUB_OUTPUT
+
+      - name: Generate SBOM (Trivy)
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
+        with:
+          image-ref: 'ghcr.io/${{ github.repository_owner }}/nodejs:latest'
+          format: 'spdx-json'
+          output: 'nodejs-sbom.spdx.json'
+
+      - name: Attach SBOM to Image
+        run: |
+          cosign attach sbom --sbom nodejs-sbom.spdx.json ghcr.io/${{ github.repository_owner }}/nodejs:latest
+
+      - name: Sign Distroless Node.js
+        run: |
+          cosign sign --yes ghcr.io/${{ github.repository_owner }}/nodejs:latest
+          cosign verify --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ghcr.io/${{ github.repository_owner }}/nodejs:latest
+
 
       - name: Functional Smoke Test (Verification)
         run: |
-          docker run --rm ghcr.io/${{ github.repository_owner }}/nodejs:latest --version
+          docker run --rm -v $(pwd)/app:/app ghcr.io/${{ github.repository_owner }}/nodejs:latest /app/test.js
 
       - name: Generate SLSA Build Provenance (Level 3)
         uses: actions/attest-build-provenance@v2

@@ -3,7 +3,7 @@
 Thank you for your interest in contributing to Distroless-The-Hard-Way! We are on a mission to build a zero-trust, 100% sovereign OS ecosystem.
 
 ## 🏗 Architectural Rules
-Before contributing, please read **`GEMINI.md`**. This repository follows strict architectural pillars:
+Before contributing, please read **`AGENT.md`**. This repository follows strict architectural pillars:
 1. **Zero OS Extraction**: No `.so` binaries from existing OS packages.
 2. **Strict Source Compilation**: Everything must be compiled from raw `tar.gz` source.
 3. **Mandatory Documentation Synchronization**: Every logic change requires an accompanying documentation update in `docs/pipelines/`.

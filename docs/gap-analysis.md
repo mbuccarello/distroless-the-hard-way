@@ -10,7 +10,7 @@ This document evaluates the architectural alignment of this project with industr
 | **Root Trust** | Sovereign (Mozilla NSS) | Google/Wolfi | **Resolved**: Certificates are built from source, eliminating the Fedora CA dependency. |
 | **System Config** | Sovereign (Hard Way) | Wolfi | **Resolved**: /etc/services, /etc/passwd, and /etc/protocols are manually constructed. |
 | **Package Management** | OCI-Native Metadata | Wolfi (apk) | **Divergent Strategy**: We leverage OCI registry metadata for traceability instead of a runtime package database. |
-| **Runtime Compilation** | Hybrid (Fedora Extract) | Wolfi | **Active Gap**: PHP, Python, and Perl still rely on Fedora RPM extraction. |
+| **Runtime Compilation** | Sovereign (Source) | Wolfi | **Resolved**: Interpreted runtimes (PHP, Python, Perl) are now 100% source-built, eliminating Fedora extraction "noise". |
 
 ---
 
@@ -26,11 +26,11 @@ Achieving full parity with Google's cc image.
 - **Achievement**: Integrated native compilation of libgomp and libstdc++.
 - **Result**: Support for advanced multi-threaded runtimes (Java, .NET) is now native.
 
-### Phase 3: Sovereign Runtime Bootstrapping (In Progress)
+### Phase 3: Sovereign Runtime Bootstrapping (Completed)
 Eliminating the "Fedora Bridge" for high-level language runtimes.
-- **Target**: PHP 8.3 and Python 3.12.
-- **Action**: Develop native compilation pipelines that build the interpreters directly from upstream source within the Foundation layer.
-- **Goal**: Reach 100% source-to-binary sovereignty for the entire stack.
+- **Achievement**: Developed native compilation pipelines for PHP 8.3, Python 3.12, and Perl 5.38.
+- **Result**: Reached 100% source-to-binary sovereignty for the interpreted stack, linked against sovereign foundations (libxml2, libffi, etc.).
+- **Security**: Integrated SBOM generation and Trivy scanning for every sovereign image.
 
 ### Phase 4: Declarative Assembly (Long Term)
 Transitioning from imperative shell scripts to a declarative assembly engine.

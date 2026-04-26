@@ -6,10 +6,11 @@ This specification defines the construction of the python3 Distroless image, pro
 
 ## 1. Hierarchy Specification
 - **Parent Image**: `ghcr.io/mbuccarello/cc:latest`
-- **LTS Version**: Python 3.12 (Fedora 40)
-- **Provenance Strategy**: Type B (Official OS-Native RPM Extraction)
+- **LTS Version**: Python 3.12.5
+- **Provenance Strategy**: Type B (Sovereign Source Compilation)
 
 ## 2. Implementation Logic
-- **Assembly Strategy**: Official Fedora 40 packages are downloaded from the project mirrors using the `base-fedora` sandbox. Binaries are then extracted using `rpm2cpio`.
-- **Zero-Compilation**: No Python source code is compiled; the system uses the official, security-patched binaries provided by the Fedora Project maintainers.
+- **Assembly Strategy**: CPython 3.12 is compiled from source within the `base-fedora` sandbox, ensuring absolute control over the ABI and optimization flags.
+- **Sovereign Foundations**: Linked against native `libffi`, `readline`, `sqlite`, `bz2`, and `lzma` foundations.
+- **Verification**: Functional assertions via `app/test.py`.
 

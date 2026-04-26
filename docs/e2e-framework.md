@@ -26,7 +26,7 @@ All verification tests must satisfy the following criteria:
 | Runtime | Parent Infrastructure | Deployment Strategy |
 | :--- | :--- | :--- |
 | Node.js | `cc` | LTS Binary Repackaging |
-| Python 3 | `cc` | Standalone CPython Extraction |
+| Python 3 | `cc` | Sovereign Source Compilation |
 | Java | `cc` | Eclipse Temurin Runtime |
 | .NET | `cc` | Microsoft CoreCLR Deployment |
 

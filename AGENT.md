@@ -12,9 +12,13 @@ It teaches users how to create distroless container images *without* relying on 
 - **Zero OS Extraction:** You are strictly forbidden from writing workflows that rely on precompiled `.so` library binaries from host OS packages (e.g. `apt`, `apk`).
 - **Zero Pre-Built Extraction Shims:** You must never use `alpine` or `ubuntu` containers to unpack intermediate tarballs in CI/CD. All extractions must be handled natively by our custom "Pipeline 0" bootstrap image `ghcr.io/.../bootstrap:latest`.
 - **Exec-Form Invocation:** Because we extract directly into empty `scratch` containers without an OS, docker instructions must use **Exec Form** (e.g., `RUN ["/tar", "-xzf", "file.tar.gz"]`) to invoke syscall processes directly rather than relying on `/bin/sh`.
-- **Strict Source Compilation:** Agents must rely entirely on verified raw source code (`.tar.gz`) fetched directly from upstream providers. Everything must be natively compiled.
+1.  **Strict Source Compilation**: No OS extraction for Layer 3+ runtimes.
+2.  **Sovereign Foundations**: All runtimes must link against project foundations in `/usr/local/lib`.
+3.  **Atomic Verification**: Images must pass `app/test.*` smoke tests before signing.
+4.  **Standardized Debugging**: Follow the [Debugging & Diagnostics Guide](docs/debugging.md) for troubleshooting.
 - **The Google Distroless Layered Hierarchy:** The architecture strictly enforces a linear cascading hierarchy spanning `base -> cc -> java/python` specifically modeled against Google's Distroless Bazel architecture.
 - **Undistro Philosophy:** While we leverage Fedora for `glibc` and `openssl` compatibility, we do not inherit the host OS's filesystem structure. Our images are "Undistro"—minimal, standard-compliant, and agnostic to the upstream package provider. Path structures must remain "universal" (e.g., `/etc/ssl/certs/ca-certificates.crt`) rather than matching distribution-specific quirks.
+- **LTS Runtimes:** All language runtimes (Node.js, Python, PHP, Perl, .NET, Java) must use the Long Term Support (LTS) or most stable "Standard Support" version as defined by upstream providers.
 - **Layered Master Orchestration:** Agents must utilize the tiered orchestrator system (Layer 1: Foundations, Layer 2: Assembly, Layer 3: Validation) to prevent race conditions and ensure cryptographic chain-of-custody.
 - **Naming Conventions:** 
     - `base-fedora`: Compilation Sandbox (Layer 1 Mirror). Pulls from Docker Hub, pushes to GHCR.
@@ -27,6 +31,7 @@ When generating or modifying GitHub Action assembly pipelines, you must include 
 2. **Keyless Signing:** All intermediate layers and bases must be signed using Sigstore/Cosign OIDC Keyless mechanisms (e.g., `cosign sign --yes`). Do not look for "missing" private keys.
 3. **Malcontent:** Every final assembled image must run Chainguard's `malcontent analyze` to prove no arbitrary capabilities or malware were compiled into the final binary.
 4. **Trivy:** SBOM/SCA generation.
+5. **SLSA Level 3:** Non-falsifiable build attestations for every layer.
 
 ## 4. Documentation Standards
 - **Formal Engineering Tone:** Documentation must be written as objective technical specifications. Phrases such as "We discovered", "I found", or "The fix is" are strictly prohibited. Agents must describe the system state and design rationale as technical facts.

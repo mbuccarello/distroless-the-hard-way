@@ -65,11 +65,12 @@ For projects that publish official, standalone binary distribution tarballs, the
 - **Verification**: Strict cryptographic pinning against official project manifest metadata (e.g., Node.js SHASUMS256, Adoptium API).
 - **Benefit**: Ensures the runtime is exactly as intended by the language maintainers without any intermediary modification.
 
-### Type B: OS-Native Package Extraction (Python, PHP, Perl)
-For projects that officially distribute only source code (requiring OS-level compilation), the system extracts binaries from **Official Fedora 40 Repositories**.
-- **Process**: The system uses the `base-fedora` sandbox to fetch official RPMs via `dnf download --resolve`. These RPMs are then extracted in the runner using `rpm2cpio`.
-- **Integrity**: Leverages the binary signing and security patching provided by the Fedora Project maintainers.
-- **Alignment**: Ensures 100% ABI compatibility with the `glibc` and core libraries established in Stage 2 (Foundations).
+### Type B: Sovereign Source Compilation (Python, PHP, Perl)
+For high-level language runtimes, the system implements a full source-to-binary pipeline.
+- **Process**: Interpreters are compiled directly from upstream source tarballs within the project's compilation sandboxes.
+- **Sovereign Linking**: These runtimes are linked against sovereign foundational libraries (e.g., `libxml2`, `libffi`, `oniguruma`) rather than host OS packages.
+- **Hardened RPATH**: All binaries are built with hardened RPATHs pointing to `/usr/local/lib`, ensuring absolute relocatability and independence from the host OS environment.
+- **Traceability**: Full SAST and SCA coverage is applied to the source-build process.
 
 ---
 

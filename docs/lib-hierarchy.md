@@ -24,8 +24,14 @@ The status **Fedora Extract** indicates a **transitional state**. These componen
 | `tzdata` | Source | IANA Source | `static` | Configuration |
 | `libicu*.so` | Fedora Extract | Fedora 40 | `dotnet` | Dotnet Runtime |
 | `libkrb5.so` | Fedora Extract | Fedora 40 | `dotnet` | Networking |
-| `libffi.so` | Fedora Extract | Fedora 40 | `python` | Python Runtime |
-| `libxml2.so` | Fedora Extract | Fedora 40 | `php` | PHP Runtime |
+| `libffi.so` | Source | Libffi Source | `python` | Foundation |
+| `libxml2.so` | Source | Libxml2 Source | `php` | Foundation |
+| `libonig.so` | Source | Oniguruma Source | `php` | Foundation |
+| `libsqlite3.so` | Source | SQLite Source | `php` | Foundation |
+| `libreadline.so` | Source | Readline Source | `python` | Foundation |
+| `libbz2.so` | Source | Bzip2 Source | `python` | Foundation |
+| `liblzma.so` | Source | XZ Source | `python` | Foundation |
+| `libxcrypt.so` | Source | Libxcrypt Source | `base` | Foundation |
 
 ---
 
@@ -37,14 +43,15 @@ The following components are currently extracted from Fedora for convenience and
 - [ ] **libicu**: Compile Unicode components from source to remove Dotnet's dependency on Fedora RPMs.
 - [ ] **libkrb5 (GSSAPI)**: Native compilation of Kerberos libraries to support advanced networking.
 
-### Priority 2: Runtime Dependencies
-- [ ] **libkrb5 (GSSAPI)**: Native compilation of Kerberos libraries.
-- [ ] **libffi**: Native build for Python foreign function interface.
-- [ ] **libxml2 / libedit**: Native builds for PHP and general CLI tools.
+### Priority 2: Runtime Dependencies (Completed)
+- [x] **libffi**: Native build for Python foreign function interface.
+- [x] **libxml2 / libedit**: Native builds for PHP and general CLI tools.
+- [x] **sqlite / oniguruma**: Native builds for database and regex support.
 
-### Priority 3: Full Runtime Bootstrapping
-- [ ] **Python 3 Interpreter**: Move from Fedora RPMs to a full native source compilation.
-- [ ] **PHP 8.x Interpreter**: Move from Fedora RPMs to a full native source compilation.
+### Priority 3: Full Runtime Bootstrapping (Completed)
+- [x] **Python 3 Interpreter**: Move from Fedora RPMs to a full native source compilation.
+- [x] **Perl 5.38 Interpreter**: Move from Fedora RPMs to a full native source compilation.
+- [x] **PHP 8.3 Interpreter**: Move from Fedora RPMs to a full native source compilation.
 
 ---
 

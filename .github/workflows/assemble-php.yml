@@ -1,58 +1,56 @@
-name: "Layer 2: Assembly (PHP 8.3)"
+name: Opensource Distroless Assembler - php
 
 on:
-  workflow_run:
-    workflows: ["Layer 1.5: Runtime Foundations (Shared Libs)"]
-    types: [completed]
   workflow_dispatch:
   workflow_call:
 
 jobs:
   assemble:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_call' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
       id-token: write
       attestations: write
-
+    
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
-
-      - name: Authenticate to GHCR
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        
+      - name: Authenticate to GitHub Container Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Build PHP Image
+      - name: Construct PHP 8.3 Application Runtime (Source Build)
         id: build
         run: |
           cat <<EOF > Dockerfile
           FROM ghcr.io/${{ github.repository_owner }}/base-fedora:latest as builder
           RUN dnf install -y gcc make autoconf bison re2c pkgconfig \
               libxml2-devel sqlite-devel openssl-devel zlib-devel \
-              libffi-devel oniguruma-devel
+              libffi-devel oniguruma-devel file diffutils
           
-          WORKDIR /build
-          RUN curl -L -o php.tar.gz https://www.php.net/distributions/php-8.3.6.tar.xz
-          RUN tar -xzf php.tar.gz --strip-components=1
-          
-          # We use PKG_CONFIG_PATH to point to our sovereign artifacts
+          # Inject Sovereign Foundations
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libffi:latest / /artifacts/
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libxml2:latest / /artifacts/
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-oniguruma:latest / /artifacts/
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-sqlite:latest / /artifacts/
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libxcrypt:latest / /artifacts/
           
+          WORKDIR /build
+          # Target PHP 8.3.11 (Latest Stable)
+          RUN curl -L -o php.tar.xz https://www.php.net/distributions/php-8.3.11.tar.xz
+          RUN tar -xJf php.tar.xz --strip-components=1
+          
+          # Configure and Build
           ENV PKG_CONFIG_PATH=/artifacts/lib/pkgconfig:/artifacts/lib64/pkgconfig
           ENV CPPFLAGS="-I/artifacts/include"
-          ENV LDFLAGS="-L/artifacts/lib -L/artifacts/lib64"
-
+          # Standardize RPATH to include our sovereign library search paths
+          ENV LDFLAGS="-L/artifacts/lib -L/artifacts/lib64 -Wl,-rpath,/usr/local/lib:/artifacts/lib:/lib64:/lib"
+          
           COPY scripts/assemble.sh /usr/local/bin/assemble
           RUN chmod +x /usr/local/bin/assemble
 
-          RUN mkdir -p /tmp/php-diag && \
-              export PHP_RPATHS="/usr/local/lib /artifacts/lib" && \
+          RUN mkdir -p /rootfs && \
               assemble php "./configure --prefix=/usr/local \
               --with-config-file-path=/etc/php \
               --enable-fpm \
@@ -65,16 +63,16 @@ jobs:
               --with-iconv \
               --disable-cgi" && \
               make -j$(nproc) && \
-              make install DESTDIR=/rootfs
+              make install INSTALL_ROOT=/rootfs
           
+          # Construct Final Distroless Image
           FROM scratch
-          COPY --from=builder /tmp/php-diag /tmp/php-diag
           COPY --from=ghcr.io/${{ github.repository_owner }}/base:latest / /
-          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libffi:latest / /
-          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libxml2:latest / /
-          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-oniguruma:latest / /
-          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-sqlite:latest / /
-          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libxcrypt:latest / /
+          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libffi:latest /lib64/. /usr/local/lib/
+          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libxml2:latest /lib/. /usr/local/lib/
+          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-oniguruma:latest /lib/. /usr/local/lib/
+          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-sqlite:latest /lib/. /usr/local/lib/
+          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libxcrypt:latest /lib/. /usr/local/lib/
           COPY --from=builder /rootfs/usr/local /usr/local/
           
           ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
@@ -85,9 +83,27 @@ jobs:
           
           IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/php:latest
           docker build -t $IMAGE_NAME .
+          docker run --rm -v $(pwd)/app:/app $IMAGE_NAME /app/test.php
           docker push $IMAGE_NAME
           DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "$IMAGE_NAME" | cut -d'@' -f2)
           echo "digest=$DIGEST" >> $GITHUB_OUTPUT
+          echo "image_name=$IMAGE_NAME" >> $GITHUB_OUTPUT
+
+      - name: Generate SBOM (Trivy)
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
+        with:
+          image-ref: ${{ steps.build.outputs.image_name }}
+          format: 'spdx-json'
+          output: 'php-sbom.spdx.json'
+
+      - name: Attach SBOM to Image
+        run: |
+          cosign attach sbom --sbom php-sbom.spdx.json ${{ steps.build.outputs.image_name }}
+
+      - name: Sign Distroless PHP
+        run: |
+          cosign sign --yes ${{ steps.build.outputs.image_name }}
+          cosign verify --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ${{ steps.build.outputs.image_name }}
 
       - name: Generate SLSA Build Provenance
         uses: actions/attest-build-provenance@v2

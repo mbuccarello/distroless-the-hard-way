@@ -26,13 +26,15 @@ The verification follows a **Build-vs-Run Isolation** pattern:
 2.  **Run Stage**: The compiled binary is executed inside our **Distroless The Hard Way Distroless** target image.
 3.  **Assertion**: The workflow fails if any of the verification points (Runtime, SSL, or Timezone) return an error.
 
-## Individual Runtime Pipelines
+## Individual Runtime Verification
 
-| Pipeline | Target Image | Verification App |
+Verification logic is integrated directly into the assembly pipelines to ensure atomic validation before image promotion.
+
+| Assembly Pipeline | Target Image | Verification Logic |
 | :--- | :--- | :--- |
-| [`test-dotnet.yml`](../../.github/workflows/test-dotnet.yml) | `dotnet:latest` | `E2E/dotnet/` |
-| [`test-java.yml`](../../.github/workflows/test-java.yml) | `java:latest` | `E2E/java/` |
-| [`test-nodejs.yml`](../../.github/workflows/test-nodejs.yml) | `nodejs:latest` | `E2E/nodejs/` |
-| [`test-python3.yml`](../../.github/workflows/test-python3.yml) | `python3:latest` | `E2E/python3/` |
-| [`test-perl.yml`](../../.github/workflows/test-perl.yml) | `perl:latest` | `E2E/perl/` |
-| [`test-php.yml`](../../.github/workflows/test-php.yml) | `php:latest` | `E2E/php/` |
+| [`assemble-dotnet.yml`](../../.github/workflows/assemble-dotnet.yml) | `dotnet:latest` | `app/test-dotnet.cs` |
+| [`assemble-java.yml`](../../.github/workflows/assemble-java.yml) | `java:latest` | `app/test.java` |
+| [`assemble-nodejs.yml`](../../.github/workflows/assemble-nodejs.yml) | `nodejs:latest` | `app/test.js` |
+| [`assemble-python3.yml`](../../.github/workflows/assemble-python3.yml) | `python3:latest` | `app/test.py` |
+| [`assemble-perl.yml`](../../.github/workflows/assemble-perl.yml) | `perl:latest` | `app/test.pl` |
+| [`assemble-php.yml`](../../.github/workflows/assemble-php.yml) | `php:latest` | `app/test.php` |

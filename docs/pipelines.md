@@ -7,7 +7,7 @@ The pipeline is divided into three logical layers, managed by GitHub Actions:
 
 1.  **Layer 1 (Foundations)**: Compiles raw source code into OCI payloads.
 2.  **Layer 2 (Assembly)**: Merges payloads into OCI images (static, base, cc).
-3.  **Layer 3 (Verification)**: Runs E2E functional assertions.
+3.  **Layer 3 (Atomic Verification)**: Integrated functional assertions within assembly pipelines.
 
 ---
 
@@ -59,3 +59,4 @@ Every step in every layer must pass:
 1.  **Semgrep Audit**: Static analysis of source and build scripts.
 2.  **Cosign Signing**: Keyless OIDC-based image signing.
 3.  **SLSA Attestation**: Generation of build provenance.
+4.  **SBOM Generation**: Generation and attachment of SPDX SBOMs via Trivy.

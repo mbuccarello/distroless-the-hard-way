@@ -42,12 +42,12 @@ Automated functional assertions that confirm the integrity of the entire stack. 
 | :--- | :--- | :--- | :--- |
 | **Go (Static)** | static | OK | Native Static Binary |
 | **Go (Cgo)** | base | OK | Dynamic Binary |
-| **PHP** | base | OK | Fedora PHP 8.3 |
-| **Perl** | base | OK | Fedora Perl 5.38 |
+| **PHP** | base | OK | Sovereign (Source Build 8.3) |
+| **Perl** | base | OK | Sovereign (Source Build 5.38) |
 | **Java** | cc | OK | Eclipse Temurin 21 |
 | **Node.js** | cc | OK | Node.js 20 LTS |
 | **.NET** | cc | OK | .NET Runtime 8.0 |
-| **Python 3** | cc | OK | Fedora Python 3.12 |
+| **Python 3** | cc | OK | Sovereign (Source Build 3.12) |
 
 ---
 

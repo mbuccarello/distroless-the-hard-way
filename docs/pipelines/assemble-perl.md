@@ -6,10 +6,11 @@ This specification defines the construction of the perl Distroless image, provid
 
 ## 1. Hierarchy Specification
 - **Parent Image**: `ghcr.io/mbuccarello/cc:latest`
-- **LTS Version**: Perl 5.38 (Fedora 40)
-- **Provenance Strategy**: Type B (Official OS-Native RPM Extraction)
+- **LTS Version**: Perl 5.38.2
+- **Provenance Strategy**: Type B (Sovereign Source Compilation)
 
 ## 2. Implementation Logic
-- **Assembly Strategy**: Official Fedora 40 Perl packages are downloaded via the `base-fedora` sandbox. Binaries are then extracted using `rpm2cpio`.
-- **Zero-Compilation**: No Perl source code is compiled; the runtime is sourced directly from the official Fedora distribution.
+- **Assembly Strategy**: Perl is compiled from source within the `base-fedora` sandbox, using a relocatable configuration (`-Dprefix=/usr/local`).
+- **Sovereign Linking**: Linked against `libxcrypt` and `libxml2` foundations.
+- **Verification**: Functional assertions via `app/test.pl`.
 

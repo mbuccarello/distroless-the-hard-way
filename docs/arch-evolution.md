@@ -49,5 +49,25 @@ graph TD
 - **Cons:** Slightly more complex assembly workflows (using Fedora as extractor).
 - **Compliance:** Maintains SLSA compliance as all source-built artifacts are still verified via Cosign before assembly.
 
+## 6. Phase 3: Sovereign Runtime Compilation (The "Sovereign" Goal)
+We transitioned from extracting interpreters from Fedora RPMs to building them from source (Python 3.12, PHP 8.3, Perl 5.38).
+
+### The RPATH Strategy: Self-Contained Discovery
+In Phase 2, we relied on `ldconfig` to create a global `/etc/ld.so.cache`. While effective, we wanted to achieve even higher levels of isolation for sovereign runtimes.
+
+**Solution: Hardened RPATH**
+We now inject `-Wl,-rpath,/usr/local/lib:/artifacts/lib` directly into the binaries during the compilation phase.
+- **Benefit**: The binary is "self-aware" of its library search paths. It does not require a global cache or `LD_LIBRARY_PATH`.
+- **Reliability**: This eliminates the "library not found" errors that plague minimal container environments.
+- **Independence**: The runtime is 100% independent from the host OS layout, achieving the project's ultimate goal of a bit-perfect, sovereign product.
+
 ---
+## 7. Phase 4: Enterprise LTS Hardening (Current)
+We are now applying the sovereign high-assurance model to the project's most complex enterprise runtimes.
+
+### Key Objectives:
+1.  **LTS Upgrades**: Transitioning to Long-Term Support versions (OpenJDK 21, Node.js v22, .NET 8.0).
+2.  **Sovereign Foundations**: Ensuring these heavy runtimes link exclusively against our project-built `glibc`, `openssl`, and `zlib`.
+3.  **Cryptographic Integrity**: Mandating Keyless Signing (Cosign) and SLSA Level 3 Provenance for every image in the stack.
+
 *This document serves as a record of our team's technical journey and a reference for future architectural decisions.*

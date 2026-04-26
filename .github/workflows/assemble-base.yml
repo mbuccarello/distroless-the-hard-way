@@ -76,6 +76,19 @@ jobs:
           docker push ghcr.io/${{ github.repository_owner }}/base:latest
           DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "ghcr.io/${{ github.repository_owner }}/base:latest" | cut -d'@' -f2)
           echo "digest=$DIGEST" >> $GITHUB_OUTPUT
+          echo "image_name=ghcr.io/${{ github.repository_owner }}/base:latest" >> $GITHUB_OUTPUT
+
+      - name: Generate SBOM (Trivy)
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
+        with:
+          image-ref: 'ghcr.io/${{ github.repository_owner }}/base:latest'
+          format: 'spdx-json'
+          output: 'base-sbom.spdx.json'
+
+      - name: Attach SBOM to Image
+        run: |
+          cosign attach sbom --sbom base-sbom.spdx.json ghcr.io/${{ github.repository_owner }}/base:latest
+
 
       - name: Sign Distroless Base
         run: |

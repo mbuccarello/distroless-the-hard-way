@@ -78,11 +78,26 @@ jobs:
           docker push ghcr.io/${{ github.repository_owner }}/dotnet:latest
           DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "ghcr.io/${{ github.repository_owner }}/dotnet:latest" | cut -d'@' -f2)
           echo "digest=$DIGEST" >> $GITHUB_OUTPUT
+          echo "image_name=ghcr.io/${{ github.repository_owner }}/dotnet:latest" >> $GITHUB_OUTPUT
+
+      - name: Generate SBOM (Trivy)
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
+        with:
+          image-ref: 'ghcr.io/${{ github.repository_owner }}/dotnet:latest'
+          format: 'spdx-json'
+          output: 'dotnet-sbom.spdx.json'
+
+      - name: Attach SBOM to Image
+        run: |
+          cosign attach sbom --sbom dotnet-sbom.spdx.json ghcr.io/${{ github.repository_owner }}/dotnet:latest
+
 
       - name: Functional Smoke Test
         run: |
-          docker run --rm ghcr.io/${{ github.repository_owner }}/dotnet:latest --list-runtimes
-          docker run --rm ghcr.io/${{ github.repository_owner }}/dotnet:latest --version
+          dotnet new console -n dotnet-test -o app/dotnet-test
+          cp app/test-dotnet.cs app/dotnet-test/Program.cs
+          dotnet publish app/dotnet-test -c Release -r linux-x64 --self-contained false -o app/dotnet-out
+          docker run --rm -v $(pwd)/app/dotnet-out:/app ghcr.io/${{ github.repository_owner }}/dotnet:latest /app/dotnet-test.dll
 
       - name: Sign Distroless Dotnet
         run: |
