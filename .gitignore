@@ -4,3 +4,10 @@
 
 # Local Backups
 backup/
+
+# Logs and Diagnostics
+*.log
+*.txt
+*.xz
+payload/
+debug/**/*.log
