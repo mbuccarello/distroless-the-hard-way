@@ -1,3 +1,5 @@
+[<- Back to Main README](../README.md)
+
 # Specification: Binary Capability Analysis
 
 The integrity of compiled OCI images is verified using Chainguard Malcontent to detect unexpected capabilities, syscalls, or malicious indicators.

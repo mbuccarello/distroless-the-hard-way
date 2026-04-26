@@ -1,0 +1,99 @@
+--- Building Perl Debug Image ---
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [builder  1/11] FROM ghcr.io/mbuccarello/base-fedora:latest@sha256:1919fee917112bd946684e8d45d34cefd1329dc093a56cfc9a34e906f47f8975
+#1 resolve ghcr.io/mbuccarello/base-fedora:latest@sha256:1919fee917112bd946684e8d45d34cefd1329dc093a56cfc9a34e906f47f8975 0.1s done
+#1 CACHED
+
+#2 FROM ghcr.io/mbuccarello/base:latest@sha256:7e18302fdc148927ac6bb8513960b84ffbad3585f5a9ea3eaeb6ced8471cf9a1
+#2 resolve ghcr.io/mbuccarello/base:latest@sha256:7e18302fdc148927ac6bb8513960b84ffbad3585f5a9ea3eaeb6ced8471cf9a1 0.1s done
+#2 CACHED
+
+#3 FROM ghcr.io/mbuccarello/foundation-libxcrypt:latest@sha256:762ff143eeb6db29921a5f2d88d9efc0fce163aea392035f4f26ddb0c1efcc9c
+#3 resolve ghcr.io/mbuccarello/foundation-libxcrypt:latest@sha256:762ff143eeb6db29921a5f2d88d9efc0fce163aea392035f4f26ddb0c1efcc9c 0.1s done
+#3 CACHED
+
+#4 [stage-1  1/12] COPY --from=ghcr.io/mbuccarello/base:latest / /
+#4 CACHED
+
+#5 [internal] load build definition from Dockerfile
+#5 transferring dockerfile: 1.38kB 0.0s done
+#5 WARN: FromAsCasing: 'as' and 'FROM' keywords' casing do not match (line 1)
+#5 DONE 0.0s
+
+#6 [internal] load metadata for ghcr.io/mbuccarello/foundation-libxcrypt:latest
+#6 DONE 0.1s
+
+#7 [internal] load metadata for ghcr.io/mbuccarello/base:latest
+#7 DONE 0.1s
+
+#8 [internal] load metadata for ghcr.io/mbuccarello/base-fedora:latest
+#8 DONE 0.1s
+
+#9 [internal] load .dockerignore
+#9 transferring context: 2B done
+#9 DONE 0.0s
+
+#10 [builder 7/7] RUN sh Configure -des     -Dprefix=/usr/local     -Duseshrplib     -Dusethreads     -Dlibpth='/artifacts/lib /usr/lib64 /lib64 /lib'     -Accflags='-I/artifacts/include'     -Aldflags='-Wl,-rpath,/usr/local/lib:/artifacts/lib:/lib64:/lib -L/artifacts/lib'     -Dccdlflags='-Wl,-rpath,/usr/local/lib:/artifacts/lib:/lib64:/lib' &&     make -j$(nproc) &&     make install DESTDIR=/rootfs
+#10 CACHED
+
+#11 [builder 2/7] RUN dnf install -y gcc make autoconf bison pkgconfig
+#11 CACHED
+
+#12 [builder 3/7] WORKDIR /build
+#12 CACHED
+
+#13 [builder 5/7] RUN tar -xzf perl.tar.gz --strip-components=1
+#13 CACHED
+
+#14 [stage-1 3/4] COPY --from=ghcr.io/mbuccarello/foundation-libxcrypt:latest /include/. /usr/local/include/
+#14 CACHED
+
+#15 [builder 4/7] RUN curl -L -o perl.tar.gz https://www.cpan.org/src/5.0/perl-5.38.2.tar.gz
+#15 CACHED
+
+#16 [builder 6/7] COPY --from=ghcr.io/mbuccarello/foundation-libxcrypt:latest / /artifacts/
+#16 CACHED
+
+#17 [stage-1 2/4] COPY --from=ghcr.io/mbuccarello/foundation-libxcrypt:latest /lib/. /usr/local/lib/
+#17 CACHED
+
+#18 [stage-1 4/4] COPY --from=builder /rootfs/usr/local /usr/local/
+#18 CACHED
+
+#19 exporting to image
+#19 exporting layers done
+#19 exporting manifest sha256:4c363b42184d41dc197a4f103ceeb03f31f06a4b3124fab8ab4efccdd513cb6a
+#19 exporting manifest sha256:4c363b42184d41dc197a4f103ceeb03f31f06a4b3124fab8ab4efccdd513cb6a done
+#19 exporting config sha256:0a691e0cb1d4cb3867c85995abfa269014a61f8e3d88705258c253f68847d01a done
+#19 exporting attestation manifest sha256:c86abba3f24667db67e06cefc6872b20de9e5cd3adeea828e5db8ef0b63e159e 0.0s done
+#19 exporting manifest list sha256:c76b2ad794d28f17d959fa2a9fca6a77efd7779fe2a969f8c46367829dd433d2 0.0s done
+#19 naming to docker.io/library/perl-debug:latest done
+#19 DONE 0.1s
+
+ [33m1 warning found (use docker --debug to expand):
+[0m - FromAsCasing: 'as' and 'FROM' keywords' casing do not match (line 1)
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/p93c5bvkoa4s8422ecaspui02
+--- Verifying Perl Binary ---
+perl: warning: Setting locale failed.
+perl: warning: Please check that your locale settings:
+	LANGUAGE = (unset),
+	LC_ALL = (unset),
+	LANG = "C.UTF-8"
+    are supported and installed on your system.
+perl: warning: Falling back to the standard locale ("C").
+
+This is perl 5, version 38, subversion 2 (v5.38.2) built for x86_64-linux-thread-multi
+
+Copyright 1987-2023, Larry Wall
+
+Perl may be copied only under the terms of either the Artistic License or the
+GNU General Public License, which may be found in the Perl 5 source kit.
+
+Complete documentation for Perl, including FAQ lists, should be found on
+this system using "man perl" or "perldoc perl".  If you have access to the
+Internet, point your browser at https://www.perl.org/, the Perl Home Page.
+
+--- Auditing Linked Libraries ---
+exec /usr/bin/ldd: no such file or directory

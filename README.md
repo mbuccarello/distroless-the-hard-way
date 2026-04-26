@@ -61,17 +61,33 @@ Automated functional assertions that confirm the integrity of the entire stack. 
 
 ---
 
-## Repository Structure
+## Repository Structure & Documentation Index
+
+The project is structured logically to separate operational configuration from architectural documentation and testing.
 
 ```text
 distroless-the-hard-way/
 ├── .github/workflows/         # Layered Orchestration (L1, L2, L3)
 ├── app/                       # Verification applications (Go, PHP, etc.)
-├── docs/                      
+├── debug/                     # Local debugging environments for each runtime
+├── docs/                      # Core Documentation Directory
 │   ├── architecture.md        # Technical System Specification
-│   ├── pipelines.md           # Detailed pipeline documentation
-│   └── gap-analysis.md        # Roadmap and Google Parity tracking
+│   ├── arch-evolution.md      # Historical context on dynamic linking challenges
+│   ├── lib-hierarchy.md       # Detailed breakdown of the sovereign libraries
+│   ├── pipelines.md           # Deep dive into the GitHub Actions orchestration
+│   ├── debugging.md           # Guide on using the local `debug/` environments
+│   ├── gap-analysis.md        # Roadmap and Google parity tracking
+│   ├── e2e-framework.md       # Functional validation framework
+│   ├── test-plan.md           # High-level E2E strategy
+│   ├── SLSA-Level-3.md        # Supply chain security compliance
+│   ├── Signing.md             # Keyless signature verification guides
+│   ├── Semgrep.md             # Static analysis configuration
+│   ├── GHCR-Token.md          # Registry authentication
+│   └── Malcontent.md          # Policy enforcement for supply chain
 ```
+
+**[Explore the full documentation in the `docs/` directory.](docs/)**
+
 
 ---
 

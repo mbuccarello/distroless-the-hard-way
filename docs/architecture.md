@@ -1,3 +1,5 @@
+[<- Back to Main README](../README.md)
+
 # Technical Specification: System Architecture
 
 Distroless The Hard Way implements a modular, Decoupled Component Architecture (DCA) to achieve a zero-trust supply chain. The system is designed to provide bit-perfect reproducibility and cryptographic transparency by eliminating reliance on pre-compiled host OS binaries.

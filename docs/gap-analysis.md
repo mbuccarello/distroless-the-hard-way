@@ -1,3 +1,5 @@
+[<- Back to Main README](../README.md)
+
 # Gap Analysis: Distroless The Hard Way vs. Google Distroless and Wolfi
 
 This document evaluates the architectural alignment of this project with industry standards (Google Distroless) and modern atomic distributions (Wolfi), tracking our progress toward 100% source sovereignty.

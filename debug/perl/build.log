@@ -1,0 +1,166 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 1.35kB done
+#1 WARN: FromAsCasing: 'as' and 'FROM' keywords' casing do not match (line 1)
+#1 DONE 0.0s
+
+#2 [internal] load metadata for ghcr.io/mbuccarello/base-fedora:latest
+#2 DONE 0.1s
+
+#3 [internal] load metadata for ghcr.io/mbuccarello/foundation-libxcrypt:latest
+#3 DONE 0.1s
+
+#4 [internal] load metadata for ghcr.io/mbuccarello/base:latest
+#4 DONE 0.1s
+
+#5 [internal] load .dockerignore
+#5 transferring context: 2B done
+#5 DONE 0.0s
+
+#6 [builder  1/11] FROM ghcr.io/mbuccarello/base-fedora:latest@sha256:1919fee917112bd946684e8d45d34cefd1329dc093a56cfc9a34e906f47f8975
+#6 resolve ghcr.io/mbuccarello/base-fedora:latest@sha256:1919fee917112bd946684e8d45d34cefd1329dc093a56cfc9a34e906f47f8975 0.1s done
+#6 CACHED
+
+#7 FROM ghcr.io/mbuccarello/base:latest@sha256:7e18302fdc148927ac6bb8513960b84ffbad3585f5a9ea3eaeb6ced8471cf9a1
+#7 resolve ghcr.io/mbuccarello/base:latest@sha256:7e18302fdc148927ac6bb8513960b84ffbad3585f5a9ea3eaeb6ced8471cf9a1 0.1s done
+#7 CACHED
+
+#8 FROM ghcr.io/mbuccarello/foundation-libxcrypt:latest@sha256:762ff143eeb6db29921a5f2d88d9efc0fce163aea392035f4f26ddb0c1efcc9c
+#8 resolve ghcr.io/mbuccarello/foundation-libxcrypt:latest@sha256:762ff143eeb6db29921a5f2d88d9efc0fce163aea392035f4f26ddb0c1efcc9c 0.1s done
+#8 CACHED
+
+#9 [stage-1  1/12] COPY --from=ghcr.io/mbuccarello/base:latest / /
+#9 CACHED
+
+#10 [stage-1 2/4] COPY --from=ghcr.io/mbuccarello/foundation-libxcrypt:latest /lib/. /usr/local/lib/
+#10 CACHED
+
+#11 [builder 5/7] RUN tar -xzf perl.tar.gz --strip-components=1
+#11 CACHED
+
+#12 [builder 4/7] RUN curl -L -o perl.tar.gz https://www.cpan.org/src/5.0/perl-5.38.2.tar.gz
+#12 CACHED
+
+#13 [builder 3/7] WORKDIR /build
+#13 CACHED
+
+#14 [builder 2/7] RUN dnf install -y gcc make autoconf bison pkgconfig
+#14 CACHED
+
+#15 [builder 6/7] COPY --from=ghcr.io/mbuccarello/foundation-libxcrypt:latest / /artifacts/
+#15 CACHED
+
+#16 [stage-1 3/4] COPY --from=ghcr.io/mbuccarello/foundation-libxcrypt:latest /include/. /usr/local/include/
+#16 CACHED
+
+#17 [builder 7/7] RUN sh Configure -des     -Dprefix=/usr/local     -Duseshrplib     -Dusethreads     -Dlibpth='/artifacts/lib /usr/lib64 /lib64 /lib'     -Accflags='-I/artifacts/include'     -Aldflags='-Wl,-rpath,/usr/local/lib:/lib64:/lib -L/artifacts/lib'     -Dccdlflags='-Wl,-rpath,/usr/local/lib:/lib64:/lib' &&     make -j$(nproc) &&     make install DESTDIR=/rootfs
+#17 8.286 First let's make sure your kit is complete.  Checking...
+#17 37.24 Locating common programs...
+#17 43.29 Checking compatibility between /usr/bin/echo and builtin echo (if any)...
+#17 44.10 Symbolic links are supported.
+#17 44.18 Checking how to test for symbolic links...
+#17 44.37 You can test for symbolic links with 'test -h'.
+#17 44.45 Checking for cross-compile
+#17 44.46 No targethost for running compiler tests against defined, running locally
+#17 44.65 Good, your tr supports [:lower:] and [:upper:] to convert case.
+#17 44.73 Using [:upper:] and [:lower:] to convert case.
+#17 45.47 aix   	      dragonfly       irix_4   		netbsd        sco_2_3_4   
+#17 45.47 aix_3         dynix   	      irix_5   		newsos4       solaris_2   
+#17 45.47 aix_4         dynixptx        irix_6   		nonstopux     stellar   
+#17 45.47 altos486      epix   	      irix_6_0   	openbsd       sunos_4_0   
+#17 45.47 amigaos       esix4   	      irix_6_1   	opus          sunos_4_1   
+#17 45.47 atheos        fps   	      isc   		os2   	      super-ux   
+#17 45.47 aux_3         freebsd         isc_2   		os390         svr4   
+#17 45.47 bitrig        freemint        linux-android   	os400         svr5   
+#17 45.47 bsdos         gnu   	      linux   		posix-bc      ti1500   
+#17 45.47 catamount     gnukfreebsd     lynxos   		qnx   	      umips   
+#17 45.47 convexos      gnuknetbsd      midnightbsd   	riscos        unicos   
+#17 45.47 cxux          greenhills      minix   		sco   	      unicosmk   
+#17 45.47 cygwin        haiku   	      mips   		sco_2_3_0     unisysdynix   
+#17 45.47 darwin        hpux   	      mirbsd   		sco_2_3_1     utekv   
+#17 45.47 dcosx         i386   	      mpc   		sco_2_3_2     vos   
+#17 45.47 dec_osf       interix         ncr_tower   	sco_2_3_3   
+#17 46.52 Which of these apply, if any? [linux]  
+#17 49.20 Operating system name? [linux]  
+#17 49.82 Operating system version? [6.12.65-linuxkit]  
+#17 50.73 Installation prefix to use? (~name ok) [/usr/local]  
+#17 50.99 AFS may be running... I'll be extra cautious then...
+#17 51.29 What installation prefix should I use for installing files? (~name ok)
+#17 51.29 [/usr/local]  
+#17 52.07 Build a threading Perl? [y]  
+#17 52.51 Use which C compiler? [cc]  
+#17 55.50 Checking for GNU cc in disguise and/or its version number...
+#17 57.83 Now, how can we feed standard input to your C preprocessor...
+#17 60.57 Directories to use for library searches?
+#17 60.57 [/artifacts/lib /usr/lib64 /lib64 /lib /usr/local/lib /usr/lib /lib/../lib64 /usr/lib/../lib64 /usr/local/lib64]  
+#17 60.94 What is the file extension used for shared libraries? [so]  
+#17 61.19 Make shared library basenames unique? [n]  
+#17 61.40 Build Perl for SOCKS? [n]  
+#17 61.67 Try to use long doubles if available? [n]  
+#17 61.80 Checking for optional libraries...
+#17 63.09 What libraries to use? [-lpthread -ldl -lm -lcrypt -lutil -lc]  
+#17 63.45 What optimizer/debugger flag should be used? [-O2]  
+#17 63.52 Checking if your compiler accepts -fno-strict-aliasing
+#17 64.99 Yes, it does.
+#17 64.99 Checking if your compiler accepts -pipe
+#17 66.17 Yes, it does.
+#17 66.17 Checking if your compiler accepts -fstack-protector-strong
+#17 67.57 Yes, it does.
+#17 68.00 Any additional cc flags?
+#17 68.00 [-D_REENTRANT -D_GNU_SOURCE -I/artifacts/include -fwrapv -fno-strict-aliasing -pipe -fstack-protector-strong -I/usr/local/include]  
+#17 68.09 Let me guess what the preprocessor flags are...
+#17 77.09 Any additional ld flags (NOT including libraries)?
+#17 77.09 [ -Wl,-rpath,/usr/local/lib:/lib64:/lib -L/artifacts/lib -fstack-protector-strong -L/usr/local/lib]  
+#17 77.23 Checking your choice of C compiler and flags for coherency...
+#17 79.00 I've tried to compile and run the following simple program:
+#17 79.00 
+#17 79.00 #include <stdio.h>
+#17 79.00 int main() { printf("Ok\n"); return(0); }
+#17 79.00 
+#17 79.00 I used the command:
+#17 79.00 
+#17 79.00 	cc -o try -O2 -D_REENTRANT -D_GNU_SOURCE -I/artifacts/include -fwrapv -fno-strict-aliasing -pipe -fstack-protector-strong -I/usr/local/include -Wl,-rpath,/usr/local/lib:/lib64:/lib -L/artifacts/lib -fstack-protector-strong -L/usr/local/lib try.c -lpthread -ldl -lm -lcrypt -lutil -lc
+#17 79.00 	 ./try
+#17 79.00 
+#17 79.00 and I got the following output:
+#17 79.00 
+#17 79.00 ./try: error while loading shared libraries: libcrypt.so.1: cannot open shared object file: No such file or directory
+#17 79.00 The program compiled OK, but exited with status 127.
+#17 79.07 You have a problem.  Shall I abort Configure [y]  
+#17 79.12 Ok.  Stopping Configure.
+#17 ERROR: process "/bin/sh -c sh Configure -des     -Dprefix=/usr/local     -Duseshrplib     -Dusethreads     -Dlibpth='/artifacts/lib /usr/lib64 /lib64 /lib'     -Accflags='-I/artifacts/include'     -Aldflags='-Wl,-rpath,/usr/local/lib:/lib64:/lib -L/artifacts/lib'     -Dccdlflags='-Wl,-rpath,/usr/local/lib:/lib64:/lib' &&     make -j$(nproc) &&     make install DESTDIR=/rootfs" did not complete successfully: exit code: 1
+------
+ > [builder 7/7] RUN sh Configure -des     -Dprefix=/usr/local     -Duseshrplib     -Dusethreads     -Dlibpth='/artifacts/lib /usr/lib64 /lib64 /lib'     -Accflags='-I/artifacts/include'     -Aldflags='-Wl,-rpath,/usr/local/lib:/lib64:/lib -L/artifacts/lib'     -Dccdlflags='-Wl,-rpath,/usr/local/lib:/lib64:/lib' &&     make -j$(nproc) &&     make install DESTDIR=/rootfs:
+79.00 
+79.00 	cc -o try -O2 -D_REENTRANT -D_GNU_SOURCE -I/artifacts/include -fwrapv -fno-strict-aliasing -pipe -fstack-protector-strong -I/usr/local/include -Wl,-rpath,/usr/local/lib:/lib64:/lib -L/artifacts/lib -fstack-protector-strong -L/usr/local/lib try.c -lpthread -ldl -lm -lcrypt -lutil -lc
+79.00 	 ./try
+79.00 
+79.00 and I got the following output:
+79.00 
+79.00 ./try: error while loading shared libraries: libcrypt.so.1: cannot open shared object file: No such file or directory
+79.00 The program compiled OK, but exited with status 127.
+79.07 You have a problem.  Shall I abort Configure [y]  
+79.12 Ok.  Stopping Configure.
+------
+
+ [33m1 warning found (use docker --debug to expand):
+[0m - FromAsCasing: 'as' and 'FROM' keywords' casing do not match (line 1)
+Dockerfile:14
+--------------------
+  13 |     # We use -Dccdlflags to ensure RPATH is baked into the binary and modules
+  14 | >>> RUN sh Configure -des \
+  15 | >>>     -Dprefix=/usr/local \
+  16 | >>>     -Duseshrplib \
+  17 | >>>     -Dusethreads \
+  18 | >>>     -Dlibpth='/artifacts/lib /usr/lib64 /lib64 /lib' \
+  19 | >>>     -Accflags='-I/artifacts/include' \
+  20 | >>>     -Aldflags='-Wl,-rpath,/usr/local/lib:/lib64:/lib -L/artifacts/lib' \
+  21 | >>>     -Dccdlflags='-Wl,-rpath,/usr/local/lib:/lib64:/lib' && \
+  22 | >>>     make -j$(nproc) && \
+  23 | >>>     make install DESTDIR=/rootfs
+  24 |     
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/sh -c sh Configure -des     -Dprefix=/usr/local     -Duseshrplib     -Dusethreads     -Dlibpth='/artifacts/lib /usr/lib64 /lib64 /lib'     -Accflags='-I/artifacts/include'     -Aldflags='-Wl,-rpath,/usr/local/lib:/lib64:/lib -L/artifacts/lib'     -Dccdlflags='-Wl,-rpath,/usr/local/lib:/lib64:/lib' &&     make -j$(nproc) &&     make install DESTDIR=/rootfs" did not complete successfully: exit code: 1
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/krixwnpsby1sl48drlhfmyct1

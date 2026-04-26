@@ -1,3 +1,5 @@
+[<- Back to Main README](../README.md)
+
 # GitHub Container Registry (GHCR) Authentication
 
 To run "Distroless The Hard Way" in your own repository fork, you must grant GitHub Actions the permission to publish OCI images to `ghcr.io`.
