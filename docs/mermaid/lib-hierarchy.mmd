@@ -1,20 +1,21 @@
 graph TB
-    %% Modern Enterprise Design System
     classDef source fill:#6366f1,stroke:#4338ca,color:#fff,stroke-width:2px,font-weight:bold;
-    classDef fedora fill:#ffffff,stroke:#d97706,color:#92400e,stroke-width:2px,stroke-dasharray: 5 5;
+    classDef fedora fill:#ffffff,stroke:#ef4444,color:#b91c1c,stroke-width:2px,stroke-dasharray: 5 5;
     classDef image fill:#10b981,stroke:#064e3b,color:#fff,stroke-width:2px,font-weight:bold;
     classDef header fill:#0f172a,stroke:#0f172a,color:#fff,font-weight:bold,font-size:16px;
 
     %% Foundations
     subgraph L1_Cont [" "]
         direction TB
-        h1["🏗️ LAYER 1: FOUNDATIONS (HARD WAY)"]:::header
+        h1["🏗️ LAYER 1 & 1.5: SYSTEM & RUNTIME FOUNDATIONS"]:::header
         
         subgraph L1_Content ["&nbsp;"]
             direction LR
-            glibc["✅ [SOURCE] glibc<br/>(libc.so.6)"]
-            openssl["🔐 [SOURCE] openssl<br/>(libssl.so.3)"]
-            zlib["🗜️ [SOURCE] zlib<br/>(libz.so.1)"]
+            glibc["✅ [SOURCE] glibc"]
+            openssl["🔐 [SOURCE] openssl"]
+            libffi["🧩 [SOURCE] libffi"]
+            xml2["📄 [SOURCE] libxml2"]
+            nc["📟 [SOURCE] ncurses"]
         end
     end
     style L1_Cont fill:#ffffff,stroke:#cbd5e1,stroke-width:2px;
@@ -23,70 +24,57 @@ graph TB
     %% Assembly
     subgraph L2_Cont [" "]
         direction TB
-        h2["🚀 LAYER 2: CORE ASSEMBLY"]:::header
+        h2["🚀 LAYER 2: CORE ASSEMBLY (100% SOVEREIGN)"]:::header
         
         subgraph L2_Content ["&nbsp;"]
             direction TB
-            cacert["⚠️ [FEDORA] ca-certificates"]
+            cacert["✅ [SOURCE] ca-certificates"]
             base["📦 base image"]
+            cc_img["🛠️ cc image"]
             
-            subgraph CC_Box ["🛠️ CC Image Content"]
-                direction LR
-                libgcc["✅ [SOURCE] libgcc_s.so.1"]
-                libstd["✅ [SOURCE] libstdc++.so.6"]
-                cc_img["🛠️ cc image"]
-            end
-            
-            cacert -.-> base
+            cacert ===> base
             base ===> cc_img
-            libgcc -.-> cc_img
-            libstd -.-> cc_img
         end
     end
     style L2_Cont fill:#ffffff,stroke:#cbd5e1,stroke-width:2px;
     style L2_Content fill:#ffffff,stroke:none;
-    style CC_Box fill:#f8fafc,stroke:#94a3b8,stroke-dasharray: 5 5;
 
     %% Runtimes
     subgraph L3_Cont [" "]
         direction TB
-        h3["✨ LAYER 3: RUNTIMES & FLAVORS"]:::header
+        h3["✨ LAYER 3: RUNTIMES (PHASE 4 SOVEREIGNTY)"]:::header
         
         subgraph L3_Content ["&nbsp;"]
             direction LR
             
             subgraph PHP ["PHP 8.3"]
-                php_libs["⚠️ [FEDORA] libxml2, pcre2,<br/>libedit, ncurses"]
-                php_bin["🐘 [FEDORA] PHP Interpreter"]
-                php_libs -.-> php_bin
+                php_bin["🐘 [SOURCE] PHP Interpreter"]
             end
 
             subgraph Dotnet [".NET 8.0"]
-                dotnet_libs["⚠️ [FEDORA] libicu, krb5-libs"]
+                dotnet_libs["⚠️ [FEDORA] libicu, krb5"]
                 dotnet_bin["✨ [BINARY] .NET Runtime"]
                 dotnet_libs -.-> dotnet_bin
             end
 
             subgraph Python ["Python 3.12"]
-                py_libs["⚠️ [FEDORA] libffi, expat, readline,<br/>sqlite, gdbm, libdb"]
-                py_bin["🐍 [FEDORA] Python Interpreter"]
-                py_libs -.-> py_bin
+                py_bin["🐍 [SOURCE] Python Interpreter"]
             end
         end
     end
     style L3_Cont fill:#ffffff,stroke:#cbd5e1,stroke-width:2px;
     style L3_Content fill:#ffffff,stroke:none;
-    style PHP fill:#ffffff,stroke:#e2e8f0;
-    style Dotnet fill:#ffffff,stroke:#e2e8f0;
-    style Python fill:#ffffff,stroke:#e2e8f0;
+    style PHP fill:#ffffff,stroke:#10b981;
+    style Dotnet fill:#ffffff,stroke:#fecaca;
+    style Python fill:#ffffff,stroke:#10b981;
 
-    %% Global Connections - CONNECTING CONTAINER TO TARGET NODE
+    %% Global Connections
     L1_Cont ===> base
     cc_img ===> PHP
     cc_img ===> Dotnet
     cc_img ===> Python
 
     %% Applying Classes
-    class glibc,openssl,zlib,libgcc,libstd source;
-    class cacert,php_bin,php_libs,dotnet_bin,dotnet_libs,py_bin,py_libs fedora;
-    class base,cc_img image;
+    class glibc,openssl,libffi,xml2,nc,cacert,php_bin,py_bin source;
+    class dotnet_libs fedora;
+    class base,cc_img,dotnet_bin image;

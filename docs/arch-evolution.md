@@ -33,16 +33,19 @@ We realized that manually managing symlinks is not sustainable for complex runti
 
 ```mermaid
 graph TD
-    subgraph "Assembly Stage (Fedora 40 Extractor)"
-        A[Base Artifacts: Glibc, OpenSSL] --> B[RootFS Preparation]
-        C[Language Runtimes: .NET, PHP] --> B
-        B --> D[ldconfig -r /rootfs]
-        D --> E[Binary ld.so.cache]
+    subgraph "Sovereign Construction (Layer 1 & 1.5)"
+        L1[Core DNA: glibc, openssl] --> L15[Shared Foundations: libxml2, ncurses]
+    end
+
+    subgraph "Compilation Phase (The RPATH Shift)"
+        L15 --> C[Runtime Build: PHP, Python, Perl]
+        C --> D["LDFLAGS: -Wl,-rpath,/usr/local/lib"]
+        D --> E[Self-Aware Binaries]
     end
     
     subgraph "Final Distroless Image (Scratch)"
-        E --> F[Optimized Library Discovery]
-        F --> G[Runtime Execution]
+        E --> F[Atomic Assembly]
+        F --> G[Execution without LD_LIBRARY_PATH]
     end
 ```
 

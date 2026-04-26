@@ -7,41 +7,55 @@ graph TB
     
     subgraph L1_Cont [" "]
         direction TB
-        h1["🏗️ LAYER 1: FOUNDATIONS (GNU-NATIVE)"]:::header
+        h1["🏗️ LAYER 1: SYSTEM FOUNDATIONS"]:::header
         
         subgraph Layer1 ["&nbsp;"]
             direction TB
             F --> B1["build-openssl"]
             F --> B2["build-zlib"]
             F --> B3["build-tzdata"]
-            F --> B4["build-bootstrap"]
-            B1 --> G["build-glibc"]
-            B2 --> G
+            B1 & B2 & B3 --> G["build-glibc"]
             G --> GC["build-gcc"]
         end
     end
     style L1_Cont fill:#ffffff,stroke:#cbd5e1,stroke-width:2px;
     style Layer1 fill:#ffffff,stroke:none;
     
-    GC ===> A["Master Assembly"]:::action
+    GC ===> RF["Master Runtime Foundations"]:::action
+
+    subgraph L15_Cont [" "]
+        direction TB
+        h15["📦 LAYER 1.5: RUNTIME FOUNDATIONS"]:::header
+        
+        subgraph Layer15 ["&nbsp;"]
+            direction TB
+            RF --> L15_1["libffi"]
+            RF --> L15_2["libxml2"]
+            RF --> L15_3["ncurses"]
+        end
+    end
+    style L15_Cont fill:#ffffff,stroke:#cbd5e1,stroke-width:2px;
+    style Layer15 fill:#ffffff,stroke:none;
+
+    L15_1 & L15_2 & L15_3 ===> A["Master Assembly"]:::action
     
     subgraph L2_Cont [" "]
         direction TB
-        h2["🚀 LAYER 2: ASSEMBLY (IMAGE CONSTRUCTION)"]:::header
+        h2["🚀 LAYER 2: ASSEMBLY (CORE & RUNTIMES)"]:::header
 
         subgraph Layer2 ["&nbsp;"]
             direction TB
             A --> AB["assemble-base"]
             AB --> AC["assemble-cc"]
-            AC --> L1["assemble-java"]
-            AC --> L2["assemble-python"]
-            AC --> L3["assemble-nodejs"]
+            AC --> R_JAVA["assemble-java"]
+            AC --> R_PY["assemble-python3"]
+            AC --> R_NODE["assemble-nodejs"]
         end
     end
     style L2_Cont fill:#ffffff,stroke:#cbd5e1,stroke-width:2px;
     style Layer2 fill:#ffffff,stroke:none;
     
-    L1 & L2 & L3 ===> V["Master Validation"]:::action
+    R_JAVA & R_PY & R_NODE ===> V["Master Validation"]:::action
     
     subgraph L3_Cont [" "]
         direction TB
@@ -54,4 +68,4 @@ graph TB
     style L3_Cont fill:#ffffff,stroke:#cbd5e1,stroke-width:2px;
     style Layer3 fill:#ffffff,stroke:none;
 
-    class B1,B2,B3,B4,G,GC,AB,AC,L1,L2,L3,E2E action;
+    class B1,B2,B3,G,GC,L15_1,L15_2,L15_3,AB,AC,R_JAVA,R_PY,R_NODE,E2E action;

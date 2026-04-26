@@ -1,34 +1,34 @@
 sequenceDiagram
     autonumber
     participant Dev as 👤 Blueprint Push (Main)
-    participant Atomic as 📦 Atomic Workflows
-    participant Security as 🛡️ Security Scanners
-    participant Reg as 🏗️ GitHub Registry
-    participant Assembler as ⚙️ Assembler Workflows
+    participant L1 as 🏗️ L1: System Foundations
+    participant L15 as 📦 L1.5: Runtime Foundations
+    participant L2 as ⚙️ L2: Assembly
+    participant Reg as 🏘️ GitHub Container Registry
+    participant Security as 🛡️ Security Gate
     
-    Dev->>Atomic: Trigger foundations build
-    activate Atomic
+    Dev->>L1: Trigger foundations build
+    activate L1
+    L1->>L1: Compile (glibc, openssl, certs)
+    L1->>Security: SAST + SBOM + Cosign
+    Security-->>L1: Pass
+    L1->>Reg: Push System Artifacts
+    deactivate L1
     
-    Atomic->>Security: SAST (Semgrep)
-    Security-->>Atomic: Pass
-    Atomic->>Atomic: Compile native binaries
-    Atomic->>Security: SCA/SBOM (Trivy/Syft)
-    Security-->>Atomic: Pass (Artifact Verified)
-    Atomic->>Security: Sign manifest (Cosign)
+    Reg->>L15: Trigger Runtime Foundations
+    activate L15
+    L15->>Reg: Pull L1 Artifacts
+    L15->>L15: Compile (libffi, ncurses, xml2)
+    L15->>Security: SAST + SBOM + Cosign
+    Security-->>L15: Pass
+    L15->>Reg: Push Library Artifacts
+    deactivate L15
     
-    Atomic->>Reg: Push artifacts-glibc/ssl/zlib
-    deactivate Atomic
-    
-    Note over Reg, Assembler: Atomic foundation artifacts verified
-    
-    Assembler->>Reg: Run assemble-base.yml
-    activate Assembler
-    Assembler->>Reg: Pull verified artifacts
-    Reg-->>Assembler: Download .tar.gz + SBOMs
-    
-    Assembler->>Assembler: Construct Monolithic Base
-    Assembler->>Security: Sign Final OCI Manifest
-    Assembler->>Reg: Push base:latest
-    deactivate Assembler
-    
-    Reg-->>Assembler: Trigger follow-up layers
+    Reg->>L2: Trigger Assembly
+    activate L2
+    L2->>Reg: Pull L1 + L1.5 Artifacts
+    L2->>L2: Construct Runtimes (Python, Java, etc.)
+    L2->>Security: Sign OCI Manifest + SLSA
+    Security-->>L2: Pass
+    L2->>Reg: Push Final Images
+    deactivate L2

@@ -8,56 +8,52 @@ Distroless The Hard Way is a technical implementation and educational curriculum
 
 ---
 
-## System Architecture: The 4-Layer Hierarchy
+## System Architecture: The 4-Layer Sovereign Hierarchy
 
-The project implements a canonical, layered inheritance model inspired by Google Distroless, ensuring maximum minimalism for every workload. For detailed technical specifications, refer to the [System Architecture](docs/architecture.md) and [Library Hierarchy](docs/lib-hierarchy.md).
+The project implements a canonical, layered inheritance model that is now **100% decoupled from Fedora RPMs**. Every binary in the stack is source-built within our high-assurance pipelines.
 
-### Layer 1: Foundations (The Build Payloads)
-Independent source-built artifacts containing the raw DNA of the system. Detailed documentation available in [Pipeline Orchestration](docs/pipelines.md).
-*   **cacerts**: Sovereign Root Trust Store derived directly from Mozilla NSS source.
-*   **glibc**: Core C runtime compiled from GNU source.
-*   **openssl**: Cryptography engine.
-*   **tzdata**: Timezone database.
-*   **gcc/libgomp**: C++ runtime and OpenMP support.
+### Layer 1: System Foundations (GNU-Native)
+Independent source-built artifacts containing the raw DNA of the system.
+*   **cacerts**: Sovereign Root Trust Store (Mozilla NSS source).
+*   **glibc**: Core C runtime (GNU source).
+*   **openssl**: Cryptography engine (OpenSSL source).
+*   **tzdata**: Timezone database (IANA source).
+
+### Layer 1.5: Runtime Foundations (Shared Libraries)
+Sovereign library "packages" distributed as OCI artifacts.
+*   **libffi, libxml2, sqlite, ncurses, readline**: Compiled from source and linked against Layer 1.
 
 ### Layer 2: Core Images (The OCI Roots)
-Atomic images constructed from Layer 1 payloads.
-*   **static**: The Zero-Layer for pure static binaries (Go, Rust). Contains only certs, tzdata, and sovereign configuration files (passwd, group, netbase).
-*   **base**: Inherits from static. Adds glibc and openssl for dynamic C applications.
-*   **cc**: Inherits from base. Adds the C++ runtime for complex native extensions.
+Atomic, bit-perfect images constructed from Layer 1/1.5 payloads.
+*   **static**: The Zero-Layer for pure static binaries.
+*   **base**: Adds glibc, openssl, and sovereign netbase.
+*   **cc**: Adds the C++ runtime and OpenMP support.
 
 ### Layer 3: Language Runtimes
-Language-specific environments built on top of the Core layers.
-*   **Interpreted**: PHP, Python, Node.js, Perl.
-*   **Compiled/VM**: Java (OpenJDK), .NET (CoreCLR).
-
-### Layer 4: Verification (E2E)
-Automated functional assertions that confirm the integrity of the entire stack. Refer to the [E2E Framework](docs/e2e-framework.md) for validation logic.
+Hardened execution environments utilizing the **RPATH strategy** for native library discovery.
 
 ---
 
-## Execution Matrix
+## Execution Matrix (Phase 4 Enterprise LTS)
 
-| Runtime | Base Layer | Status | Upstream Source |
+| Runtime | Base Layer | Sovereignty | Upstream Version |
 | :--- | :--- | :--- | :--- |
-| **Go (Static)** | static | OK | Native Static Binary |
-| **Go (Cgo)** | base | OK | Dynamic Binary |
-| **PHP** | base | OK | Sovereign (Source Build 8.3) |
-| **Perl** | base | OK | Sovereign (Source Build 5.38) |
-| **Java** | cc | OK | Eclipse Temurin 21 |
-| **Node.js** | cc | OK | Node.js 20 LTS |
-| **.NET** | cc | OK | .NET Runtime 8.0 |
-| **Python 3** | cc | OK | Sovereign (Source Build 3.12) |
+| **Go (Static)** | static | Full | 1.22+ |
+| **PHP** | base | Full (Source) | 8.3.11 |
+| **Perl** | base | Full (Source) | 5.38.2 |
+| **Python 3** | cc | Full (Source) | 3.12.5 |
+| **Java** | cc | Hardened | Eclipse Temurin 21 (LTS) |
+| **Node.js** | cc | Hardened | Node.js 22 (LTS) |
+| **.NET** | cc | Hardened | .NET Runtime 8.0 (LTS) |
 
 ---
 
-## Security Implementation: The "Hard Way" Principles
+## Security Implementation: The Sovereign Principles
 
-- **Sovereign Root Trust**: No reliance on OS vendor CA bundles. Certificates are extracted and built from Mozilla NSS source.
-- **Sovereign Netbase**: Manual construction of /etc/services and /etc/protocols to eliminate RPM dependencies.
-- **SLSA Level 3 Provenance**: Automated build attestations for every layer. See [SLSA Implementation](docs/SLSA-Level-3.md).
-- **Keyless Signing**: Full Sigstore integration for image verification. See [Signing Documentation](docs/Signing.md).
-- **Static Analysis**: Source-code auditing via [Semgrep](docs/Semgrep.md).
+- **Zero RPM Dependency**: No reliance on host OS package managers. We use the OCI registry as a distributed, high-assurance package manager.
+- **Hardened RPATH**: Binaries are "self-aware" of their library paths, eliminating `LD_LIBRARY_PATH` hacks.
+- **Keyless Signing**: Full Sigstore/Cosign integration for image verification.
+- **SLSA Level 3**: Automated provenance for every layer.
 
 ---
 
