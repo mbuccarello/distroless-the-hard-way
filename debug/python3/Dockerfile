@@ -43,6 +43,7 @@ FROM scratch
 COPY --from=ghcr.io/mbuccarello/cc:latest / /
 COPY --from=ghcr.io/mbuccarello/foundation-libffi:latest / /
 COPY --from=ghcr.io/mbuccarello/foundation-readline:latest / /
+COPY --from=ghcr.io/mbuccarello/foundation-ncurses:latest / /
 COPY --from=ghcr.io/mbuccarello/foundation-bzip2:latest / /
 COPY --from=ghcr.io/mbuccarello/foundation-liblzma:latest / /
 COPY --from=ghcr.io/mbuccarello/foundation-sqlite:latest / /
