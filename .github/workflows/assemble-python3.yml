@@ -76,6 +76,7 @@ jobs:
           COPY --from=ghcr.io/${{ github.repository_owner }}/cc:latest / /
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libffi:latest / /
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-readline:latest / /
+          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-ncurses:latest / /
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-bzip2:latest / /
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-liblzma:latest / /
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-sqlite:latest / /
