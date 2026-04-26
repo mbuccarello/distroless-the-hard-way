@@ -96,9 +96,12 @@ jobs:
 
       - name: Functional Smoke Test
         run: |
-          dotnet new console -n dotnet-test -o app/dotnet-test
+          # Use our downloaded SDK for the smoke test to avoid host version drift
+          export DOTNET_ROOT=$(pwd)/payload/dotnet
+          export PATH=$DOTNET_ROOT:$PATH
+          dotnet new console -n dotnet-test -o app/dotnet-test -f net8.0
           cp app/test-dotnet.cs app/dotnet-test/Program.cs
-          dotnet publish app/dotnet-test -c Release -r linux-x64 --self-contained false -o app/dotnet-out
+          dotnet publish app/dotnet-test -c Release -r linux-x64 --self-contained false -f net8.0 -o app/dotnet-out
           docker run --rm -v $(pwd)/app/dotnet-out:/app ghcr.io/${{ github.repository_owner }}/dotnet:latest /app/dotnet-test.dll
 
       - name: Sign Distroless Dotnet
