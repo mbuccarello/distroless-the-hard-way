@@ -17,6 +17,13 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         
+      - name: Install Cosign (Direct Binary)
+        run: |
+          curl -O -L "https://github.com/sigstore/cosign/releases/download/v2.4.1/cosign-linux-amd64"
+          sudo mv cosign-linux-amd64 /usr/local/bin/cosign
+          sudo chmod +x /usr/local/bin/cosign
+          cosign version
+
       - name: Download and Strip Official Node.js Binary
         run: |
           mkdir -p payload/raw payload/stripped

@@ -51,8 +51,11 @@ jobs:
           # Base libs (openssl) are in /artifacts/usr, runtime foundations in root of /artifacts
           ENV PKG_CONFIG_PATH=/artifacts/lib/pkgconfig:/artifacts/lib64/pkgconfig:/artifacts/usr/lib64/pkgconfig:/artifacts/usr/lib/pkgconfig
           ENV CPPFLAGS="-I/artifacts/include -I/artifacts/usr/include"
-          
           ENV LDFLAGS="-L/artifacts/lib -L/artifacts/lib64 -L/artifacts/usr/lib64 -L/artifacts/usr/lib -Wl,-rpath,/usr/local/lib:/artifacts/lib:/lib64:/lib"
+          
+          # Explicitly guide GCC for sovereign discovery
+          ENV C_INCLUDE_PATH=/artifacts/include:/artifacts/usr/include
+          ENV LIBRARY_PATH=/artifacts/lib:/artifacts/lib64:/artifacts/usr/lib64:/artifacts/usr/lib
           
           COPY scripts/assemble.sh /usr/local/bin/assemble
           RUN chmod +x /usr/local/bin/assemble

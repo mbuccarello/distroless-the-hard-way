@@ -41,9 +41,9 @@ jobs:
           # Repack clean tarball
           tar -czf payload/dotnet.tar.gz -C payload/dotnet .
           
-          # Use base-fedora to resolve and download native dependencies (libicu, krb5, etc)
+          # Use base-fedora to resolve and download native dependencies (libicu, krb5)
           docker run --rm -v $(pwd)/payload/rpm:/payload ghcr.io/${{ github.repository_owner }}/base-fedora:latest \
-            /bin/sh -c "dnf install -y 'dnf-command(download)' && dnf download --arch x86_64 --resolve --destdir=/payload libicu krb5-libs libxcrypt xz-libs"
+            /bin/sh -c "dnf install -y 'dnf-command(download)' && dnf download --arch x86_64 --resolve --destdir=/payload libicu krb5-libs"
 
       - name: Construct Dotnet Image
         id: push
@@ -53,6 +53,8 @@ jobs:
           RUN dnf install -y cpio
           RUN mkdir -p /rootfs
           COPY --from=ghcr.io/${{ github.repository_owner }}/cc:latest / /rootfs/
+          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-libxcrypt:latest / /rootfs/
+          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-liblzma:latest / /rootfs/
           COPY payload/dotnet.tar.gz /
           COPY payload/rpm /payload
           
