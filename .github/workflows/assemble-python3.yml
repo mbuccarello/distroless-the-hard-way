@@ -19,6 +19,13 @@ jobs:
         
       - name: Authenticate to GitHub Container Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+ 
+      - name: Install Cosign (Direct Binary)
+        run: |
+          curl -O -L "https://github.com/sigstore/cosign/releases/download/v2.4.1/cosign-linux-amd64"
+          sudo mv cosign-linux-amd64 /usr/local/bin/cosign
+          sudo chmod +x /usr/local/bin/cosign
+          cosign version
 
       - name: Construct Python 3 Application Runtime (Source Build)
         id: push
@@ -49,16 +56,16 @@ jobs:
           
           COPY scripts/assemble.sh /usr/local/bin/assemble
           RUN chmod +x /usr/local/bin/assemble
-
-          RUN mkdir -p /tmp/python3-diag && \
-              assemble python3 "./configure --prefix=/usr/local \
+ 
+          RUN mkdir -p /rootfs && \
+              assemble python3 " ./configure --prefix=/usr/local \
               --enable-optimizations \
               --with-system-ffi \
               --with-openssl=/artifacts/usr \
               --with-zlib=/artifacts/usr \
-              --enable-shared" && \
+              --enable-shared && \
               make -j$(nproc) && \
-              make install DESTDIR=/rootfs
+              make install DESTDIR=/rootfs "
           
           # Construct Final Distroless Image
           FROM scratch

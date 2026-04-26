@@ -24,6 +24,13 @@ jobs:
       - name: Authenticate to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
+      - name: Install Cosign (Direct Binary)
+        run: |
+          curl -O -L "https://github.com/sigstore/cosign/releases/download/v2.4.1/cosign-linux-amd64"
+          sudo mv cosign-linux-amd64 /usr/local/bin/cosign
+          sudo chmod +x /usr/local/bin/cosign
+          cosign version
+
       - name: Build Perl Image
         id: build
         run: |
@@ -42,9 +49,9 @@ jobs:
           COPY scripts/assemble.sh /usr/local/bin/assemble
           RUN chmod +x /usr/local/bin/assemble
           
-          # Documentation-driven Configure for relocatable Perl
-          RUN mkdir -p /tmp/perl-diag && \
-              assemble perl "sh Configure -des \
+          # Sovereign source-to-binary compilation of Perl 5.38
+          RUN mkdir -p /rootfs && \
+              assemble perl " sh Configure -des \
               -Dprefix=/usr/local \
               -Duseshrplib \
               -Dusethreads \
@@ -52,9 +59,9 @@ jobs:
               -Dccflags='-I/artifacts/include' \
               -Dldflags='-Wl,-rpath,/usr/local/lib:/artifacts/lib:/lib64:/lib -L/artifacts/lib' \
               -Dccdlflags='-Wl,-rpath,/usr/local/lib:/artifacts/lib:/lib64:/lib' \
-              -Alddlflags='-Wl,-rpath,/usr/local/lib:/artifacts/lib:/lib64:/lib -L/artifacts/lib -shared'" && \
+              -Alddlflags='-Wl,-rpath,/usr/local/lib:/artifacts/lib:/lib64:/lib -L/artifacts/lib -shared' && \
               make -j$(nproc) && \
-              make install DESTDIR=/rootfs
+              make install DESTDIR=/rootfs "
           
           FROM scratch
           COPY --from=ghcr.io/${{ github.repository_owner }}/base:latest / /
