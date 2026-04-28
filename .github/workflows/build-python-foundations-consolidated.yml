@@ -60,8 +60,8 @@ jobs:
           RUN curl -L -o readline.tar.gz https://ftp.gnu.org/gnu/readline/readline-8.2.tar.gz && \
               mkdir readline && tar -xzf readline.tar.gz -C readline --strip-components=1 && \
               cd readline && \
-              ./configure --prefix=/usr --libdir=/usr/lib64 --with-curses && \
-              make -j\$(nproc) TERMCAP_LIB="-L/artifacts/usr/lib64 -lncursesw" && \
+              ./configure --prefix=/usr --libdir=/usr/lib64 --with-curses LDFLAGS="-L/artifacts/usr/lib64" CPPFLAGS="-I/artifacts/usr/include" && \
+              make -j\$(nproc) SHLIB_LIBS="-L/artifacts/usr/lib64 -lncursesw" && \
               make install DESTDIR=/artifacts
           
           # 4. zlib
@@ -105,7 +105,9 @@ jobs:
               make install DESTDIR=/artifacts
 
           # Audit linkage of readline
+          RUN ls -l /artifacts/usr/lib64
           RUN LD_LIBRARY_PATH=/artifacts/usr/lib64 ldd /artifacts/usr/lib64/libreadline.so.8
+          RUN LD_LIBRARY_PATH=/artifacts/usr/lib64 ldd /artifacts/usr/lib64/libreadline.so.8.2
 
           FROM scratch
           COPY --from=builder /artifacts/usr /usr
