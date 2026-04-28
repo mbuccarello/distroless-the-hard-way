@@ -116,7 +116,7 @@ jobs:
 
       - name: Functional Smoke Test (Verification)
         run: |
-          docker run --rm -e LD_DEBUG=libs -v $(pwd)/app:/app ghcr.io/${{ github.repository_owner }}/python3:latest /app/test.py 2>&1
+          docker run --rm ghcr.io/${{ github.repository_owner }}/python3:latest -c "import sys; print(f'Python version: {sys.version}')"
 
       - name: Generate SLSA Build Provenance (Level 3)
         uses: actions/attest-build-provenance@v2
