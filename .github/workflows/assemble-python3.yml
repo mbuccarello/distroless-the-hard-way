@@ -64,6 +64,7 @@ jobs:
           # Explicitly guide GCC for sovereign discovery
           ENV C_INCLUDE_PATH=/artifacts/usr/include
           ENV LIBRARY_PATH=/artifacts/usr/lib64:/artifacts/usr/lib
+          ENV LD_LIBRARY_PATH=/artifacts/usr/lib64:/artifacts/usr/lib
           
           COPY scripts/assemble.sh /usr/local/bin/assemble
           RUN chmod +x /usr/local/bin/assemble
@@ -79,8 +80,8 @@ jobs:
               make install DESTDIR=/rootfs "
           
           # Prepare Standard FHS Symlinks for the final image to assist Rosetta
-          RUN ln -s usr/lib64 /rootfs/lib64 && \
-              ln -s python3.12 /rootfs/usr/local/bin/python3 || true
+          RUN ln -s python3.12 /rootfs/usr/local/bin/python3 || true
+
 
           # Construct Final Distroless Image
           FROM scratch
