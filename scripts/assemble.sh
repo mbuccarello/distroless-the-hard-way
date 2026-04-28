@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+set -o pipefail
 
 # Usage: ./assemble.sh <name> <command...>
 NAME=$1

@@ -70,7 +70,8 @@ jobs:
           RUN chmod +x /usr/local/bin/assemble
  
           RUN mkdir -p /rootfs && \
-              assemble python3 " ./configure --prefix=/usr/local \
+              ls -la /build && \
+              assemble python3 "./configure --prefix=/usr/local \
               --enable-optimizations \
               --with-system-ffi \
               --with-openssl=/artifacts/usr \
