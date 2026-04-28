@@ -64,8 +64,9 @@ jobs:
               cd readline && \
               export LDFLAGS="-L/artifacts/usr/lib64" && \
               export CPPFLAGS="-I/artifacts/usr/include" && \
+              export LD_LIBRARY_PATH="/artifacts/usr/lib64" && \
               ./configure --prefix=/usr --libdir=/usr/lib64 --with-curses && \
-              make -j\$(nproc) && \
+              make -j\$(nproc) SHLIB_LIBS="-L/artifacts/usr/lib64 -ltinfo" && \
               make install DESTDIR=/artifacts
           
           # 4. zlib
@@ -109,7 +110,7 @@ jobs:
               make install DESTDIR=/artifacts
 
           # Audit linkage of readline
-          RUN ldd /artifacts/usr/lib64/libreadline.so.8
+          RUN LD_LIBRARY_PATH=/artifacts/usr/lib64 ldd /artifacts/usr/lib64/libreadline.so.8
 
           FROM scratch
           COPY --from=builder /artifacts/usr /usr
