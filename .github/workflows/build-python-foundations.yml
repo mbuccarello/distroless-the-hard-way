@@ -85,7 +85,6 @@ jobs:
                 make -j\$(nproc) || (make V=1 && exit 1) && \
                 make install DESTDIR=/artifacts; \
               elif [ "${{ matrix.name }}" = "bzip2" ]; then \
-                # bzip2 special build for shared libraries
                 make -f Makefile-libbz2_so && \
                 make install PREFIX=/artifacts/usr && \
                 cp -a libbz2.so* /artifacts/usr/lib/ || cp -a libbz2.so* /artifacts/usr/lib64/; \
