@@ -53,7 +53,8 @@ jobs:
 
           WORKDIR /build
           RUN curl -L -o python.tar.gz https://www.python.org/ftp/python/3.12.5/Python-3.12.5.tgz
-          RUN tar -xzf python.tar.gz --strip-components=1
+          RUN tar -xzf python.tar.gz
+          WORKDIR /build/Python-3.12.5
           
           # Configure and Build
           # Base libs (openssl) and python foundations are now all standardized in /artifacts/usr
