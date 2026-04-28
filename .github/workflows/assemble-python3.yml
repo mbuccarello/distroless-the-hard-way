@@ -84,6 +84,7 @@ jobs:
           COPY --from=builder /rootfs /
           
           ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+          ENV LD_LIBRARY_PATH=/usr/local/lib:/usr/lib64:/usr/lib
           ENV LANG=C.UTF-8
           ENTRYPOINT ["/usr/local/bin/python3"]
           CMD ["--version"]
