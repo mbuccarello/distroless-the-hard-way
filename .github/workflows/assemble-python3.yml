@@ -34,21 +34,14 @@ jobs:
           FROM ghcr.io/${{ github.repository_owner }}/base-fedora:latest as builder
           RUN dnf install -y gcc make autoconf pkg-config
           
-          # Inject Sovereign Foundations (Python Specific)
+          # Inject Sovereign Foundations (Python Consolidated)
           COPY --from=ghcr.io/${{ github.repository_owner }}/cc:latest / /artifacts/
-          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-python-libffi:latest /usr /artifacts/usr/
-          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-python-readline:latest /usr /artifacts/usr/
-          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-python-ncurses:latest /usr /artifacts/usr/
-          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-python-bzip2:latest /usr /artifacts/usr/
-          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-python-liblzma:latest /usr /artifacts/usr/
-          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-python-sqlite:latest /usr /artifacts/usr/
-          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-python-libxcrypt:latest /usr /artifacts/usr/
+          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-python-consolidated:latest /usr /artifacts/usr/
           
-          # Inject System Foundations (OpenSSL, Zlib) from artifacts
-          COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-zlib:latest /zlib-layer.tar.gz /
+          # Inject System Foundations (OpenSSL) from artifacts
+          # zlib is now included in consolidated foundations, but we keep the system one if needed for other layers
           COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-openssl:latest /openssl-layer.tar.gz /
           RUN mkdir -p /artifacts/usr && \
-              tar -xzf /zlib-layer.tar.gz -C /artifacts/usr && \
               tar -xzf /openssl-layer.tar.gz -C /artifacts/usr
 
           WORKDIR /build
@@ -56,7 +49,7 @@ jobs:
           RUN tar -xzf python.tar.gz --strip-components=1
           
           # Configure and Build
-          # Base libs (openssl) and python foundations are now all standardized in /artifacts/usr
+          # Base libs (openssl) and python foundations are now all consolidated in /artifacts/usr
           ENV PKG_CONFIG_PATH=/artifacts/usr/lib64/pkgconfig:/artifacts/usr/lib/pkgconfig
           ENV CPPFLAGS="-I/artifacts/usr/include"
           ENV LDFLAGS="-L/artifacts/usr/lib64 -L/artifacts/usr/lib -Wl,-rpath,/usr/local/lib:/usr/lib64:/usr/lib"
@@ -64,12 +57,13 @@ jobs:
           # Explicitly guide GCC for sovereign discovery
           ENV C_INCLUDE_PATH=/artifacts/usr/include
           ENV LIBRARY_PATH=/artifacts/usr/lib64:/artifacts/usr/lib
-          ENV LD_LIBRARY_PATH=/artifacts/usr/lib64:/artifacts/usr/lib
+          # LD_LIBRARY_PATH is NOT set globally to avoid breaking system tools (like awk) during build
           
           COPY scripts/assemble.sh /usr/local/bin/assemble
           RUN chmod +x /usr/local/bin/assemble
  
           RUN mkdir -p /rootfs && \
+              LD_LIBRARY_PATH=/artifacts/usr/lib64:/artifacts/usr/lib \
               assemble python3 "./configure --prefix=/usr/local \
               --enable-optimizations \
               --with-system-ffi \
@@ -86,13 +80,7 @@ jobs:
           # Construct Final Distroless Image
           FROM scratch
           COPY --from=ghcr.io/${{ github.repository_owner }}/cc:latest / /
-          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-python-libffi:latest /usr /usr/
-          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-python-readline:latest /usr /usr/
-          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-python-ncurses:latest /usr /usr/
-          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-python-bzip2:latest /usr /usr/
-          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-python-liblzma:latest /usr /usr/
-          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-python-sqlite:latest /usr /usr/
-          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-python-libxcrypt:latest /usr /usr/
+          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-python-consolidated:latest /usr /usr/
           COPY --from=builder /rootfs /
           
           ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
