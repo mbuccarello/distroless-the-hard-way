@@ -78,8 +78,7 @@ jobs:
 
 
           # Construct Final Distroless Image
-          FROM scratch
-          COPY --from=ghcr.io/${{ github.repository_owner }}/cc:latest / /
+          FROM ghcr.io/${{ github.repository_owner }}/base:latest
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-python-consolidated:latest /usr /usr/
           COPY --from=builder /rootfs /
           
@@ -116,7 +115,7 @@ jobs:
 
       - name: Functional Smoke Test (Verification)
         run: |
-          docker run --rm ghcr.io/${{ github.repository_owner }}/python3:latest -c "import readline; print('Readline loaded successfully')"
+          docker run --rm -v $(pwd)/app:/app ghcr.io/${{ github.repository_owner }}/python3:latest /app/test.py
 
       - name: Generate SLSA Build Provenance (Level 3)
         uses: actions/attest-build-provenance@v2
