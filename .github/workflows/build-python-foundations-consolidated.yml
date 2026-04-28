@@ -44,19 +44,17 @@ jobs:
               make -j\$(nproc) && \
               make install DESTDIR=/artifacts
           
-          # 2. ncurses (for terminfo and readline)
+          # 2. ncurses (with wide-character support and termlib)
           RUN curl -L -o ncurses.tar.gz https://ftp.gnu.org/gnu/ncurses/ncurses-6.4.tar.gz && \
               mkdir ncurses && tar -xzf ncurses.tar.gz -C ncurses --strip-components=1 && \
               cd ncurses && \
-              ./configure --prefix=/usr --libdir=/usr/lib64 --with-shared --without-debug --without-ada --enable-widec --with-termlib && \
+              ./configure --prefix=/usr --libdir=/usr/lib64 --with-shared --with-termlib --enable-widec && \
               make -j\$(nproc) && \
               make install DESTDIR=/artifacts && \
-              ln -s /artifacts/usr/include/ncursesw/ncurses.h /artifacts/usr/include/ncurses.h || true && \
-              ln -s /artifacts/usr/include/ncursesw/term.h /artifacts/usr/include/term.h || true && \
-              ln -s libncursesw.so.6 /artifacts/usr/lib64/libncurses.so.6 || true && \
-              ln -s libncursesw.so.6 /artifacts/usr/lib64/libtinfo.so.6 || true && \
-              ln -s libncurses.so.6 /artifacts/usr/lib64/libncurses.so || true && \
-              ln -s libtinfo.so.6 /artifacts/usr/lib64/libtinfo.so || true
+              ln -s libncursesw.so.6 /artifacts/usr/lib64/libncurses.so.6 && \
+              ln -s libtinfow.so.6 /artifacts/usr/lib64/libtinfo.so.6 && \
+              ln -s libncurses.so.6 /artifacts/usr/lib64/libncurses.so && \
+              ln -s libtinfo.so.6 /artifacts/usr/lib64/libtinfo.so
           
           # 3. readline (linked against ncurses/tinfo)
           RUN curl -L -o readline.tar.gz https://ftp.gnu.org/gnu/readline/readline-8.2.tar.gz && \
