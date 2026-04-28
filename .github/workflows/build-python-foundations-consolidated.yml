@@ -44,27 +44,24 @@ jobs:
               make -j\$(nproc) && \
               make install DESTDIR=/artifacts
           
-          # 2. ncurses (with wide-character support and termlib)
+          # 2. ncurses (consolidated into libncursesw)
           RUN curl -L -o ncurses.tar.gz https://ftp.gnu.org/gnu/ncurses/ncurses-6.4.tar.gz && \
               mkdir ncurses && tar -xzf ncurses.tar.gz -C ncurses --strip-components=1 && \
               cd ncurses && \
-              ./configure --prefix=/usr --libdir=/usr/lib64 --with-shared --with-termlib --enable-widec && \
+              ./configure --prefix=/usr --libdir=/usr/lib64 --with-shared --without-termlib --enable-widec && \
               make -j\$(nproc) && \
               make install DESTDIR=/artifacts && \
               ln -s libncursesw.so.6 /artifacts/usr/lib64/libncurses.so.6 && \
-              ln -s libtinfow.so.6 /artifacts/usr/lib64/libtinfo.so.6 && \
+              ln -s libncursesw.so.6 /artifacts/usr/lib64/libtinfo.so.6 && \
               ln -s libncurses.so.6 /artifacts/usr/lib64/libncurses.so && \
               ln -s libtinfo.so.6 /artifacts/usr/lib64/libtinfo.so
           
-          # 3. readline (linked against ncurses/tinfo)
+          # 3. readline (linked against ncursesw)
           RUN curl -L -o readline.tar.gz https://ftp.gnu.org/gnu/readline/readline-8.2.tar.gz && \
               mkdir readline && tar -xzf readline.tar.gz -C readline --strip-components=1 && \
               cd readline && \
-              export LDFLAGS="-L/artifacts/usr/lib64" && \
-              export CPPFLAGS="-I/artifacts/usr/include" && \
-              export LD_LIBRARY_PATH="/artifacts/usr/lib64" && \
               ./configure --prefix=/usr --libdir=/usr/lib64 --with-curses && \
-              make -j\$(nproc) SHLIB_LIBS="-L/artifacts/usr/lib64 -ltinfo" && \
+              make -j\$(nproc) TERMCAP_LIB="-L/artifacts/usr/lib64 -lncursesw" && \
               make install DESTDIR=/artifacts
           
           # 4. zlib
