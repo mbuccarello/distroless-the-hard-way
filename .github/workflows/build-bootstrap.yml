@@ -86,7 +86,7 @@ jobs:
           docker push ghcr.io/${{ github.repository_owner }}/bootstrap:latest
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@v3.5.0
+        uses: sigstore/cosign-installer@v4.1.1
         
       - name: Sign Bootstrap Distroless Core
         run: cosign sign --yes ghcr.io/${{ github.repository_owner }}/bootstrap:latest
