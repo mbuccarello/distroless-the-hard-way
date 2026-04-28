@@ -1,0 +1,131 @@
+name: "Layer 1.5: Python Runtime Foundations (Consolidated)"
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/build-python-foundations-consolidated.yml"
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  build-consolidated:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        
+      - name: Authenticate to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        
+      - name: Build Consolidated Foundations
+        id: build
+        run: |
+          cat <<EOF > Dockerfile
+          FROM ghcr.io/${{ github.repository_owner }}/base-fedora:latest as builder
+          RUN dnf install -y gcc make autoconf automake libtool perl perl-open diffutils tar gzip xz bzip2
+          
+          WORKDIR /build
+          
+          # Setup artifacts dir
+          RUN mkdir -p /artifacts/usr/lib64 /artifacts/usr/include
+          
+          # 1. libffi
+          RUN curl -L -o libffi.tar.gz https://github.com/libffi/libffi/releases/download/v3.4.6/libffi-3.4.6.tar.gz && \
+              mkdir libffi && tar -xzf libffi.tar.gz -C libffi --strip-components=1 && \
+              cd libffi && \
+              ./configure --prefix=/usr --libdir=/usr/lib64 --disable-static && \
+              make -j\$(nproc) && \
+              make install DESTDIR=/artifacts
+          
+          # 2. ncurses (for terminfo and readline)
+          RUN curl -L -o ncurses.tar.gz https://ftp.gnu.org/gnu/ncurses/ncurses-6.4.tar.gz && \
+              mkdir ncurses && tar -xzf ncurses.tar.gz -C ncurses --strip-components=1 && \
+              cd ncurses && \
+              ./configure --prefix=/usr --libdir=/usr/lib64 --with-shared --without-debug --without-ada --enable-widec --with-termlib && \
+              make -j\$(nproc) && \
+              make install DESTDIR=/artifacts && \
+              ln -s /artifacts/usr/include/ncursesw/ncurses.h /artifacts/usr/include/ncurses.h || true && \
+              ln -s /artifacts/usr/include/ncursesw/term.h /artifacts/usr/include/term.h || true && \
+              ln -s libncursesw.so.6 /artifacts/usr/lib64/libncurses.so.6 || true && \
+              ln -s libncursesw.so.6 /artifacts/usr/lib64/libtinfo.so.6 || true && \
+              ln -s libncurses.so.6 /artifacts/usr/lib64/libncurses.so || true && \
+              ln -s libtinfo.so.6 /artifacts/usr/lib64/libtinfo.so || true
+          
+          # 3. readline (linked against ncurses/tinfo)
+          RUN curl -L -o readline.tar.gz https://ftp.gnu.org/gnu/readline/readline-8.2.tar.gz && \
+              mkdir readline && tar -xzf readline.tar.gz -C readline --strip-components=1 && \
+              cd readline && \
+              export LDFLAGS="-L/artifacts/usr/lib64" && \
+              export CPPFLAGS="-I/artifacts/usr/include" && \
+              ./configure --prefix=/usr --libdir=/usr/lib64 --with-curses && \
+              make -j\$(nproc) && \
+              make install DESTDIR=/artifacts
+          
+          # 4. zlib
+          RUN curl -L -o zlib.tar.gz https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz && \
+              mkdir zlib && tar -xzf zlib.tar.gz -C zlib --strip-components=1 && \
+              cd zlib && \
+              ./configure --prefix=/usr --libdir=/usr/lib64 && \
+              make -j\$(nproc) && \
+              make install DESTDIR=/artifacts
+              
+          # 5. bzip2
+          RUN curl -L -o bzip2.tar.gz https://sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz && \
+              mkdir bzip2 && tar -xzf bzip2.tar.gz -C bzip2 --strip-components=1 && \
+              cd bzip2 && \
+              make -f Makefile-libbz2_so && \
+              make install PREFIX=/artifacts/usr && \
+              cp -a libbz2.so* /artifacts/usr/lib64/
+              
+          # 6. liblzma (xz)
+          RUN curl -L -o xz.tar.gz https://github.com/tukaani-project/xz/releases/download/v5.6.2/xz-5.6.2.tar.gz && \
+              mkdir xz && tar -xzf xz.tar.gz -C xz --strip-components=1 && \
+              cd xz && \
+              ./configure --prefix=/usr --libdir=/usr/lib64 && \
+              make -j\$(nproc) && \
+              make install DESTDIR=/artifacts
+              
+          # 7. sqlite
+          RUN curl -L -o sqlite.tar.gz https://www.sqlite.org/2024/sqlite-autoconf-3460000.tar.gz && \
+              mkdir sqlite && tar -xzf sqlite.tar.gz -C sqlite --strip-components=1 && \
+              cd sqlite && \
+              ./configure --prefix=/usr --libdir=/usr/lib64 && \
+              make -j\$(nproc) && \
+              make install DESTDIR=/artifacts
+              
+          # 8. libxcrypt
+          RUN curl -L -o libxcrypt.tar.xz https://github.com/besser82/libxcrypt/releases/download/v4.4.36/libxcrypt-4.4.36.tar.xz && \
+              mkdir libxcrypt && tar -xJf libxcrypt.tar.xz -C libxcrypt --strip-components=1 && \
+              cd libxcrypt && \
+              ./configure --prefix=/usr --libdir=/usr/lib64 --enable-hashes=strong,glibc --enable-obsolete-api=yes && \
+              make -j\$(nproc) && \
+              make install DESTDIR=/artifacts
+
+          # Audit linkage of readline
+          RUN ldd /artifacts/usr/lib64/libreadline.so.8
+
+          FROM scratch
+          COPY --from=builder /artifacts/usr /usr
+          EOF
+          
+          IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/foundation-python-consolidated:latest
+          docker build -t $IMAGE_NAME .
+          docker push $IMAGE_NAME
+          
+          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "$IMAGE_NAME" | cut -d'@' -f2)
+          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
+          echo "image_name=$IMAGE_NAME" >> $GITHUB_OUTPUT
+
+      - name: Generate SLSA Build Provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ghcr.io/${{ github.repository_owner }}/foundation-python-consolidated
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
