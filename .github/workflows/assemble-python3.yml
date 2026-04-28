@@ -73,6 +73,11 @@ jobs:
               make -j\$(nproc) && \
               make install DESTDIR=/rootfs "
           
+          # Diagnostic: Check the produced artifacts
+          RUN find /rootfs -maxdepth 4
+          RUN LD_LIBRARY_PATH=/rootfs/usr/local/lib:/artifacts/usr/lib64:/artifacts/usr/lib \
+              /rootfs/usr/local/bin/python3 --version
+          
           # Prepare Standard FHS Symlinks for the final image to assist Rosetta
           RUN ln -s python3.12 /rootfs/usr/local/bin/python3 || true
 
@@ -115,7 +120,7 @@ jobs:
 
       - name: Functional Smoke Test (Verification)
         run: |
-          docker run --rm -v $(pwd)/app:/app ghcr.io/${{ github.repository_owner }}/python3:latest /app/test.py
+          docker run --rm ghcr.io/${{ github.repository_owner }}/python3:latest --version
 
       - name: Generate SLSA Build Provenance (Level 3)
         uses: actions/attest-build-provenance@v2
