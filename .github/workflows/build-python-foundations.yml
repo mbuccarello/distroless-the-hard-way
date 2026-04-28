@@ -76,13 +76,19 @@ jobs:
           
           # Build Logic: Force -fPIC for all static libs to allow linking into shared modules
           # Use merged-usr architecture for Python foundations
-          RUN export CFLAGS="-O2 -fPIC -I/artifacts/usr/include" && \
+          RUN mkdir -p /artifacts/usr && \
+              export CFLAGS="-O2 -fPIC -I/artifacts/usr/include" && \
               export CXXFLAGS="-O2 -fPIC -I/artifacts/usr/include" && \
               export LDFLAGS="-L/artifacts/usr/lib64 -L/artifacts/usr/lib" && \
               if [ -f "./configure" ]; then \
                 ./configure --prefix=/usr --libdir=/usr/lib64 ${{ matrix.config }} || (cat config.log && exit 1) && \
                 make -j\$(nproc) || (make V=1 && exit 1) && \
                 make install DESTDIR=/artifacts; \
+              elif [ "${{ matrix.name }}" = "bzip2" ]; then \
+                # bzip2 special build for shared libraries
+                make -f Makefile-libbz2_so && \
+                make install PREFIX=/artifacts/usr && \
+                cp -a libbz2.so* /artifacts/usr/lib/ || cp -a libbz2.so* /artifacts/usr/lib64/; \
               else \
                 make -j\$(nproc) PREFIX=/usr CFLAGS="-O2 -fPIC -I/artifacts/usr/include" LDFLAGS="-L/artifacts/usr/lib64 -L/artifacts/usr/lib" || (make V=1 PREFIX=/usr CFLAGS="-O2 -fPIC" && exit 1) && \
                 make install PREFIX=/usr DESTDIR=/artifacts CFLAGS="-O2 -fPIC"; \
