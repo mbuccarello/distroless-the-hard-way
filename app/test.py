@@ -9,6 +9,7 @@ print(f"Platform: {platform.platform()}")
 # Check for core functional capabilities
 modules = ['sqlite3', 'ctypes', 'ssl', 'bz2', 'lzma', 'readline']
 for mod in modules:
+    print(f"Attempting to import '{mod}'...")
     try:
         __import__(mod)
         print(f"[OK] Module '{mod}' is loaded.")
