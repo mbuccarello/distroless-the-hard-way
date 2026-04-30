@@ -1,4 +1,5 @@
 # syntax=docker/dockerfile:1.4
+FROM scratch as empty
 FROM ghcr.io/mbuccarello/base-fedora:latest as builder
 RUN dnf install -y gcc make autoconf automake libtool perl perl-open diffutils patch
 WORKDIR /build

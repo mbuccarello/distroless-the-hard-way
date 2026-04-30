@@ -16,9 +16,17 @@ variable "GLOBAL_LDFLAGS" {
   default = "-L/artifacts/usr/lib64 -L/artifacts/usr/lib"
 }
 
+target "empty" {
+  dockerfile = "Dockerfile"
+  target = "empty"
+}
+
 target "foundation-base" {
   dockerfile = "Dockerfile"
   context = "."
+  contexts = {
+    deps = "target:empty"
+  }
   args = {
     CFLAGS = GLOBAL_CFLAGS
     LDFLAGS = GLOBAL_LDFLAGS
