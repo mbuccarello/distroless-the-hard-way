@@ -54,12 +54,13 @@ target "readline" {
   }
   args = {
     LIB_NAME = "readline"
-    LIB_URL = "https://ftp.gnu.org/gnu/readline/readline-8.2.tar.gz"
-    LIB_SHA = "3feb7171f16a84ee82ca18a36d7b9be109a52c04f492a053331d7d1095007c35"
+    LIB_URL = "https://ftp.gnu.org/gnu/readline/readline-8.3.tar.gz"
+    LIB_SHA = "fe5383204467828cd495ee8d1d3c037a7eba1389c22bc6a041f627976f9061cc"
     # Arch Intelligence: Use curses and multibyte
     LIB_CONFIG = "--with-curses --enable-multibyte"
     # Arch Intelligence: Link against ncursesw via our linker scripts
     LDFLAGS_EXTRA = "-lncursesw"
+    MAKE_EXTRA = "SHLIB_LIBS=-lncursesw"
   }
   tags = ["${REGISTRY}/foundation-python-readline:latest"]
 }

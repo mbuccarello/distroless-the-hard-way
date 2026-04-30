@@ -9,6 +9,7 @@ ARG LIB_URL
 ARG LIB_SHA
 ARG LIB_CONFIG=""
 ARG LDFLAGS_EXTRA=""
+ARG MAKE_EXTRA=""
 
 # Mount dependencies from the 'deps' stage
 # If not overridden by Bake, 'deps' is just an empty scratch stage
@@ -29,8 +30,8 @@ ENV LDFLAGS="-L/artifacts/usr/lib64 -L/artifacts/usr/lib ${LDFLAGS_EXTRA}"
 
 RUN if [ -f "./configure" ]; then \
       ./configure --prefix=/usr --libdir=/usr/lib64 ${LIB_CONFIG} || (cat config.log && exit 1) && \
-      make -j$(nproc) || (make V=1 && exit 1) && \
-      make install DESTDIR=/artifacts; \
+      make -j$(nproc) ${MAKE_EXTRA} || (make V=1 ${MAKE_EXTRA} && exit 1) && \
+      make install DESTDIR=/artifacts ${MAKE_EXTRA}; \
     elif [ "${LIB_NAME}" = "openssl" ]; then \
       ./Configure --prefix=/usr --libdir=lib64 ${LIB_CONFIG} && \
       make -j$(nproc) && \
