@@ -41,7 +41,10 @@ ENV CFLAGS="-O2 -fPIC -I/artifacts/usr/include -I/artifacts/usr/include/ncursesw
 ENV CXXFLAGS="-O2 -fPIC -I/artifacts/usr/include -I/artifacts/usr/include/ncursesw"
 ENV LDFLAGS="-L/artifacts/usr/lib64 -L/artifacts/usr/lib ${LDFLAGS_EXTRA}"
 
-RUN if [ -f "./configure" ]; then \
+RUN if [ ! -f "./configure" ] && [ -f "./autogen.sh" ]; then \
+      ./autogen.sh; \
+    fi && \
+    if [ -f "./configure" ]; then \
       ./configure --prefix=/usr --libdir=/usr/lib64 ${LIB_CONFIG} || (cat config.log && exit 1) && \
       make -j$(nproc) ${MAKE_EXTRA} || (make V=1 ${MAKE_EXTRA} && exit 1) && \
       make install DESTDIR=/artifacts ${MAKE_EXTRA}; \

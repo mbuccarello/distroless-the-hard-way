@@ -21,7 +21,7 @@ CRITICAL_FLAGS = {
 
 # Some packages require specific make flags (like Arch does for readline)
 CRITICAL_MAKE = {
-    "readline": "SHLIB_LIBS='-lncursesw -ltinfo'"
+    "readline": 'SHLIB_LIBS=\\"-lncursesw -ltinfo\\"'
 }
 
 def fetch_pkgbuild(pkgname, dest_dir):
