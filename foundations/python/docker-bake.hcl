@@ -42,7 +42,7 @@ target "ncurses" {
     LIB_URL = "https://ftp.gnu.org/gnu/ncurses/ncurses-6.4.tar.gz"
     LIB_SHA = "6931283d9ac87c5073f30b6290c4c75f21632bb4fc3603ac8100812bed248159"
     # Arch Intelligence: Comprehensive flags for ABI stability
-    LIB_CONFIG = "--with-shared --enable-widec --enable-pc-files --with-cxx-binding --with-cxx-shared --without-ada --disable-root-access --disable-root-environ --disable-setuid-environ"
+    LIB_CONFIG = "--with-shared --enable-widec --enable-pc-files --with-cxx-binding --with-cxx-shared --without-ada --disable-root-access --disable-root-environ --disable-setuid-environ --enable-lp64"
   }
   tags = ["${REGISTRY}/foundation-python-ncurses:latest"]
 }

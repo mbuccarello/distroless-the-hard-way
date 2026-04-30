@@ -110,9 +110,15 @@ jobs:
 
       - name: Functional Smoke Test (Verification)
         run: |
+          IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/python3:latest
+          echo "--- Image Linkage Analysis ---"
+          docker run --rm $IMAGE_NAME ldd /usr/local/bin/python3.12 || true
+          docker run --rm $IMAGE_NAME ldd /usr/lib64/libreadline.so.8 || true
+          docker run --rm $IMAGE_NAME find /usr/local/lib/python3.12/lib-dynload -name "readline*" -exec ldd {} \; || true
+          
           for mod in sqlite3 ctypes ssl bz2 lzma readline; do
             echo "Testing $mod..."
-            docker run --rm ghcr.io/${{ github.repository_owner }}/python3:latest -c "import $mod; print('$mod OK')"
+            docker run --rm $IMAGE_NAME -c "import $mod; print('$mod OK')"
           done
 
       - name: Generate SLSA Build Provenance (Level 3)
