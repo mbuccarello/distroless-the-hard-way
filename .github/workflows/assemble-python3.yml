@@ -124,9 +124,9 @@ jobs:
           docker run --rm $IMAGE_NAME ldd /usr/lib64/libreadline.so.8 || true
           docker run --rm $IMAGE_NAME find /usr/local/lib/python3.12/lib-dynload -name "readline*" -exec ldd {} \; || true
           
-          for mod in sqlite3 ctypes ssl bz2 lzma readline; do
+          for mod in sqlite3 ctypes ssl bz2 lzma _curses readline; do
             echo "Testing $mod..."
-            docker run --rm $IMAGE_NAME -v -c "import $mod; print('$mod OK')"
+            docker run --rm $IMAGE_NAME -c "import $mod; print('$mod OK')"
           done
 
       - name: Generate SLSA Build Provenance (Level 3)
