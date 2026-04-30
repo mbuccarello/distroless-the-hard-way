@@ -130,6 +130,7 @@ def main():
         if pkg in DEPENDENCIES:
             hcl += '  contexts = {\n'
             for dep in DEPENDENCIES[pkg]:
+                hcl += f'    deps = "target:{dep}"\n'
                 hcl += f'    {dep} = "target:{dep}"\n'
             hcl += '  }\n'
             

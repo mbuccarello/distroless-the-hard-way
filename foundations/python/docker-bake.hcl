@@ -29,6 +29,7 @@ target "readline" {
     MAKE_EXTRA = "SHLIB_LIBS=\"-lncursesw -ltinfo\""
   }
   contexts = {
+    deps = "target:ncurses"
     ncurses = "target:ncurses"
   }
   tags = ["${REGISTRY}/foundation-python-readline:latest"]
