@@ -31,10 +31,14 @@ RUN if [ -f "./configure" ]; then \
       ./configure --prefix=/usr --libdir=/usr/lib64 ${LIB_CONFIG} || (cat config.log && exit 1) && \
       make -j$(nproc) || (make V=1 && exit 1) && \
       make install DESTDIR=/artifacts; \
+    elif [ "${LIB_NAME}" = "openssl" ]; then \
+      ./Configure --prefix=/usr --libdir=lib64 ${LIB_CONFIG} && \
+      make -j$(nproc) && \
+      make install_sw DESTDIR=/artifacts; \
     elif [ "${LIB_NAME}" = "bzip2" ]; then \
       make -f Makefile-libbz2_so && \
       make install PREFIX=/artifacts/usr && \
-      cp -a libbz2.so* /artifacts/usr/lib/ || cp -a libbz2.so* /artifacts/usr/lib64/; \
+      cp -a libbz2.so* /artifacts/usr/lib64/; \
     else \
       make -j$(nproc) PREFIX=/usr CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}" && \
       make install PREFIX=/usr DESTDIR=/artifacts CFLAGS="${CFLAGS}"; \

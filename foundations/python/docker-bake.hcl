@@ -94,6 +94,30 @@ target "liblzma" {
   tags = ["${REGISTRY}/foundation-python-liblzma:latest"]
 }
 
+target "zlib" {
+  inherits = ["foundation-base"]
+  args = {
+    LIB_NAME = "zlib"
+    LIB_URL = "https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz"
+    LIB_SHA = "9a93b2b7dfdac77ce3c6974bcbd9c00548af549ee2f30521920e1d6ba1793707"
+  }
+  tags = ["${REGISTRY}/foundation-python-zlib:latest"]
+}
+
+target "openssl" {
+  inherits = ["foundation-base"]
+  args = {
+    LIB_NAME = "openssl"
+    LIB_URL = "https://github.com/openssl/openssl/releases/download/openssl-3.3.1/openssl-3.3.1.tar.gz"
+    LIB_SHA = "1677c44cf9ffba457499691f5efbd83b8e7998397a2203699478e9417852a149"
+    LIB_CONFIG = "shared zlib --with-zlib-include=/artifacts/usr/include --with-zlib-lib=/artifacts/usr/lib64"
+  }
+  contexts = {
+    deps = "target:zlib"
+  }
+  tags = ["${REGISTRY}/foundation-python-openssl:latest"]
+}
+
 target "libxcrypt" {
   inherits = ["foundation-base"]
   args = {
@@ -104,7 +128,6 @@ target "libxcrypt" {
   }
   tags = ["${REGISTRY}/foundation-python-libxcrypt:latest"]
 }
-
 
 target "consolidated" {
   dockerfile = "Dockerfile.consolidated"
@@ -117,6 +140,8 @@ target "consolidated" {
     bzip2 = "target:bzip2"
     liblzma = "target:liblzma"
     libxcrypt = "target:libxcrypt"
+    zlib = "target:zlib"
+    openssl = "target:openssl"
   }
   tags = ["${REGISTRY}/foundation-python-consolidated:latest"]
 }

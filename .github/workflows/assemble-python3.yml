@@ -37,11 +37,6 @@ jobs:
           # Inject Sovereign Foundations (Python Consolidated)
           # We only use our foundations and OpenSSL to guarantee ABI sovereignty
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-python-consolidated:latest /usr /artifacts/usr/
-          
-          # Inject System Foundations (OpenSSL) from artifacts
-          COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-openssl:latest /openssl-layer.tar.gz /
-          RUN mkdir -p /artifacts/usr && \
-              tar -xzf /openssl-layer.tar.gz -C /artifacts/usr
 
 
           WORKDIR /build
