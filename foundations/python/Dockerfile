@@ -71,7 +71,10 @@ RUN if [ ! -f "./configure" ]; then \
 RUN if [ "${LIB_NAME}" = "ncurses" ]; then \
       ln -s ncursesw/ncurses.h /artifacts/usr/include/ncurses.h || true && \
       ln -s ncursesw/curses.h /artifacts/usr/include/curses.h || true && \
-      ln -s ncursesw/term.h /artifacts/usr/include/term.h || true; \
+      ln -s ncursesw/term.h /artifacts/usr/include/term.h || true && \
+      for lib in ncurses ncurses++ form panel menu tic tinfo; do \
+        ln -s lib${lib}w.so /artifacts/usr/lib64/lib${lib}.so || true; \
+      done; \
     fi
 
 FROM scratch
