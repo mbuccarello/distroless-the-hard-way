@@ -59,15 +59,17 @@ jobs:
               LD_LIBRARY_PATH=/artifacts/usr/lib64:/artifacts/usr/lib \
               ./configure --prefix=/usr/local \
               --enable-optimizations \
-              --with-system-ffi \
+              --with-system-libffi \
               --with-openssl=/artifacts/usr \
               --enable-shared && \
-              make -j$(nproc) && \
+              make -j\$(nproc) && \
               echo '--- Linkage Audit: python ---' && \
               LD_LIBRARY_PATH=/artifacts/usr/lib64:/artifacts/usr/lib ldd ./python && \
               echo '--- Linkage Audit: readline ---' && \
               LD_LIBRARY_PATH=/artifacts/usr/lib64:/artifacts/usr/lib ldd /artifacts/usr/lib64/libreadline.so.8 && \
-              make install DESTDIR=/rootfs
+              make install DESTDIR=/rootfs && \
+              echo '--- Linkage Audit: extension modules ---' && \
+              find /rootfs/usr/local/lib/python3.12/lib-dynload -name "*.so" -exec sh -c 'echo "Checking {}"; LD_LIBRARY_PATH=/artifacts/usr/lib64:/artifacts/usr/lib ldd {}' \;
 
           
           # Prepare Standard FHS Symlinks for the final image to assist Rosetta
