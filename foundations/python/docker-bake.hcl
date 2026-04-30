@@ -39,10 +39,10 @@ target "ncurses" {
   inherits = ["foundation-base"]
   args = {
     LIB_NAME = "ncurses"
-    LIB_URL = "https://ftp.gnu.org/gnu/ncurses/ncurses-6.4.tar.gz"
-    LIB_SHA = "6931283d9ac87c5073f30b6290c4c75f21632bb4fc3603ac8100812bed248159"
-    # Arch Intelligence: Bundle tinfo into ncursesw, use widec
-    LIB_CONFIG = "--with-shared --without-debug --without-ada --enable-widec --disable-lp64"
+    LIB_URL = "https://ftp.gnu.org/gnu/ncurses/ncurses-6.5.tar.gz"
+    LIB_SHA = "1361911347164aec4d37396a5e5054f26223d346098e98347f422acb30ca1243"
+    # Arch Intelligence: Comprehensive flags for ABI stability
+    LIB_CONFIG = "--with-shared --with-versioned-syms --enable-widec --enable-pc-files --with-cxx-binding --with-cxx-shared --with-manpage-format=normal --without-ada --disable-root-access --disable-root-environ --disable-setuid-environ"
   }
   tags = ["${REGISTRY}/foundation-python-ncurses:latest"]
 }
@@ -56,7 +56,7 @@ target "readline" {
     LIB_NAME = "readline"
     LIB_URL = "https://ftp.gnu.org/gnu/readline/readline-8.2.tar.gz"
     LIB_SHA = "3feb7171f16a84ee82ca18a36d7b9be109a52c04f492a053331d7d1095007c35"
-    # Arch Intelligence: Link against ncursesw
+    # Arch Intelligence: Link against ncursesw via our linker scripts
     LDFLAGS_EXTRA = "-lncursesw"
   }
   tags = ["${REGISTRY}/foundation-python-readline:latest"]
