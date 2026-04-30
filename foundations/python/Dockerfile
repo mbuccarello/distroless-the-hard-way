@@ -38,6 +38,7 @@ RUN mkdir -p /artifacts/usr/lib /artifacts/usr/include
 ENV CFLAGS="-O2 -fPIC -I/artifacts/usr/include -I/artifacts/usr/include/ncursesw"
 ENV LDFLAGS="-L/artifacts/usr/lib -L/artifacts/usr/lib64"
 ENV PKG_CONFIG_PATH="/artifacts/usr/lib/pkgconfig:/artifacts/usr/lib64/pkgconfig"
+ENV LD_LIBRARY_PATH="/artifacts/usr/lib:/artifacts/usr/lib64"
 
 RUN if [ ! -f "./configure" ]; then \
       if [ -f "./autogen.sh" ]; then ./autogen.sh; \
