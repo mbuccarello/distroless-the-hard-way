@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.4
 FROM scratch as deps
 FROM ghcr.io/mbuccarello/base-fedora:latest as builder
-RUN dnf install -y gcc make autoconf automake libtool perl perl-open diffutils patch unzip git gettext gettext-devel pkgconf-pkg-config m4 bison flex
+RUN dnf install -y gcc make autoconf automake libtool perl perl-open diffutils patch unzip git gettext gettext-devel pkgconf-pkg-config m4 bison flex texinfo
 WORKDIR /build
 
 ARG LIB_NAME
@@ -43,9 +43,10 @@ RUN if [[ "${LIB_URL}" == git+* ]]; then \
 
 RUN mkdir -p /artifacts/usr
 ENV CFLAGS="-O2 -fPIC -I/artifacts/usr/include -I/artifacts/usr/include/ncursesw"
-RUN if [ ! -f "./configure" ] && [ -f "./autogen.sh" ]; then \
-      export MAKEINFO=true && \
-      ./autogen.sh; \
+RUN if [ ! -f "./configure" ]; then \
+      if [ -f "./autogen.sh" ]; then ./autogen.sh; \
+      elif [ -f "./autogen" ]; then ./autogen; \
+      else autoreconf -fi; fi; \
     fi && \
     if [ -f "./configure" ]; then \
       ./configure --prefix=/usr --libdir=/usr/lib64 ${LIB_CONFIG} || (cat config.log && exit 1) && \
