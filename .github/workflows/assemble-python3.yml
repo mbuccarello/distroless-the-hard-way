@@ -126,7 +126,7 @@ jobs:
           
           for mod in sqlite3 ctypes ssl bz2 lzma readline; do
             echo "Testing $mod..."
-            docker run --rm $IMAGE_NAME -c "import $mod; print('$mod OK')"
+            docker run --rm $IMAGE_NAME -v -c "import $mod; print('$mod OK')"
           done
 
       - name: Generate SLSA Build Provenance (Level 3)
