@@ -41,21 +41,17 @@ jobs:
         run: |
           cd foundations/python
           docker buildx bake default --push
+          
+          IMAGE_NAME="ghcr.io/${{ github.repository_owner }}/foundation-python-consolidated:latest"
+          docker pull $IMAGE_NAME
+          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "$IMAGE_NAME" | cut -d'@' -f2)
+          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
+          echo "image_name=$IMAGE_NAME" >> $GITHUB_OUTPUT
 
-      - name: Generate SBOMs and Attestations
-        run: |
-          TARGETS="ncurses readline openssl sqlite libffi bzip2 xz zlib libxcrypt consolidated"
-          for target in $TARGETS; do
-            IMAGE_NAME="ghcr.io/${{ github.repository_owner }}/foundation-python-${target}:latest"
-            docker pull $IMAGE_NAME
-            DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "$IMAGE_NAME" | cut -d'@' -f2)
-            
-            # Generate SBOM (using local trivy if available or just skip for now to save time, 
-            # but let's try to keep the logic if possible)
-            # For now, let's just do the attestations which are critical for SLSA
-            echo "Attesting $IMAGE_NAME..."
-            gh attestation create "$IMAGE_NAME" --repo ${{ github.repository }} --subject-digest "$DIGEST"
-          done
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Generate SLSA Build Provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ghcr.io/${{ github.repository_owner }}/foundation-python-consolidated
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
 
