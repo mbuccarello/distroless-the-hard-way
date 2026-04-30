@@ -25,7 +25,8 @@ target "readline" {
   args = {
     LIB_NAME = "readline"
     LIB_URL = "https://ftp.gnu.org/gnu/readline/readline-8.3.tar.gz"
-    LIB_CONFIG = "--with-curses SHLIB_LIBS='-lncursesw'"
+    LIB_CONFIG = "--with-curses"
+    MAKE_EXTRA = "SHLIB_LIBS='-lncursesw'"
   }
   tags = ["${REGISTRY}/foundation-python-readline:latest"]
 }
