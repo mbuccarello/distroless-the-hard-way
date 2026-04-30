@@ -40,7 +40,7 @@ target "ncurses" {
   args = {
     LIB_NAME = "ncurses"
     LIB_URL = "https://ftp.gnu.org/gnu/ncurses/ncurses-6.5.tar.gz"
-    LIB_SHA = "1361911347164aec4d37396a5e5054f26223d346098e98347f422acb30ca1243"
+    LIB_SHA = "a0f2b23a9d9703495d736a4413158c8959d333068e367809930f7966f91d8e17"
     # Arch Intelligence: Comprehensive flags for ABI stability
     LIB_CONFIG = "--with-shared --with-versioned-syms --enable-widec --enable-pc-files --with-cxx-binding --with-cxx-shared --with-manpage-format=normal --without-ada --disable-root-access --disable-root-environ --disable-setuid-environ"
   }
