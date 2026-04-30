@@ -38,16 +38,14 @@ RUN if [ -n "${LIB_SHA}" ]; then \
 
 RUN mkdir -p /artifacts/usr
 ENV CFLAGS="-O2 -fPIC -I/artifacts/usr/include -I/artifacts/usr/include/ncursesw"
-ENV CXXFLAGS="-O2 -fPIC -I/artifacts/usr/include -I/artifacts/usr/include/ncursesw"
-ENV LDFLAGS="-L/artifacts/usr/lib64 -L/artifacts/usr/lib ${LDFLAGS_EXTRA}"
-
 RUN if [ ! -f "./configure" ] && [ -f "./autogen.sh" ]; then \
+      export MAKEINFO=true && \
       ./autogen.sh; \
     fi && \
     if [ -f "./configure" ]; then \
       ./configure --prefix=/usr --libdir=/usr/lib64 ${LIB_CONFIG} || (cat config.log && exit 1) && \
-      make -j$(nproc) ${MAKE_EXTRA} || (make V=1 ${MAKE_EXTRA} && exit 1) && \
-      make install DESTDIR=/artifacts ${MAKE_EXTRA}; \
+      eval make -j$(nproc) ${MAKE_EXTRA} || (eval make V=1 ${MAKE_EXTRA} && exit 1) && \
+      eval make install DESTDIR=/artifacts ${MAKE_EXTRA}; \
     elif [ "${LIB_NAME}" = "openssl" ]; then \
       ./Configure --prefix=/usr --libdir=lib64 ${LIB_CONFIG} && \
       make -j$(nproc) && \
