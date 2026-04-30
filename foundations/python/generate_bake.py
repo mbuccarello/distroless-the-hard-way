@@ -106,7 +106,7 @@ def get_metadata(pkgname, pkg_dir):
                         break
 
     main_url = HARDCODED_SOURCES.get(pkgname, info["sources"][0] if info["sources"] else None)
-    main_sha = info["sha512sums"][0] if info["sha512sums"] else None
+    main_sha = "SKIP" if pkgname in HARDCODED_SOURCES else (info["sha512sums"][0] if info["sha512sums"] else None)
     
     return {
         "url": main_url, 
