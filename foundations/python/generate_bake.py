@@ -26,7 +26,7 @@ CRITICAL_FLAGS = {
     "readline": "--with-curses",
     "libffi": "--disable-multi-os-directory",
     "libxcrypt": "--disable-obsolete-api --disable-werror",
-    "python": "--enable-shared --with-system-ffi --with-system-expat --enable-optimizations --with-lto --enable-loadable-sqlite-extensions --without-ensurepip"
+    "python": "--enable-shared --with-system-ffi --without-ensurepip"
 }
 
 # Hardcoded sources for packages that are tricky to parse

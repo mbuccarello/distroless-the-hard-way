@@ -138,7 +138,7 @@ target "python" {
     LIB_NAME = "python"
     LIB_URL = "https://www.python.org/ftp/python/3.14.4/Python-3.14.4.tar.xz"
     LIB_SHA = "89a7f8b8a31f48d150badb4751df137d47d9014c9c422649a1a55aef5618aa7f0259dd18c151e6804fa8312c6a21544332a9f630ee81150dc00505637e62bb8c"
-    LIB_CONFIG = "--enable-shared --with-system-ffi --with-system-expat --enable-optimizations --with-lto --enable-loadable-sqlite-extensions --without-ensurepip"
+    LIB_CONFIG = "--enable-shared --with-system-ffi --without-ensurepip"
   }
   contexts = {
     deps = "target:ncurses"
