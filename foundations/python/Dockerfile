@@ -43,6 +43,7 @@ RUN if [[ "${LIB_URL}" == git+* ]]; then \
 
 RUN mkdir -p /artifacts/usr
 ENV CFLAGS="-O2 -fPIC -I/artifacts/usr/include -I/artifacts/usr/include/ncursesw"
+ENV LDFLAGS="-L/artifacts/usr/lib64"
 RUN if [ ! -f "./configure" ]; then \
       if [ -f "./autogen.sh" ]; then ./autogen.sh; \
       elif [ -f "./autogen" ]; then ./autogen; \
