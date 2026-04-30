@@ -21,7 +21,7 @@ RUN --mount=type=bind,from=deps,target=/deps \
 
 RUN curl -L -o source.archive ${LIB_URL} || (echo "${LIB_URL}" | grep -q "^git+" && git clone "${LIB_URL#git+}" . ) || true
 
-RUN if [ -n "${LIB_SHA}" ]; then \
+RUN if [ -n "${LIB_SHA}" ] && [ -f "source.archive" ]; then \
       if [ ${#LIB_SHA} -eq 64 ]; then \
         echo "${LIB_SHA}  source.archive" | sha256sum -c -; \
       else \

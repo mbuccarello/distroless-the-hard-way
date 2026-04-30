@@ -11,6 +11,12 @@ import re
 CORE_TARGETS = ["ncurses", "readline", "openssl", "sqlite", "libffi", "bzip2", "xz", "zlib", "libxcrypt"]
 ARCH_GITLAB_BASE = "https://gitlab.archlinux.org/archlinux/packaging/packages/{}/-/raw/main/PKGBUILD"
 
+# Define library dependencies for Bake contexts
+DEPENDENCIES = {
+    "readline": ["ncurses"],
+}
+
+
 # Hardcoded ABI-aligned flags for critical libraries to prevent Segfault 139
 CRITICAL_FLAGS = {
     "ncurses": "--with-shared --with-cxx-shared --enable-widec --without-debug --without-normal --with-termlib",
@@ -59,10 +65,27 @@ def get_metadata(pkgname, pkg_dir):
     if not info["sources"]:
         with open(os.path.join(pkg_dir, "PKGBUILD"), "r") as f:
             content = f.read()
+            # Simple variable expansion for url, pkgname, pkgver, pkgbase
+            vars = {}
+            for v in ["url", "pkgname", "pkgver", "pkgbase"]:
+                match = re.search(fr"^{v}=(.*)$", content, re.MULTILINE)
+                if match: vars[v] = match.group(1).strip("\"").strip("'")
+
             src_match = re.search(r"source=\((.*?)\)", content, re.DOTALL)
             if src_match:
                 for line in src_match.group(1).split():
                     line = line.strip("\"").strip("'")
+                    # Expand variables in the source line
+                    for k, v in vars.items():
+                        line = line.replace(f"${{{k}}}", v).replace(f"${k}", v)
+                    
+                    # Clean up Bash brace expansion like {,.asc}
+                    if "{" in line: line = line.split("{")[0]
+                    # Strip quotes after splitting braces
+                    line = line.strip("\"").strip("'")
+                    # Clean up double slashes (except after http:)
+                    line = re.sub(r"(?<!:)/{2,}", "/", line)
+                    
                     if "::" in line: line = line.split("::")[1]
                     if line.startswith("http") or line.startswith("git+"):
                         info["sources"].append(line)
@@ -103,6 +126,13 @@ def main():
         if data["flags"]: hcl += f'    LIB_CONFIG = "{data["flags"]}"\n'
         if data["make_extra"]: hcl += f'    MAKE_EXTRA = "{data["make_extra"]}"\n'
         hcl += f'  }}\n'
+        
+        if pkg in DEPENDENCIES:
+            hcl += '  contexts = {\n'
+            for dep in DEPENDENCIES[pkg]:
+                hcl += f'    {dep} = "target:{dep}"\n'
+            hcl += '  }\n'
+            
         hcl += f'  tags = ["${{REGISTRY}}/foundation-python-{pkg}:latest"]\n'
         hcl += f'}}\n\n'
     

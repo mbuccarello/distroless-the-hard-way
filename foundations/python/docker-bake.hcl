@@ -28,6 +28,9 @@ target "readline" {
     LIB_CONFIG = "--with-curses"
     MAKE_EXTRA = "SHLIB_LIBS=\"-lncursesw -ltinfo\""
   }
+  contexts = {
+    ncurses = "target:ncurses"
+  }
   tags = ["${REGISTRY}/foundation-python-readline:latest"]
 }
 
@@ -92,6 +95,7 @@ target "libxcrypt" {
   inherits = ["foundation-base"]
   args = {
     LIB_NAME = "libxcrypt"
+    LIB_URL = "https://github.com/besser82/libxcrypt/releases/download/v4.5.2/libxcrypt-4.5.2.tar.xz"
     LIB_CONFIG = "--disable-obsolete-api"
   }
   tags = ["${REGISTRY}/foundation-python-libxcrypt:latest"]
