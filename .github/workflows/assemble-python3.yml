@@ -46,7 +46,7 @@ jobs:
           # Configure and Build
           # Base libs (openssl) and python foundations are now all consolidated in /artifacts/usr
           # Set Global Build Environment for Sovereignty
-          ENV CFLAGS="-I/artifacts/usr/include"
+          ENV CFLAGS="-I/artifacts/usr/include -I/artifacts/usr/include/ncursesw"
           ENV LDFLAGS="-L/artifacts/usr/lib64 -L/artifacts/usr/lib -Wl,-rpath,/usr/local/lib -Wl,-rpath,/usr/lib64"
           ENV PKG_CONFIG_PATH="/artifacts/usr/lib64/pkgconfig:/artifacts/usr/lib/pkgconfig"
           ENV LD_LIBRARY_PATH="/artifacts/usr/lib64:/artifacts/usr/lib"
