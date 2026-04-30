@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.4
 FROM scratch as deps
 FROM ghcr.io/mbuccarello/base-fedora:latest as builder
-RUN dnf install -y gcc make autoconf automake libtool perl perl-open diffutils patch unzip
+RUN dnf install -y gcc make autoconf automake libtool perl perl-open diffutils patch unzip git
 WORKDIR /build
 
 ARG LIB_NAME
@@ -20,7 +20,11 @@ RUN --mount=type=bind,from=deps,target=/deps \
     fi
 
 RUN if [[ "${LIB_URL}" == git+* ]]; then \
-      git clone "${LIB_URL#git+}" . ; \
+      URL="${LIB_URL#git+}" && \
+      TAG=$(echo "${URL}" | grep -oP '(?<=#tag=)[^?]+' || echo "${URL}" | grep -oP '(?<=#branch=)[^?]+' || echo "") && \
+      BASE_URL=$(echo "${URL}" | cut -d'#' -f1 | cut -d'?' -f1) && \
+      git clone "${BASE_URL}" . && \
+      if [ -n "${TAG}" ]; then git checkout "${TAG}"; fi; \
     else \
       curl -L -o source.archive "${LIB_URL}" && \
       if [ -n "${LIB_SHA}" ]; then \
