@@ -1,5 +1,5 @@
 group "default" {
-  targets = ["ncurses", "readline", "openssl", "sqlite", "libffi", "bzip2", "xz", "zlib", "libxcrypt", "expat", "gdbm", "python", "consolidated"]
+  targets = ["ncurses", "readline", "openssl", "sqlite", "libffi", "bzip2", "xz", "zlib", "libxcrypt", "expat", "gdbm", "python", "consolidated", "runtime"]
 }
 
 variable "REGISTRY" { default = "ghcr.io/mbuccarello" }

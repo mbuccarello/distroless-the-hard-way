@@ -126,7 +126,7 @@ def main():
             data = get_metadata(pkg, tmpdir)
             graph[pkg] = data
 
-    hcl = 'group "default" {\n  targets = [' + ", ".join(f'"{k}"' for k in graph.keys()) + ', "consolidated"]\n}\n\n'
+    hcl = 'group "default" {\n  targets = [' + ", ".join(f'"{k}"' for k in graph.keys()) + ', "consolidated", "runtime"]\n}\n\n'
     hcl += 'variable "REGISTRY" { default = "ghcr.io/mbuccarello" }\n\n'
     hcl += 'target "foundation-base" {\n  dockerfile = "Dockerfile"\n  context = "."\n}\n\n'
 
