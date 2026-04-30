@@ -14,9 +14,14 @@ ARCH_GITLAB_BASE = "https://gitlab.archlinux.org/archlinux/packaging/packages/{}
 # Hardcoded ABI-aligned flags for critical libraries to prevent Segfault 139
 CRITICAL_FLAGS = {
     "ncurses": "--with-shared --with-cxx-shared --enable-widec --without-debug --without-normal",
-    "readline": "--with-curses SHLIB_LIBS='-lncursesw'",
+    "readline": "--with-curses",
     "libffi": "--disable-multi-os-directory",
     "libxcrypt": "--disable-obsolete-api"
+}
+
+# Some packages require specific make flags (like Arch does for readline)
+CRITICAL_MAKE = {
+    "readline": "SHLIB_LIBS='-lncursesw'"
 }
 
 def fetch_pkgbuild(pkgname, dest_dir):
@@ -66,10 +71,15 @@ def get_metadata(pkgname, pkg_dir):
     main_url = info["sources"][0] if info["sources"] else None
     main_sha = info["sha512sums"][0] if info["sha512sums"] else None
     
-    return {"url": main_url, "sha": main_sha, "flags": CRITICAL_FLAGS.get(pkgname, "")}
+    return {
+        "url": main_url, 
+        "sha": main_sha, 
+        "flags": CRITICAL_FLAGS.get(pkgname, ""),
+        "make_extra": CRITICAL_MAKE.get(pkgname, "")
+    }
 
 def main():
-    print("🚀 Starting Sovereign Distroless Automation Engine (V6)...")
+    print("🚀 Starting Sovereign Distroless Automation Engine (V7)...")
     graph = {}
     
     for pkg in CORE_TARGETS:
@@ -91,6 +101,7 @@ def main():
         if data["url"]: hcl += f'    LIB_URL = "{data["url"]}"\n'
         if data["sha"] and data["sha"] != "SKIP": hcl += f'    LIB_SHA = "{data["sha"]}"\n'
         if data["flags"]: hcl += f'    LIB_CONFIG = "{data["flags"]}"\n'
+        if data["make_extra"]: hcl += f'    MAKE_EXTRA = "{data["make_extra"]}"\n'
         hcl += f'  }}\n'
         hcl += f'  tags = ["${{REGISTRY}}/foundation-python-{pkg}:latest"]\n'
         hcl += f'}}\n\n'
