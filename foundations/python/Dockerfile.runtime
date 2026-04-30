@@ -1,6 +1,7 @@
 # syntax=docker/dockerfile:1.4
 FROM ghcr.io/mbuccarello/base-fedora:latest as system
-RUN mkdir -p /rootfs/lib64 /rootfs/usr/lib64 && \
+RUN mkdir -p /rootfs/usr/lib /rootfs/lib64 && \
+    ln -s lib /rootfs/usr/lib64 && \
     for lib in ld-linux-x86-64.so.2 libc.so.6 libm.so.6 libdl.so.2 libpthread.so.0 librt.so.1 libgcc_s.so.1 libstdc++.so.6 libutil.so.1 libcrypt.so.2; do \
       cp -L /lib64/$lib /rootfs/lib64/ || cp -L /usr/lib64/$lib /rootfs/lib64/ || true; \
     done

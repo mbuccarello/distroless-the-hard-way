@@ -34,9 +34,11 @@ RUN if [[ "${LIB_URL}" == git+* ]]; then \
       fi; \
     fi
 
-RUN mkdir -p /artifacts/usr
+RUN mkdir -p /artifacts/usr/lib /artifacts/usr/include
 ENV CFLAGS="-O2 -fPIC -I/artifacts/usr/include -I/artifacts/usr/include/ncursesw"
-ENV LDFLAGS="-L/artifacts/usr/lib64"
+ENV LDFLAGS="-L/artifacts/usr/lib -L/artifacts/usr/lib64"
+ENV PKG_CONFIG_PATH="/artifacts/usr/lib/pkgconfig:/artifacts/usr/lib64/pkgconfig"
+
 RUN if [ ! -f "./configure" ]; then \
       if [ -f "./autogen.sh" ]; then ./autogen.sh; \
       elif [ -f "./autogen" ]; then ./autogen; \
@@ -70,7 +72,8 @@ RUN if [ "${LIB_NAME}" = "ncurses" ]; then \
       done; \
     fi && \
     if [ "${LIB_NAME}" = "python" ]; then \
-      ln -s python3.12 /artifacts/usr/bin/python3 || true; \
+      ln -s python3.14 /artifacts/usr/bin/python3 || true; \
+      ln -s python3.14 /artifacts/usr/bin/python3.12 || true; \
     fi
 
 FROM scratch
