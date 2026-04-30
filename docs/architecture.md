@@ -92,6 +92,7 @@ Raw source code archives (Glibc, OpenSSL, TZData) are verified and compiled into
 ### Stage 1.5: Runtime Foundations (Shared Libraries)
 Intermediate shared libraries (libxml2, libffi, ncurses, etc.) required by language runtimes.
 *   **Sovereign Linking**: These libraries are compiled from source and linked against the Stage 1 `glibc` and `openssl` artifacts.
+*   **Declarative Orchestration (Docker Bake)**: To solve the complexity of resolving dependency trees and matching C-library ABI flags, this layer is orchestrated via native Docker Buildx Bake (`docker-bake.hcl`). This establishes a clear, native dependency graph (e.g., `readline` cleanly depending on `ncurses`) while enforcing uniform `CFLAGS`/`LDFLAGS` globally.
 *   **OCI Distribution**: Distributed as OCI "packages", allowing Layer 2 to assemble them without re-compilation.
 
 ### Stage 2: Core Assembly (OCI Roots)
@@ -137,11 +138,18 @@ Each layer must pass a sequential set of security checkpoints:
 
 ---
 
-## 5. Technical Transparency
+## 5. Technical Transparency: Intelligence vs. Product
 
-### 5.1 The "Workshop" vs. The "Product"
-*   **The Workshop (Fedora 40)**: Used strictly for compilation tools (GCC, Make).
-*   **The Product (Scratch)**: The final image is a bit-perfect assembly of our source-built artifacts. It contains **zero** binaries or metadata from the Fedora workshop.
+To construct a completely independent, from-scratch distroless image without guessing ABI flags, the system relies on a clean separation between intelligence, the sandbox, and the final product.
+
+### 5.1 The Intelligence (Arch Linux)
+*   **The Intelligence Source:** Arch Linux `PKGBUILD` scripts serve as our open-source encyclopedia. We parse them strictly to learn the correct `./configure` flags and dependency graphs for raw C-libraries. We do **not** use Arch packages, Alpine, or any vendored ecosystem.
+
+### 5.2 The Workshop (Fedora 40)
+*   **The Compiler Sandbox**: Used strictly for its compilation tools (GCC, Make). It executes the flags we learned from our intelligence gathering.
+
+### 5.3 The Product (Scratch)
+*   **The Independent OS**: The final image is a bit-perfect assembly of our raw, source-built artifacts orchestrated via Docker Bake. It contains **zero** binaries or metadata from the Fedora workshop or the Arch Linux intelligence source.
 
 ### 5.2 Sovereign Definition
 A component is **Sovereign** if it is derived from verified upstream source, natively compiled against our foundations, and assembled into a scratch container without OS package intermediaries.

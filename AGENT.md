@@ -11,6 +11,8 @@ It teaches users how to create distroless container images *without* relying on 
 ## 2. Core Operational Pillars
 - **Zero OS Extraction:** You are strictly forbidden from writing workflows that rely on precompiled `.so` library binaries from host OS packages (e.g. `apt`, `apk`).
 - **Zero Pre-Built Extraction Shims:** You must never use `alpine` or `ubuntu` containers to unpack intermediate tarballs in CI/CD. All extractions must be handled natively by our custom "Pipeline 0" bootstrap image `ghcr.io/.../bootstrap:latest`.
+- **Prohibit Vendored Distroless Ecosystems:** You are strictly forbidden from migrating the architecture to vendored declarative build systems like Chainguard, Wolfi, or Alpine Apko. The system must remain independent and orchestrated natively (e.g., via Docker Buildx Bake).
+- **Rule: The Arch Linux Dependency Graph Protocol:** Agents must **never guess** `./configure` flags or dependency trees when adding a new C-library to the distroless foundations. You are explicitly instructed to search and read Arch Linux `PKGBUILD` files as your primary intelligence reference. This guarantees correct `glibc` ABI compatibility and an accurate dependency graph.
 - **Exec-Form Invocation:** Because we extract directly into empty `scratch` containers without an OS, docker instructions must use **Exec Form** (e.g., `RUN ["/tar", "-xzf", "file.tar.gz"]`) to invoke syscall processes directly rather than relying on `/bin/sh`.
 1.  **Strict Source Compilation**: No OS extraction for Layer 3+ runtimes.
 2.  **Sovereign Foundations**: All runtimes must link against project foundations in `/usr/local/lib`.

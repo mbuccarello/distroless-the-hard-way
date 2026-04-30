@@ -12,6 +12,13 @@ Distroless The Hard Way is a technical implementation and educational curriculum
 
 The project implements a canonical, layered inheritance model that is now **100% decoupled from Fedora RPMs**. Every binary in the stack is source-built within our high-assurance pipelines.
 
+### Intelligence Gathering and Arch Linux
+Because this project compiles 100% of its artifacts from raw `.tar.gz` source code, resolving the correct C-library dependency tree and exact ABI flags (like `--with-termlib` for ncurses) is an inherently difficult engineering challenge.
+
+To solve this, we credit **Arch Linux** as our primary intelligence source. We exclusively read Arch Linux `PKGBUILD` Git repositories to map out dependency graphs and extract the correct `./configure` flags. The straightforward, transparent nature of Arch Linux build scripts helped us realize the complexity of managing dependencies and provided an easy way to understand how raw GNU source code should be assembled. 
+
+*Note: We only use Arch Linux as a blueprint for intelligence gathering. We do not use their binaries, their package managers, or any vendored distroless solution. The product is 100% independent.*
+
 ### Layer 1: System Foundations (GNU-Native)
 Independent source-built artifacts containing the raw DNA of the system.
 *   **cacerts**: Sovereign Root Trust Store (Mozilla NSS source).
@@ -34,7 +41,9 @@ Hardened execution environments utilizing the **RPATH strategy** for native libr
 
 ---
 
-## Execution Matrix (Phase 4 Enterprise LTS)
+## Execution Matrix and Docker Bake Orchestration
+
+The orchestration of these layers is shifting toward **native Docker Bake** to map out the dependency graphs explicitly, without relying on third-party package managers. This ensures that the build order and ABI compatibility flags are strictly enforced across the entire dependency tree.
 
 | Runtime | Base Layer | Sovereignty | Upstream Version |
 | :--- | :--- | :--- | :--- |
