@@ -81,9 +81,15 @@ jobs:
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-python-consolidated:latest /usr /usr/
           COPY --from=builder /rootfs /
           
+          # Ensure terminfo is available for ncurses/readline
+          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-python-consolidated:latest /usr/share/terminfo /usr/share/terminfo
+          RUN mkdir -p /usr/lib && ln -s /usr/share/terminfo /usr/lib/terminfo
+          
           ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
           ENV LD_LIBRARY_PATH=/usr/local/lib:/usr/lib64:/usr/lib
           ENV LANG=C.UTF-8
+          ENV TERMINFO=/usr/share/terminfo
+          ENV TERM=xterm-256color
           ENTRYPOINT ["/usr/local/bin/python3"]
           CMD ["--version"]
           EOF
