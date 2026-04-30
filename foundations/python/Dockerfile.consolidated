@@ -1,0 +1,9 @@
+# syntax=docker/dockerfile:1.4
+FROM scratch
+COPY --from=libffi /usr /usr
+COPY --from=ncurses /usr /usr
+COPY --from=readline /usr /usr
+COPY --from=sqlite /usr /usr
+COPY --from=bzip2 /usr /usr
+COPY --from=liblzma /usr /usr
+COPY --from=libxcrypt /usr /usr

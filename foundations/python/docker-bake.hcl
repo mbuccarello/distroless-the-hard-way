@@ -1,7 +1,7 @@
 # docker-bake.hcl
 
 group "default" {
-  targets = ["libffi", "sqlite", "ncurses", "readline", "bzip2", "liblzma", "libxcrypt"]
+  targets = ["libffi", "sqlite", "ncurses", "readline", "bzip2", "liblzma", "libxcrypt", "consolidated"]
 }
 
 variable "REGISTRY" {
@@ -101,4 +101,19 @@ target "libxcrypt" {
     LIB_CONFIG = "--enable-hashes=strong,glibc --enable-obsolete-api=yes"
   }
   tags = ["${REGISTRY}/foundation-python-libxcrypt:latest"]
+}
+
+target "consolidated" {
+  dockerfile = "Dockerfile.consolidated"
+  context = "."
+  contexts = {
+    libffi = "target:libffi"
+    ncurses = "target:ncurses"
+    readline = "target:readline"
+    sqlite = "target:sqlite"
+    bzip2 = "target:bzip2"
+    liblzma = "target:liblzma"
+    libxcrypt = "target:libxcrypt"
+  }
+  tags = ["${REGISTRY}/foundation-python-consolidated:latest"]
 }
