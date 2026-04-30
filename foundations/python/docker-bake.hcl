@@ -1,78 +1,58 @@
-# docker-bake.hcl
-
 group "default" {
-  targets = ["libffi", "sqlite", "ncurses", "readline", "bzip2", "liblzma", "libxcrypt", "consolidated"]
+  targets = ["ncurses", "readline", "openssl", "sqlite", "libffi", "bzip2", "xz", "zlib", "consolidated"]
 }
 
-variable "REGISTRY" {
-  default = "ghcr.io/mbuccarello"
-}
-
-variable "GLOBAL_CFLAGS" {
-  default = "-O2 -fPIC -I/artifacts/usr/include"
-}
-
-variable "GLOBAL_LDFLAGS" {
-  default = "-L/artifacts/usr/lib64 -L/artifacts/usr/lib"
-}
+variable "REGISTRY" { default = "ghcr.io/mbuccarello" }
 
 target "foundation-base" {
   dockerfile = "Dockerfile"
   context = "."
-  args = {
-    CFLAGS = GLOBAL_CFLAGS
-    LDFLAGS = GLOBAL_LDFLAGS
-  }
-}
-
-target "libffi" {
-  inherits = ["foundation-base"]
-  args = {
-    LIB_NAME = "libffi"
-    LIB_URL = "https://github.com/libffi/libffi/releases/download/v3.4.6/libffi-3.4.6.tar.gz"
-    LIB_SHA = "b0dea9df23c863a7a50e825440f3ebffabd65df1497108e5d437747843895a4e"
-  }
-  tags = ["${REGISTRY}/foundation-python-libffi:latest"]
 }
 
 target "ncurses" {
   inherits = ["foundation-base"]
   args = {
     LIB_NAME = "ncurses"
-    LIB_URL = "https://ftp.gnu.org/gnu/ncurses/ncurses-6.4.tar.gz"
-    LIB_SHA = "6931283d9ac87c5073f30b6290c4c75f21632bb4fc3603ac8100812bed248159"
-    # Arch Intelligence: Comprehensive flags for ABI stability
-    LIB_CONFIG = "--with-shared --enable-widec --enable-pc-files --with-cxx-binding --with-cxx-shared --without-ada --disable-root-access --disable-root-environ --disable-setuid-environ --enable-lp64"
+    LIB_URL = "git+https://github.com/ThomasDickey/ncurses-snapshots.git?signed#tag=v6_6"
+    LIB_SHA = "cad17bf83ef3ccd71fb7c33933ddbbbef2e8bd050d5e4e4ebb344b5df8292b1cd3c9e1787e88087d73cc96f625ba0c7cd6714d7720af7f8bd50b314e9838d2a7"
   }
   tags = ["${REGISTRY}/foundation-python-ncurses:latest"]
 }
 
 target "readline" {
   inherits = ["foundation-base"]
-  contexts = {
-    deps = "target:ncurses"
-  }
   args = {
     LIB_NAME = "readline"
     LIB_URL = "https://ftp.gnu.org/gnu/readline/readline-8.3.tar.gz"
-    LIB_SHA = "fe5383204467828cd495ee8d1d3c037a7eba1389c22bc6a041f627976f9061cc"
-    # Arch Intelligence: Use curses and multibyte
-    LIB_CONFIG = "--with-curses --enable-multibyte"
-    # Arch Intelligence: Link against ncursesw via our linker scripts
-    LDFLAGS_EXTRA = "-lncursesw"
-    MAKE_EXTRA = "SHLIB_LIBS=-lncursesw"
   }
   tags = ["${REGISTRY}/foundation-python-readline:latest"]
+}
+
+target "openssl" {
+  inherits = ["foundation-base"]
+  args = {
+    LIB_NAME = "openssl"
+    LIB_URL = "https://github.com/openssl/openssl/releases/download/openssl-3.6.2/openssl-3.6.2.tar.gz"
+  }
+  tags = ["${REGISTRY}/foundation-python-openssl:latest"]
 }
 
 target "sqlite" {
   inherits = ["foundation-base"]
   args = {
     LIB_NAME = "sqlite"
-    LIB_URL = "https://www.sqlite.org/2024/sqlite-autoconf-3460000.tar.gz"
-    LIB_SHA = "6f8e6a7b335273748816f9b3b62bbdc372a889de8782d7f048c653a447417a7d"
+    LIB_URL = "https://www.sqlite.org/2026/sqlite-src-3530000.zip"
   }
   tags = ["${REGISTRY}/foundation-python-sqlite:latest"]
+}
+
+target "libffi" {
+  inherits = ["foundation-base"]
+  args = {
+    LIB_NAME = "libffi"
+    LIB_URL = "https://github.com/libffi/libffi/archive/refs/tags/v3.5.2.tar.gz"
+  }
+  tags = ["${REGISTRY}/foundation-python-libffi:latest"]
 }
 
 target "bzip2" {
@@ -80,69 +60,42 @@ target "bzip2" {
   args = {
     LIB_NAME = "bzip2"
     LIB_URL = "https://sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz"
-    LIB_SHA = "ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269"
   }
   tags = ["${REGISTRY}/foundation-python-bzip2:latest"]
 }
 
-target "liblzma" {
+target "xz" {
   inherits = ["foundation-base"]
   args = {
-    LIB_NAME = "liblzma"
-    LIB_URL = "https://github.com/tukaani-project/xz/releases/download/v5.6.2/xz-5.6.2.tar.gz"
-    LIB_SHA = "8bfd20c0e1d86f0402f2497cfa71c6ab62d4cd35fd704276e3140bfb71414519"
+    LIB_NAME = "xz"
+    LIB_URL = "git+https://github.com/tukaani-project/xz#tag=v5.8.3?signed"
+    LIB_SHA = "47f7d0cdd200c0db0bee0cf5d1419993d02219ee7c52dc3ea017a9b6af5c2dc5c0d80eab485715f2eb7016829ad14963e836bf07b32b11b9743fd933df2476d0"
   }
-  tags = ["${REGISTRY}/foundation-python-liblzma:latest"]
+  tags = ["${REGISTRY}/foundation-python-xz:latest"]
 }
 
 target "zlib" {
   inherits = ["foundation-base"]
   args = {
     LIB_NAME = "zlib"
-    LIB_URL = "https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz"
-    LIB_SHA = "9a93b2b7dfdac77ceba5a558a580e74667dd6fede4585b91eefb60f03b72df23"
+    LIB_URL = "https://github.com/madler/zlib/releases/download/v1.3.2/zlib-1.3.2.tar.xz"
+    LIB_SHA = "cf3d49fbabddc57cca99858feeca8f910e9de42a16014cddd406814d2d24ee33fee2af3805d7efbb1b04b05f55818092b000daf82502b675df65f2512c353f73"
   }
   tags = ["${REGISTRY}/foundation-python-zlib:latest"]
-}
-
-target "openssl" {
-  inherits = ["foundation-base"]
-  args = {
-    LIB_NAME = "openssl"
-    LIB_URL = "https://github.com/openssl/openssl/releases/download/openssl-3.3.1/openssl-3.3.1.tar.gz"
-    LIB_SHA = "777cd596284c883375a2a7a11bf5d2786fc5413255efab20c50d6ffe6d020b7e"
-    LIB_CONFIG = "shared zlib --with-zlib-include=/artifacts/usr/include --with-zlib-lib=/artifacts/usr/lib64"
-  }
-  contexts = {
-    deps = "target:zlib"
-  }
-  tags = ["${REGISTRY}/foundation-python-openssl:latest"]
-}
-
-target "libxcrypt" {
-  inherits = ["foundation-base"]
-  args = {
-    LIB_NAME = "libxcrypt"
-    LIB_URL = "https://github.com/besser82/libxcrypt/releases/download/v4.4.36/libxcrypt-4.4.36.tar.xz"
-    LIB_SHA = "e5e1f4caee0a01de2aee26e3138807d6d3ca2b8e67287966d1fefd65e1fd8943"
-    LIB_CONFIG = "--enable-hashes=strong,glibc --enable-obsolete-api=yes --disable-werror"
-  }
-  tags = ["${REGISTRY}/foundation-python-libxcrypt:latest"]
 }
 
 target "consolidated" {
   dockerfile = "Dockerfile.consolidated"
   context = "."
   contexts = {
-    libffi = "target:libffi"
     ncurses = "target:ncurses"
     readline = "target:readline"
-    sqlite = "target:sqlite"
-    bzip2 = "target:bzip2"
-    liblzma = "target:liblzma"
-    libxcrypt = "target:libxcrypt"
-    zlib = "target:zlib"
     openssl = "target:openssl"
+    sqlite = "target:sqlite"
+    libffi = "target:libffi"
+    bzip2 = "target:bzip2"
+    xz = "target:xz"
+    zlib = "target:zlib"
   }
   tags = ["${REGISTRY}/foundation-python-consolidated:latest"]
 }

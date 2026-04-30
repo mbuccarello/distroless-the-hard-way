@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.4
 FROM scratch as deps
 FROM ghcr.io/mbuccarello/base-fedora:latest as builder
-RUN dnf install -y gcc make autoconf automake libtool perl perl-open diffutils patch
+RUN dnf install -y gcc make autoconf automake libtool perl perl-open diffutils patch unzip
 WORKDIR /build
 
 ARG LIB_NAME
@@ -19,9 +19,17 @@ RUN --mount=type=bind,from=deps,target=/deps \
       cp -rn /deps/usr/* /artifacts/usr/ || true; \
     fi
 
-RUN curl -L -o source.tar.gz ${LIB_URL} && \
-    echo "${LIB_SHA}  source.tar.gz" | sha256sum -c - && \
-    tar -xzf source.tar.gz --strip-components=1 || tar -xJf source.tar.gz --strip-components=1
+RUN curl -L -o source.archive ${LIB_URL} && \
+    if [ ${#LIB_SHA} -eq 64 ]; then \
+      echo "${LIB_SHA}  source.archive" | sha256sum -c -; \
+    else \
+      echo "${LIB_SHA}  source.archive" | sha512sum -c -; \
+    fi && \
+    if [[ "${LIB_URL}" == *.zip ]]; then \
+      unzip source.archive && cp -rf */* . || true; \
+    else \
+      tar -xf source.archive --strip-components=1 || tar -xJf source.archive --strip-components=1; \
+    fi
 
 RUN mkdir -p /artifacts/usr
 ENV CFLAGS="-O2 -fPIC -I/artifacts/usr/include -I/artifacts/usr/include/ncursesw"
