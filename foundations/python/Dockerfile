@@ -46,7 +46,8 @@ ENV CFLAGS="-O2 -fPIC -I/artifacts/usr/include -I/artifacts/usr/include/ncursesw
 RUN if [ ! -f "./configure" ]; then \
       if [ -f "./autogen.sh" ]; then ./autogen.sh; \
       elif [ -f "./autogen" ]; then ./autogen; \
-      else autoreconf -fi; fi; \
+      elif [ -f "configure.ac" ] || [ -f "configure.in" ]; then autoreconf -fi; \
+      fi; \
     fi && \
     if [ -f "./configure" ]; then \
       ./configure --prefix=/usr --libdir=/usr/lib64 ${LIB_CONFIG} || (cat config.log && exit 1) && \
