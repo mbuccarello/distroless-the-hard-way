@@ -15,7 +15,7 @@ target "ncurses" {
     LIB_NAME = "ncurses"
     LIB_URL = "git+https://github.com/ThomasDickey/ncurses-snapshots.git?signed#tag=v6_6"
     LIB_SHA = "cad17bf83ef3ccd71fb7c33933ddbbbef2e8bd050d5e4e4ebb344b5df8292b1cd3c9e1787e88087d73cc96f625ba0c7cd6714d7720af7f8bd50b314e9838d2a7"
-    LIB_CONFIG = "--with-shared --with-cxx-shared --enable-widec --without-debug --without-normal"
+    LIB_CONFIG = "--with-shared --with-cxx-shared --enable-widec --without-debug --without-normal --with-termlib"
   }
   tags = ["${REGISTRY}/foundation-python-ncurses:latest"]
 }
@@ -26,7 +26,7 @@ target "readline" {
     LIB_NAME = "readline"
     LIB_URL = "https://ftp.gnu.org/gnu/readline/readline-8.3.tar.gz"
     LIB_CONFIG = "--with-curses"
-    MAKE_EXTRA = "SHLIB_LIBS='-lncursesw'"
+    MAKE_EXTRA = "SHLIB_LIBS='-lncursesw -ltinfo'"
   }
   tags = ["${REGISTRY}/foundation-python-readline:latest"]
 }

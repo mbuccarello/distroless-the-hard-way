@@ -59,16 +59,10 @@ RUN if [ -f "./configure" ]; then \
       make install PREFIX=/usr DESTDIR=/artifacts CFLAGS="${CFLAGS}"; \
     fi
 
-# Apply "Arch Linux Intelligence" for ncurses to solve readline crashes
 RUN if [ "${LIB_NAME}" = "ncurses" ]; then \
       ln -s ncursesw/ncurses.h /artifacts/usr/include/ncurses.h || true && \
       ln -s ncursesw/curses.h /artifacts/usr/include/curses.h || true && \
-      ln -s ncursesw/term.h /artifacts/usr/include/term.h || true && \
-      # Linker scripts for tinfo/ncurses as per Arch Intelligence
-      echo "INPUT(libncursesw.so.6)" > /artifacts/usr/lib64/libncurses.so && \
-      echo "INPUT(libncursesw.so.6)" > /artifacts/usr/lib64/libtinfo.so && \
-      ln -s libncursesw.so.6 /artifacts/usr/lib64/libncurses.so.6 || true && \
-      ln -s libncursesw.so.6 /artifacts/usr/lib64/libtinfo.so.6 || true; \
+      ln -s ncursesw/term.h /artifacts/usr/include/term.h || true; \
     fi
 
 FROM scratch

@@ -13,7 +13,7 @@ ARCH_GITLAB_BASE = "https://gitlab.archlinux.org/archlinux/packaging/packages/{}
 
 # Hardcoded ABI-aligned flags for critical libraries to prevent Segfault 139
 CRITICAL_FLAGS = {
-    "ncurses": "--with-shared --with-cxx-shared --enable-widec --without-debug --without-normal",
+    "ncurses": "--with-shared --with-cxx-shared --enable-widec --without-debug --without-normal --with-termlib",
     "readline": "--with-curses",
     "libffi": "--disable-multi-os-directory",
     "libxcrypt": "--disable-obsolete-api"
@@ -21,7 +21,7 @@ CRITICAL_FLAGS = {
 
 # Some packages require specific make flags (like Arch does for readline)
 CRITICAL_MAKE = {
-    "readline": "SHLIB_LIBS='-lncursesw'"
+    "readline": "SHLIB_LIBS='-lncursesw -ltinfo'"
 }
 
 def fetch_pkgbuild(pkgname, dest_dir):
