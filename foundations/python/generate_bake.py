@@ -29,6 +29,12 @@ CRITICAL_FLAGS = {
     "python": "--enable-shared --with-system-ffi --with-system-expat --enable-optimizations --with-lto --enable-loadable-sqlite-extensions --without-ensurepip"
 }
 
+# Hardcoded sources for packages that are tricky to parse
+HARDCODED_SOURCES = {
+    "expat": "https://github.com/libexpat/libexpat/releases/download/R_2_6_2/expat-2.6.2.tar.bz2",
+    "gdbm": "https://ftp.gnu.org/gnu/gdbm/gdbm-1.23.tar.gz"
+}
+
 # Some packages require specific make flags (like Arch does for readline)
 CRITICAL_MAKE = {
     "readline": 'SHLIB_LIBS=\\"-lncursesw -ltinfo\\"'
@@ -92,10 +98,14 @@ def get_metadata(pkgname, pkg_dir):
                     
                     if "::" in line: line = line.split("::")[1]
                     if line.startswith("http") or line.startswith("git+"):
+                        if "{" in line or "$" in line:
+                            # Try to resolve common variables if still present
+                            line = line.replace("${pkgname}", pkgname).replace("$pkgname", pkgname)
+                            line = line.replace("${pkgver}", "latest").replace("$pkgver", "latest") # Rough fallback
                         info["sources"].append(line)
                         break
 
-    main_url = info["sources"][0] if info["sources"] else None
+    main_url = HARDCODED_SOURCES.get(pkgname, info["sources"][0] if info["sources"] else None)
     main_sha = info["sha512sums"][0] if info["sha512sums"] else None
     
     return {

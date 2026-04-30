@@ -118,7 +118,7 @@ target "expat" {
   inherits = ["foundation-base"]
   args = {
     LIB_NAME = "expat"
-    LIB_URL = "git+https://github.com/libexpat/libexpat?signed#tag=R_2_8_0"
+    LIB_URL = "https://github.com/libexpat/libexpat/releases/download/R_2_6_2/expat-2.6.2.tar.bz2"
     LIB_SHA = "114a51e9809ab670568042b36c04d30105246ed8bfdc4225e4275fbac0463aadd7ee7c72838a7fcc421f0334dbb1aae7bf3aa76d56fff69598dee9cee3a82eb1"
   }
   tags = ["${REGISTRY}/foundation-python-expat:latest"]
@@ -128,7 +128,7 @@ target "gdbm" {
   inherits = ["foundation-base"]
   args = {
     LIB_NAME = "gdbm"
-    LIB_URL = "git+https://git.gnu.org.ua/gdbm.git?signed#tag=v1.26"
+    LIB_URL = "https://ftp.gnu.org/gnu/gdbm/gdbm-1.23.tar.gz"
     LIB_SHA = "7a964fae6f8383196e6b40bccad952723ba8c601c7d50153b4011db5bbb908202a6caf61055a3cceaab8dd71c4232420373a9d864a85fd8708097f4e1ce88c8a"
   }
   tags = ["${REGISTRY}/foundation-python-gdbm:latest"]
