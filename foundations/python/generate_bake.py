@@ -22,7 +22,7 @@ CRITICAL_FLAGS = {
     "ncurses": "--with-shared --with-cxx-shared --enable-widec --without-debug --without-normal --with-termlib",
     "readline": "--with-curses",
     "libffi": "--disable-multi-os-directory",
-    "libxcrypt": "--disable-obsolete-api"
+    "libxcrypt": "--disable-obsolete-api --disable-werror"
 }
 
 # Some packages require specific make flags (like Arch does for readline)

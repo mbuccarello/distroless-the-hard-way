@@ -97,7 +97,7 @@ target "libxcrypt" {
   args = {
     LIB_NAME = "libxcrypt"
     LIB_URL = "https://github.com/besser82/libxcrypt/releases/download/v4.5.2/libxcrypt-4.5.2.tar.xz"
-    LIB_CONFIG = "--disable-obsolete-api"
+    LIB_CONFIG = "--disable-obsolete-api --disable-werror"
   }
   tags = ["${REGISTRY}/foundation-python-libxcrypt:latest"]
 }

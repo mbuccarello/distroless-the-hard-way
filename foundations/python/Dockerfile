@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.4
 FROM scratch as deps
 FROM ghcr.io/mbuccarello/base-fedora:latest as builder
-RUN dnf install -y gcc make autoconf automake libtool perl perl-open diffutils patch unzip git gettext gettext-devel pkgconf-pkg-config m4 bison flex texinfo
+RUN dnf install -y gcc make autoconf automake libtool perl perl-open diffutils patch unzip git gettext gettext-devel pkgconf-pkg-config m4 bison flex texinfo po4a
 WORKDIR /build
 
 ARG LIB_NAME
