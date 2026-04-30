@@ -69,7 +69,11 @@ jobs:
               LD_LIBRARY_PATH=/artifacts/usr/lib64:/artifacts/usr/lib ldd /artifacts/usr/lib64/libreadline.so.8 && \
               make install DESTDIR=/rootfs && \
               echo '--- Linkage Audit: extension modules ---' && \
-              find /rootfs/usr/local/lib/python3.12/lib-dynload -name "*.so" -exec sh -c 'echo "Checking {}"; LD_LIBRARY_PATH=/artifacts/usr/lib64:/artifacts/usr/lib ldd {}' \;
+              find /rootfs/usr/local/lib/python3.12/lib-dynload -name "*.so" -exec sh -c 'echo "Checking {}"; LD_LIBRARY_PATH=/artifacts/usr/lib64:/artifacts/usr/lib ldd {}' \; && \
+              mkdir -p /rootfs/usr/share && \
+              cp -a /artifacts/usr/share/terminfo /rootfs/usr/share/ && \
+              mkdir -p /rootfs/usr/lib && \
+              ln -s /usr/share/terminfo /rootfs/usr/lib/terminfo
 
           
           # Prepare Standard FHS Symlinks for the final image to assist Rosetta
@@ -80,10 +84,6 @@ jobs:
           FROM ghcr.io/${{ github.repository_owner }}/base:latest
           COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-python-consolidated:latest /usr /usr/
           COPY --from=builder /rootfs /
-          
-          # Ensure terminfo is available for ncurses/readline
-          COPY --from=ghcr.io/${{ github.repository_owner }}/foundation-python-consolidated:latest /usr/share/terminfo /usr/share/terminfo
-          RUN mkdir -p /usr/lib && ln -s /usr/share/terminfo /usr/lib/terminfo
           
           ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
           ENV LD_LIBRARY_PATH=/usr/local/lib:/usr/lib64:/usr/lib
