@@ -17,6 +17,9 @@ Because this project compiles 100% of its artifacts from raw `.tar.gz` source co
 
 To solve this, we credit **Arch Linux** as our primary intelligence source. We exclusively read Arch Linux `PKGBUILD` Git repositories to map out dependency graphs and extract the correct `./configure` flags. The straightforward, transparent nature of Arch Linux build scripts helped us realize the complexity of managing dependencies and provided an easy way to understand how raw GNU source code should be assembled. 
 
+*   **[Detailed Dependency Intelligence & Translation Protocol](docs/dependency-intelligence.md)**: A deep dive into how we translate Arch blueprints into our independent Docker Bake system.
+*   **[Sovereign Intelligence Script](scripts/generate-foundations.py)**: A proposed automation tool for programmatically syncing our foundations with upstream blueprints.
+
 *Note: We only use Arch Linux as a blueprint for intelligence gathering. We do not use their binaries, their package managers, or any vendored distroless solution. The product is 100% independent.*
 
 ### Layer 1: System Foundations (GNU-Native)
