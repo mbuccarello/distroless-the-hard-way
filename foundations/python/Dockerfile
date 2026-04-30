@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.4
-FROM scratch as empty
+FROM scratch as deps
 FROM ghcr.io/mbuccarello/base-fedora:latest as builder
 RUN dnf install -y gcc make autoconf automake libtool perl perl-open diffutils patch
 WORKDIR /build
@@ -10,7 +10,8 @@ ARG LIB_SHA
 ARG LIB_CONFIG=""
 ARG LDFLAGS_EXTRA=""
 
-# Mount dependencies from other targets if they exist
+# Mount dependencies from the 'deps' stage
+# If not overridden by Bake, 'deps' is just an empty scratch stage
 RUN --mount=type=bind,from=deps,target=/deps \
     if [ -d "/deps/usr" ]; then \
       mkdir -p /artifacts/usr && \
@@ -44,7 +45,6 @@ RUN if [ "${LIB_NAME}" = "ncurses" ]; then \
       ln -s ncursesw/ncurses.h /artifacts/usr/include/ncurses.h || true && \
       ln -s ncursesw/term.h /artifacts/usr/include/term.h || true && \
       # Linker scripts for tinfo/ncurses as per Arch Intelligence
-      # This ensures applications finding -ltinfo or -lncurses link against the wide version
       echo "INPUT(libncursesw.so.6)" > /artifacts/usr/lib64/libncurses.so && \
       echo "INPUT(libncursesw.so.6)" > /artifacts/usr/lib64/libtinfo.so && \
       ln -s libncursesw.so.6 /artifacts/usr/lib64/libncurses.so.6 || true && \
