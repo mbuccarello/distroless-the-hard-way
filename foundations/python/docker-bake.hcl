@@ -42,7 +42,7 @@ target "ncurses" {
     LIB_URL = "https://ftp.gnu.org/gnu/ncurses/ncurses-6.4.tar.gz"
     LIB_SHA = "6931283d9ac87c5073f30b6290c4c75f21632bb4fc3603ac8100812bed248159"
     # Arch Intelligence: Comprehensive flags for ABI stability
-    LIB_CONFIG = "--with-shared --with-versioned-syms --enable-widec --enable-pc-files --with-cxx-binding --with-cxx-shared --with-manpage-format=normal --without-ada --disable-root-access --disable-root-environ --disable-setuid-environ"
+    LIB_CONFIG = "--with-shared --enable-widec --enable-pc-files --with-cxx-binding --with-cxx-shared --without-ada --disable-lp64 --disable-root-access --disable-root-environ --disable-setuid-environ"
   }
   tags = ["${REGISTRY}/foundation-python-ncurses:latest"]
 }
@@ -100,10 +100,11 @@ target "libxcrypt" {
     LIB_NAME = "libxcrypt"
     LIB_URL = "https://github.com/besser82/libxcrypt/releases/download/v4.4.36/libxcrypt-4.4.36.tar.xz"
     LIB_SHA = "e5e1f4caee0a01de2aee26e3138807d6d3ca2b8e67287966d1fefd65e1fd8943"
-    LIB_CONFIG = "--enable-hashes=strong,glibc --enable-obsolete-api=yes"
+    LIB_CONFIG = "--enable-hashes=strong,glibc --enable-obsolete-api=glibc --disable-werror"
   }
   tags = ["${REGISTRY}/foundation-python-libxcrypt:latest"]
 }
+
 
 target "consolidated" {
   dockerfile = "Dockerfile.consolidated"

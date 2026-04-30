@@ -64,18 +64,19 @@ jobs:
  
           RUN mkdir -p /rootfs && \
               LD_LIBRARY_PATH=/artifacts/usr/lib64:/artifacts/usr/lib \
-              assemble python3 "./configure --prefix=/usr/local \
+              ./configure --prefix=/usr/local \
               --enable-optimizations \
               --with-system-ffi \
               --with-openssl=/artifacts/usr \
               --with-zlib=/artifacts/usr \
               --enable-shared && \
-              make -j\$(nproc) && \
+              make -j$(nproc) && \
               echo '--- Linkage Audit: python ---' && \
               LD_LIBRARY_PATH=/artifacts/usr/lib64:/artifacts/usr/lib ldd ./python && \
               echo '--- Linkage Audit: readline ---' && \
               LD_LIBRARY_PATH=/artifacts/usr/lib64:/artifacts/usr/lib ldd /artifacts/usr/lib64/libreadline.so.8 && \
-              make install DESTDIR=/rootfs "
+              make install DESTDIR=/rootfs
+
           
           # Prepare Standard FHS Symlinks for the final image to assist Rosetta
           RUN ln -s python3.12 /rootfs/usr/local/bin/python3 || true
