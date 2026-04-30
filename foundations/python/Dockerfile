@@ -19,16 +19,21 @@ RUN --mount=type=bind,from=deps,target=/deps \
       cp -rn /deps/usr/* /artifacts/usr/ || true; \
     fi
 
-RUN curl -L -o source.archive ${LIB_URL} && \
-    if [ ${#LIB_SHA} -eq 64 ]; then \
-      echo "${LIB_SHA}  source.archive" | sha256sum -c -; \
-    else \
-      echo "${LIB_SHA}  source.archive" | sha512sum -c -; \
+RUN curl -L -o source.archive ${LIB_URL} || (echo "${LIB_URL}" | grep -q "^git+" && git clone "${LIB_URL#git+}" . ) || true
+
+RUN if [ -n "${LIB_SHA}" ]; then \
+      if [ ${#LIB_SHA} -eq 64 ]; then \
+        echo "${LIB_SHA}  source.archive" | sha256sum -c -; \
+      else \
+        echo "${LIB_SHA}  source.archive" | sha512sum -c -; \
+      fi; \
     fi && \
-    if [[ "${LIB_URL}" == *.zip ]]; then \
-      unzip source.archive && cp -rf */* . || true; \
-    else \
-      tar -xf source.archive --strip-components=1 || tar -xJf source.archive --strip-components=1; \
+    if [ -f "source.archive" ]; then \
+      if [[ "${LIB_URL}" == *.zip ]]; then \
+        unzip source.archive && cp -rf */* . || true; \
+      else \
+        tar -xf source.archive --strip-components=1 || tar -xJf source.archive --strip-components=1 || true; \
+      fi; \
     fi
 
 RUN mkdir -p /artifacts/usr

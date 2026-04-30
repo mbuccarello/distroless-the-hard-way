@@ -42,28 +42,21 @@ def parse_srcinfo(srcinfo_text):
             info["sources"].append(src)
         elif line.startswith("sha512sums ="):
             info["sha512sums"].append(line.split("=", 1)[1].strip())
+        elif line.startswith("b2sums ="): # Fallback to b2sums
+            if not info["sha512sums"]:
+                 info["sha512sums"].append(line.split("=", 1)[1].strip())
     
     main_url = None
     main_sha = None
     
-    # Heuristic 1: Look for first http/https source that is a tarball/zip
     for i, src in enumerate(info["sources"]):
-        if src.startswith("http") and any(ext in src.lower() for ext in [".tar", ".zip", ".tgz", ".xz", ".gz", ".bz2"]):
+        if src.startswith("http") or src.startswith("git+"):
             main_url = src
-            if i < len(info["sha512sums"]):
+            if i < len(info["sha512sums"]) and info["sha512sums"][i] != "SKIP":
                 main_sha = info["sha512sums"][i]
             break
-            
-    # Heuristic 2: If no http tarball, check if it's a git source (like ncurses)
-    if not main_url:
-        for i, src in enumerate(info["sources"]):
-            if src.startswith("git+") or src.startswith("http"):
-                main_url = src
-                if i < len(info["sha512sums"]):
-                    main_sha = info["sha512sums"][i]
-                break
 
-    return {"url": main_url, "sha": main_sha, "ver": info["pkgver"]}
+    return {"url": main_url, "sha": main_sha}
 
 def intercept_flags(pkgname, pkg_dir):
     cmd = [
@@ -72,8 +65,6 @@ def intercept_flags(pkgname, pkg_dir):
         "archlinux",
         "bash", "-c",
         """cd /pkg && pacman -Sy --noconfirm base-devel > /dev/null 2>&1 && \
-           useradd -m builduser && chown -R builduser:builduser /pkg && \
-           # Read the PKGBUILD to find the configure line
            grep -oP './configure\s+[^&|;]*' PKGBUILD | head -n 1 || echo ""
         """
     ]
@@ -94,7 +85,6 @@ def main():
             data["flags"] = intercept_flags(pkg, tmpdir)
             graph[pkg] = data
 
-    # Output Bake HCL
     hcl = 'group "default" {\n  targets = [' + ", ".join(f'"{k}"' for k in graph.keys()) + ', "consolidated"]\n}\n\n'
     hcl += 'variable "REGISTRY" { default = "ghcr.io/mbuccarello" }\n\n'
     hcl += 'target "foundation-base" {\n  dockerfile = "Dockerfile"\n  context = "."\n}\n\n'
@@ -104,12 +94,9 @@ def main():
         hcl += f'  inherits = ["foundation-base"]\n'
         hcl += f'  args = {{\n'
         hcl += f'    LIB_NAME = "{pkg}"\n'
-        if data["url"]:
-            hcl += f'    LIB_URL = "{data["url"]}"\n'
-        if data["sha"]:
-            hcl += f'    LIB_SHA = "{data["sha"]}"\n'
+        if data["url"]: hcl += f'    LIB_URL = "{data["url"]}"\n'
+        if data["sha"] and data["sha"] != "SKIP": hcl += f'    LIB_SHA = "{data["sha"]}"\n'
         if data["flags"]:
-            # Clean up flags
             flags = data["flags"].replace("./configure", "").replace("--prefix=/usr", "").replace("--libdir=/usr/lib", "").replace("--libdir=/usr/lib64", "").strip()
             hcl += f'    LIB_CONFIG = "{flags}"\n'
         hcl += f'  }}\n'

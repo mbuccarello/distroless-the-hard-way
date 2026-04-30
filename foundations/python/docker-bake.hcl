@@ -24,6 +24,7 @@ target "readline" {
   args = {
     LIB_NAME = "readline"
     LIB_URL = "https://ftp.gnu.org/gnu/readline/readline-8.3.tar.gz"
+    LIB_SHA = "45d6fe7e34c56d309102a94aa776a7f5284201e844450e14ff818df9fa84a72154bdca70f11828c94954b080cbbe4666fa0b00ffa8460118ec8f3ea551b73dad"
   }
   tags = ["${REGISTRY}/foundation-python-readline:latest"]
 }
@@ -51,6 +52,7 @@ target "libffi" {
   args = {
     LIB_NAME = "libffi"
     LIB_URL = "https://github.com/libffi/libffi/archive/refs/tags/v3.5.2.tar.gz"
+    LIB_SHA = "4aa7ecdbb7abc862f876cc0b0484f944fe6c49633071d36a964ad94f06d02ee08c76dceed5d6897da02c357515033f084a9a4da3a22bdd559316a5dca736332d"
   }
   tags = ["${REGISTRY}/foundation-python-libffi:latest"]
 }
