@@ -46,21 +46,26 @@ RUN if [ ! -f "./configure" ]; then \
       fi; \
     fi && \
     if [ -f "./configure" ]; then \
-      ./configure --prefix=/usr --libdir=/usr/lib64 ${LIB_CONFIG} || (cat config.log && exit 1) && \
+      ./configure --prefix=/usr --libdir=/usr/lib ${LIB_CONFIG} || (cat config.log && exit 1) && \
       eval make -j$(nproc) ${MAKE_EXTRA} || (eval make V=1 ${MAKE_EXTRA} && exit 1) && \
       eval make install DESTDIR=/artifacts ${MAKE_EXTRA}; \
     elif [ "${LIB_NAME}" = "openssl" ]; then \
-      ./Configure --prefix=/usr --libdir=lib64 ${LIB_CONFIG} && \
+      ./Configure --prefix=/usr --libdir=lib ${LIB_CONFIG} && \
       make -j$(nproc) && \
       make install_sw DESTDIR=/artifacts; \
     elif [ "${LIB_NAME}" = "bzip2" ]; then \
       make -f Makefile-libbz2_so && \
       make install PREFIX=/artifacts/usr && \
-      mkdir -p /artifacts/usr/lib64 && \
-      cp -a libbz2.so* /artifacts/usr/lib64/; \
+      mkdir -p /artifacts/usr/lib && \
+      cp -a libbz2.so* /artifacts/usr/lib/; \
     else \
       make -j$(nproc) PREFIX=/usr CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}" && \
       make install PREFIX=/usr DESTDIR=/artifacts CFLAGS="${CFLAGS}"; \
+    fi && \
+    if [ -d "/artifacts/usr/lib64" ]; then \
+      mkdir -p /artifacts/usr/lib && \
+      cp -a /artifacts/usr/lib64/* /artifacts/usr/lib/ || true && \
+      rm -rf /artifacts/usr/lib64; \
     fi
 
 RUN if [ "${LIB_NAME}" = "ncurses" ]; then \
@@ -68,7 +73,7 @@ RUN if [ "${LIB_NAME}" = "ncurses" ]; then \
       ln -s ncursesw/curses.h /artifacts/usr/include/curses.h || true && \
       ln -s ncursesw/term.h /artifacts/usr/include/term.h || true && \
       for lib in ncurses ncurses++ form panel menu tic tinfo; do \
-        ln -s lib${lib}w.so /artifacts/usr/lib64/lib${lib}.so || true; \
+        ln -s lib${lib}w.so /artifacts/usr/lib/lib${lib}.so || true; \
       done; \
     fi && \
     if [ "${LIB_NAME}" = "python" ]; then \
