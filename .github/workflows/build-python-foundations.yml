@@ -55,7 +55,9 @@ jobs:
           docker buildx bake ${{ matrix.name }} --push
           
           IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/foundation-python-${{ matrix.name }}:latest
+          docker pull $IMAGE_NAME
           DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "$IMAGE_NAME" | cut -d'@' -f2)
+
           echo "digest=$DIGEST" >> $GITHUB_OUTPUT
           echo "image_name=$IMAGE_NAME" >> $GITHUB_OUTPUT
 
