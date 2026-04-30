@@ -1,11 +1,13 @@
 # syntax=docker/dockerfile:1.4
 FROM scratch
-COPY --from=libffi /usr /usr
 COPY --from=ncurses /usr /usr
 COPY --from=readline /usr /usr
+COPY --from=openssl /usr /usr
 COPY --from=sqlite /usr /usr
+COPY --from=libffi /usr /usr
 COPY --from=bzip2 /usr /usr
 COPY --from=xz /usr /usr
-COPY --from=libxcrypt /usr /usr
 COPY --from=zlib /usr /usr
-COPY --from=openssl /usr /usr
+COPY --from=libxcrypt /usr /usr
+COPY --from=expat /usr /usr
+COPY --from=gdbm /usr /usr

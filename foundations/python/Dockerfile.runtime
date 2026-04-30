@@ -1,0 +1,10 @@
+# syntax=docker/dockerfile:1.4
+FROM ghcr.io/mbuccarello/base-fedora:latest as helper
+RUN mkdir -p /rootfs/lib64 && ln -s /usr/lib64/ld-linux-x86-64.so.2 /rootfs/lib64/ld-linux-x86-64.so.2
+
+FROM scratch
+COPY --from=helper /rootfs /
+COPY --from=consolidated /usr /usr
+COPY --from=python /usr /usr
+# Final FHS check
+ENTRYPOINT ["/usr/bin/python3"]

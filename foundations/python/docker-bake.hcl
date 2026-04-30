@@ -1,5 +1,5 @@
 group "default" {
-  targets = ["ncurses", "readline", "openssl", "sqlite", "libffi", "bzip2", "xz", "zlib", "libxcrypt", "consolidated"]
+  targets = ["ncurses", "readline", "openssl", "sqlite", "libffi", "bzip2", "xz", "zlib", "libxcrypt", "expat", "gdbm", "python", "consolidated"]
 }
 
 variable "REGISTRY" { default = "ghcr.io/mbuccarello" }
@@ -41,6 +41,10 @@ target "openssl" {
     LIB_NAME = "openssl"
     LIB_URL = "https://github.com/openssl/openssl/releases/download/openssl-3.6.2/openssl-3.6.2.tar.gz"
   }
+  contexts = {
+    deps = "target:zlib"
+    zlib = "target:zlib"
+  }
   tags = ["${REGISTRY}/foundation-python-openssl:latest"]
 }
 
@@ -49,6 +53,14 @@ target "sqlite" {
   args = {
     LIB_NAME = "sqlite"
     LIB_URL = "https://www.sqlite.org/2026/sqlite-src-3530000.zip"
+  }
+  contexts = {
+    deps = "target:zlib"
+    zlib = "target:zlib"
+    deps = "target:readline"
+    readline = "target:readline"
+    deps = "target:ncurses"
+    ncurses = "target:ncurses"
   }
   tags = ["${REGISTRY}/foundation-python-sqlite:latest"]
 }
@@ -102,6 +114,61 @@ target "libxcrypt" {
   tags = ["${REGISTRY}/foundation-python-libxcrypt:latest"]
 }
 
+target "expat" {
+  inherits = ["foundation-base"]
+  args = {
+    LIB_NAME = "expat"
+    LIB_URL = "git+https://github.com/libexpat/libexpat?signed#tag=R_2_8_0"
+    LIB_SHA = "114a51e9809ab670568042b36c04d30105246ed8bfdc4225e4275fbac0463aadd7ee7c72838a7fcc421f0334dbb1aae7bf3aa76d56fff69598dee9cee3a82eb1"
+  }
+  tags = ["${REGISTRY}/foundation-python-expat:latest"]
+}
+
+target "gdbm" {
+  inherits = ["foundation-base"]
+  args = {
+    LIB_NAME = "gdbm"
+    LIB_URL = "git+https://git.gnu.org.ua/gdbm.git?signed#tag=v1.26"
+    LIB_SHA = "7a964fae6f8383196e6b40bccad952723ba8c601c7d50153b4011db5bbb908202a6caf61055a3cceaab8dd71c4232420373a9d864a85fd8708097f4e1ce88c8a"
+  }
+  tags = ["${REGISTRY}/foundation-python-gdbm:latest"]
+}
+
+target "python" {
+  inherits = ["foundation-base"]
+  args = {
+    LIB_NAME = "python"
+    LIB_URL = "https://www.python.org/ftp/python/3.14.4/Python-3.14.4.tar.xz"
+    LIB_SHA = "89a7f8b8a31f48d150badb4751df137d47d9014c9c422649a1a55aef5618aa7f0259dd18c151e6804fa8312c6a21544332a9f630ee81150dc00505637e62bb8c"
+    LIB_CONFIG = "--enable-shared --with-system-ffi --with-system-expat --enable-optimizations --with-lto --enable-loadable-sqlite-extensions --without-ensurepip"
+  }
+  contexts = {
+    deps = "target:ncurses"
+    ncurses = "target:ncurses"
+    deps = "target:readline"
+    readline = "target:readline"
+    deps = "target:openssl"
+    openssl = "target:openssl"
+    deps = "target:sqlite"
+    sqlite = "target:sqlite"
+    deps = "target:libffi"
+    libffi = "target:libffi"
+    deps = "target:bzip2"
+    bzip2 = "target:bzip2"
+    deps = "target:xz"
+    xz = "target:xz"
+    deps = "target:zlib"
+    zlib = "target:zlib"
+    deps = "target:libxcrypt"
+    libxcrypt = "target:libxcrypt"
+    deps = "target:expat"
+    expat = "target:expat"
+    deps = "target:gdbm"
+    gdbm = "target:gdbm"
+  }
+  tags = ["${REGISTRY}/foundation-python-python:latest"]
+}
+
 target "consolidated" {
   dockerfile = "Dockerfile.consolidated"
   context = "."
@@ -115,6 +182,18 @@ target "consolidated" {
     xz = "target:xz"
     zlib = "target:zlib"
     libxcrypt = "target:libxcrypt"
+    expat = "target:expat"
+    gdbm = "target:gdbm"
   }
   tags = ["${REGISTRY}/foundation-python-consolidated:latest"]
+}
+
+target "runtime" {
+  dockerfile = "Dockerfile.runtime"
+  context = "."
+  contexts = {
+    python = "target:python"
+    consolidated = "target:consolidated"
+  }
+  tags = ["${REGISTRY}/python-distroless:3.12-sovereign"]
 }

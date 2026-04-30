@@ -8,12 +8,15 @@ import sys
 import re
 
 # Targets required for Python distroless
-CORE_TARGETS = ["ncurses", "readline", "openssl", "sqlite", "libffi", "bzip2", "xz", "zlib", "libxcrypt"]
+CORE_TARGETS = ["ncurses", "readline", "openssl", "sqlite", "libffi", "bzip2", "xz", "zlib", "libxcrypt", "expat", "gdbm", "python"]
 ARCH_GITLAB_BASE = "https://gitlab.archlinux.org/archlinux/packaging/packages/{}/-/raw/main/PKGBUILD"
 
 # Define library dependencies for Bake contexts
 DEPENDENCIES = {
     "readline": ["ncurses"],
+    "openssl": ["zlib"],
+    "sqlite": ["zlib", "readline", "ncurses"],
+    "python": ["ncurses", "readline", "openssl", "sqlite", "libffi", "bzip2", "xz", "zlib", "libxcrypt", "expat", "gdbm"]
 }
 
 
@@ -22,7 +25,8 @@ CRITICAL_FLAGS = {
     "ncurses": "--with-shared --with-cxx-shared --enable-widec --without-debug --without-normal --with-termlib",
     "readline": "--with-curses",
     "libffi": "--disable-multi-os-directory",
-    "libxcrypt": "--disable-obsolete-api --disable-werror"
+    "libxcrypt": "--disable-obsolete-api --disable-werror",
+    "python": "--enable-shared --with-system-ffi --with-system-expat --enable-optimizations --with-lto --enable-loadable-sqlite-extensions --without-ensurepip"
 }
 
 # Some packages require specific make flags (like Arch does for readline)
@@ -139,12 +143,29 @@ def main():
     
     hcl += 'target "consolidated" {\n  dockerfile = "Dockerfile.consolidated"\n  context = "."\n  contexts = {\n'
     for pkg in graph.keys():
-        hcl += f'    {pkg} = "target:{pkg}"\n'
-    hcl += '  }\n  tags = ["${REGISTRY}/foundation-python-consolidated:latest"]\n}\n'
+        if pkg != "python":
+            hcl += f'    {pkg} = "target:{pkg}"\n'
+    hcl += '  }\n  tags = ["${REGISTRY}/foundation-python-consolidated:latest"]\n}\n\n'
+
+    hcl += 'target "runtime" {\n  dockerfile = "Dockerfile.runtime"\n  context = "."\n  contexts = {\n'
+    hcl += '    python = "target:python"\n'
+    hcl += '    consolidated = "target:consolidated"\n'
+    hcl += '  }\n  tags = ["${REGISTRY}/python-distroless:3.12-sovereign"]\n}\n'
 
     with open("foundations/python/docker-bake.hcl", "w") as f:
         f.write(hcl)
+    
+    # Generate Dockerfile.consolidated
+    df_consolidated = "# syntax=docker/dockerfile:1.4\nFROM scratch\n"
+    for pkg in graph.keys():
+        if pkg != "python":
+            df_consolidated += f"COPY --from={pkg} /usr /usr\n"
+    
+    with open("foundations/python/Dockerfile.consolidated", "w") as f:
+        f.write(df_consolidated)
+    
     print("✅ foundations/python/docker-bake.hcl updated.")
+    print("✅ foundations/python/Dockerfile.consolidated updated.")
 
 if __name__ == "__main__":
     main()

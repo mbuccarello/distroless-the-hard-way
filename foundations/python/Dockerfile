@@ -7,17 +7,10 @@ WORKDIR /build
 ARG LIB_NAME
 ARG LIB_URL
 ARG LIB_SHA
-ARG LIB_CONFIG=""
-ARG LDFLAGS_EXTRA=""
-ARG MAKE_EXTRA=""
+ARG LIB_CONFIG
+ARG MAKE_EXTRA
 
-# Mount dependencies from the 'deps' stage
-# If not overridden by Bake, 'deps' is just an empty scratch stage
-RUN --mount=type=bind,from=deps,target=/deps \
-    if [ -d "/deps/usr" ]; then \
-      mkdir -p /artifacts/usr && \
-      cp -rn /deps/usr/* /artifacts/usr/ || true; \
-    fi
+COPY --from=deps / /artifacts/
 
 RUN if [[ "${LIB_URL}" == git+* ]]; then \
       URL="${LIB_URL#git+}" && \
@@ -75,6 +68,9 @@ RUN if [ "${LIB_NAME}" = "ncurses" ]; then \
       for lib in ncurses ncurses++ form panel menu tic tinfo; do \
         ln -s lib${lib}w.so /artifacts/usr/lib64/lib${lib}.so || true; \
       done; \
+    fi && \
+    if [ "${LIB_NAME}" = "python" ]; then \
+      ln -s python3.12 /artifacts/usr/bin/python3 || true; \
     fi
 
 FROM scratch
