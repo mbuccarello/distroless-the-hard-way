@@ -38,6 +38,7 @@ RUN if [ -f "./configure" ]; then \
     elif [ "${LIB_NAME}" = "bzip2" ]; then \
       make -f Makefile-libbz2_so && \
       make install PREFIX=/artifacts/usr && \
+      mkdir -p /artifacts/usr/lib64 && \
       cp -a libbz2.so* /artifacts/usr/lib64/; \
     else \
       make -j$(nproc) PREFIX=/usr CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}" && \
