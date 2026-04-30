@@ -55,3 +55,7 @@ jobs:
           subject-digest: ${{ steps.build.outputs.digest }}
           push-to-registry: true
 
+      - name: Functional Smoke Test
+        run: |
+          docker run --rm ghcr.io/${{ github.repository_owner }}/python-distroless:3.12-sovereign -c "import readline, sqlite3, ssl; print('Smoke test PASSED!')"
+
