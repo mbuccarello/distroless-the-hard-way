@@ -141,7 +141,11 @@ def main():
         if data["make_extra"]: hcl += f'    MAKE_EXTRA = "{data["make_extra"]}"\n'
         hcl += f'  }}\n'
         
-        if pkg in DEPENDENCIES:
+        if pkg == "python":
+            hcl += '  contexts = {\n'
+            hcl += '    deps = "target:consolidated"\n'
+            hcl += '  }\n'
+        elif pkg in DEPENDENCIES:
             hcl += '  contexts = {\n'
             for dep in DEPENDENCIES[pkg]:
                 hcl += f'    deps = "target:{dep}"\n'

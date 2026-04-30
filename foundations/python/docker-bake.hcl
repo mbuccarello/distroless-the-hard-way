@@ -141,28 +141,7 @@ target "python" {
     LIB_CONFIG = "--enable-shared --with-system-ffi --without-ensurepip"
   }
   contexts = {
-    deps = "target:ncurses"
-    ncurses = "target:ncurses"
-    deps = "target:readline"
-    readline = "target:readline"
-    deps = "target:openssl"
-    openssl = "target:openssl"
-    deps = "target:sqlite"
-    sqlite = "target:sqlite"
-    deps = "target:libffi"
-    libffi = "target:libffi"
-    deps = "target:bzip2"
-    bzip2 = "target:bzip2"
-    deps = "target:xz"
-    xz = "target:xz"
-    deps = "target:zlib"
-    zlib = "target:zlib"
-    deps = "target:libxcrypt"
-    libxcrypt = "target:libxcrypt"
-    deps = "target:expat"
-    expat = "target:expat"
-    deps = "target:gdbm"
-    gdbm = "target:gdbm"
+    deps = "target:consolidated"
   }
   tags = ["${REGISTRY}/foundation-python-python:latest"]
 }
