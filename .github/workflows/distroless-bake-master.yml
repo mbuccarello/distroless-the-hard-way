@@ -80,6 +80,31 @@ jobs:
           DIGEST=$(jq -r '.runtime["containerimage.digest"]' metadata.json)
           echo "digest=$DIGEST" >> $GITHUB_OUTPUT
 
+      - name: Execute E2E Smoke Test
+        run: |
+          # Use --load if not pushing, or pull if pushed
+          IMAGE_NAME="ghcr.io/${{ github.repository_owner }}/${{ inputs.stack }}-distroless:latest"
+          
+          # If we didn't push, we need to load it into the local daemon for testing
+          if [ "${{ inputs.push }}" = "false" ]; then
+            docker buildx bake -f docker-bake.hcl --set "*.output=type=docker" runtime
+          else
+            docker pull "$IMAGE_NAME"
+          fi
+
+          case "${{ inputs.stack }}" in
+            python) TEST_CMD="python3 /app/test.py" ;;
+            nodejs) TEST_CMD="node /app/test.js" ;;
+            java) TEST_CMD="java /app/test.java" ;;
+            php) TEST_CMD="php /app/test.php" ;;
+            perl) TEST_CMD="perl /app/test.pl" ;;
+            dotnet) TEST_CMD="dotnet --info" ;;
+            *) TEST_CMD="true" ;;
+          esac
+          
+          echo "🚀 Running E2E Test for ${{ inputs.stack }}..."
+          docker run --rm -v $(pwd)/app:/app "$IMAGE_NAME" $TEST_CMD
+
       - name: Sign Images
         if: ${{ inputs.push }}
         run: |
