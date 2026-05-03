@@ -61,9 +61,12 @@ jobs:
 
       - name: Initialize Distroless Engine
         run: |
-          ./distroless_engine.py --stack stacks/${{ inputs.stack }}.yaml --graph
-          echo "Current Directory: $(pwd)"
-          ls -la docker-bake.hcl Dockerfile.cc
+          echo "Workspace: ${{ github.workspace }}"
+          echo "PWD: $(pwd)"
+          ls -la
+          python3 distroless_engine.py --stack stacks/${{ inputs.stack }}.yaml --graph
+          echo "Exit Code: $?"
+          ls -la docker-bake.hcl
 
       - name: Build and Push with Bake
         id: bake
