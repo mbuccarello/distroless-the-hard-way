@@ -237,56 +237,62 @@ class Visualizer:
         return mermaid
 
 def main():
-    parser = argparse.ArgumentParser(description="Distroless Engine")
-    parser.add_argument("--stack", required=True, help="Path to stack YAML")
-    parser.add_argument("--graph", action="store_true", help="Generate Mermaid DAG")
-    args = parser.parse_args()
+    try:
+        parser = argparse.ArgumentParser(description="Distroless Engine")
+        parser.add_argument("--stack", required=True, help="Path to stack YAML")
+        parser.add_argument("--graph", action="store_true", help="Generate Mermaid DAG")
+        args = parser.parse_args()
 
-    with open(args.stack, 'r') as f:
-        stack_config = yaml.safe_load(f)
+        with open(args.stack, 'r') as f:
+            stack_config = yaml.safe_load(f)
 
-    print(f"🚀 Initializing Distroless Engine for {stack_config['name']}...")
-    
-    with tempfile.TemporaryDirectory() as tmpdir:
-        manager = MetadataManager(tmpdir)
-        resolver = DAGResolver(manager)
-        deps = stack_config.get('dependencies', [])
-        if deps:
-            resolver.resolve([d['name'] for d in deps])
+        print(f"🚀 Initializing Distroless Engine for {stack_config['name']}...")
         
-        generator = HCLGenerator(stack_config)
-        hcl = generator.generate(resolver.graph)
-        
-        with open("docker-bake.hcl", "w") as f:
-            f.write(hcl)
-        print(f"✅ Generated docker-bake.hcl")
-
-        df_cc = generator.generate_cc_dockerfile(resolver.graph)
-        with open("Dockerfile.cc", "w") as f:
-            f.write(df_cc)
-        print(f"✅ Generated Dockerfile.cc")
-
-        if args.graph:
-            viz = Visualizer(stack_config['name'])
-            mermaid = viz.generate_mermaid(resolver.graph)
-            mermaid_path = f"docs/mermaid/{stack_config['name']}-distroless.mermaid"
-            os.makedirs(os.path.dirname(mermaid_path), exist_ok=True)
-            with open(mermaid_path, "w") as f:
-                f.write(mermaid)
-            print(f"✅ Generated {mermaid_path}")
+        with tempfile.TemporaryDirectory() as tmpdir:
+            manager = MetadataManager(tmpdir)
+            resolver = DAGResolver(manager)
+            deps = stack_config.get('dependencies', [])
+            if deps:
+                resolver.resolve([d['name'] for d in deps])
             
-            # New: Automatically generate PNG image (optional in CI)
-            if os.environ.get("RENDER_DIAGRAMS") == "true":
-                image_path = f"docs/images/{stack_config['name']}-distroless.png"
-                try:
-                    import subprocess
-                    print(f"🎨 Rendering {image_path}...")
-                    subprocess.run(["npx", "-y", "@mermaid-js/mermaid-cli", "-i", mermaid_path, "-o", image_path, "-t", "dark", "-b", "transparent"], check=True, capture_output=True)
-                    print(f"✅ Generated {image_path}")
-                except Exception as e:
-                    print(f"⚠️ Could not generate PNG image: {e}")
-            else:
-                print(f"ℹ️ Skipping PNG rendering (set RENDER_DIAGRAMS=true to enable)")
+            generator = HCLGenerator(stack_config)
+            hcl = generator.generate(resolver.graph)
+            
+            with open("docker-bake.hcl", "w") as f:
+                f.write(hcl)
+            print(f"✅ Generated docker-bake.hcl")
+
+            df_cc = generator.generate_cc_dockerfile(resolver.graph)
+            with open("Dockerfile.cc", "w") as f:
+                f.write(df_cc)
+            print(f"✅ Generated Dockerfile.cc")
+
+            if args.graph:
+                viz = Visualizer(stack_config['name'])
+                mermaid = viz.generate_mermaid(resolver.graph)
+                mermaid_path = f"docs/mermaid/{stack_config['name']}-distroless.mermaid"
+                os.makedirs(os.path.dirname(mermaid_path), exist_ok=True)
+                with open(mermaid_path, "w") as f:
+                    f.write(mermaid)
+                print(f"✅ Generated {mermaid_path}")
+                
+                # New: Automatically generate PNG image (optional in CI)
+                if os.environ.get("RENDER_DIAGRAMS") == "true":
+                    image_path = f"docs/images/{stack_config['name']}-distroless.png"
+                    try:
+                        import subprocess
+                        print(f"🎨 Rendering {image_path}...")
+                        subprocess.run(["npx", "-y", "@mermaid-js/mermaid-cli", "-i", mermaid_path, "-o", image_path, "-t", "dark", "-b", "transparent"], check=True, capture_output=True)
+                        print(f"✅ Generated {image_path}")
+                    except Exception as e:
+                        print(f"⚠️ Could not generate PNG image: {e}")
+                else:
+                    print(f"ℹ️ Skipping PNG rendering (set RENDER_DIAGRAMS=true to enable)")
+    except Exception as e:
+        print(f"❌ FATAL ERROR in Engine: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
