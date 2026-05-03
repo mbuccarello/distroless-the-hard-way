@@ -154,8 +154,11 @@ class HCLGenerator:
             hcl += '  }\n'
             hcl += '}\n\n'
 
-        # Add the stack itself if it's a source build
-        if self.stack.get("type") == "source_build":
+        # Add the stack itself if it's a source build and has a source URL
+        # Core stacks like 'static', 'base', 'cc' are handled separately.
+        self.has_stack_target = False
+        if self.stack.get("type") == "source_build" and "source_url" in self.stack.get("runtime", {}) and self.stack["name"] not in ["static", "base", "cc"]:
+            self.has_stack_target = True
             hcl += f'target "{self.stack["name"]}" {{\n'
             hcl += '  dockerfile = "Dockerfile"\n'
             hcl += '  target = "lib-builder"\n'
@@ -188,7 +191,7 @@ class HCLGenerator:
         hcl += '    builder = "target:builder"\n'
         for pkg in graph.keys():
             hcl += f'    {pkg} = "target:{pkg}"\n'
-        if self.stack.get("type") == "source_build":
+        if self.has_stack_target:
             hcl += f'    {self.stack["name"]} = "target:{self.stack["name"]}"\n'
         hcl += '  }\n}\n\n'
 
@@ -216,7 +219,7 @@ class HCLGenerator:
             df += "    curl -L \"$RUNTIME_URL\" -o /tmp/runtime.tar.gz && \\\n"
             df += "    tar -xf /tmp/runtime.tar.gz -C /runtime-root/usr --strip-components=1; \\\n"
             df += "    fi\n"
-        elif self.stack.get("type") == "source_build":
+        elif self.has_stack_target:
             # Copy from the stack-specific build stage
             df += f"COPY --from={self.stack['name']} /artifacts/usr /runtime-root/usr\n"
 
