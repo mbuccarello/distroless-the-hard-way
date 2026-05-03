@@ -68,20 +68,28 @@ jobs:
           docker buildx bake \
             -f docker-bake.hcl \
             --set "*.args.REGISTRY=ghcr.io/${{ github.repository_owner }}" \
+            --metadata-file metadata.json \
             ${{ inputs.push == true && '--push' || '--load' }}
+
+      - name: Extract Digest
+        id: digest
+        if: ${{ inputs.push }}
+        run: |
+          DIGEST=$(jq -r '.runtime["containerimage.digest"]' metadata.json)
+          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
 
       - name: Sign Images
         if: ${{ inputs.push }}
         run: |
           IMAGE_NAME="ghcr.io/${{ github.repository_owner }}/${{ inputs.stack }}-distroless"
-          cosign sign --yes "${IMAGE_NAME}:latest"
-          cosign sign --yes "${IMAGE_NAME}:debug"
+          cosign sign --yes "${IMAGE_NAME}@${{ steps.digest.outputs.digest }}"
 
       - name: Generate SLSA Build Provenance (Level 3)
         if: ${{ inputs.push }}
         uses: actions/attest-build-provenance@v2
         with:
           subject-name: ghcr.io/${{ github.repository_owner }}/${{ inputs.stack }}-distroless
+          subject-digest: ${{ steps.digest.outputs.digest }}
           push-to-registry: true
 
       - name: Upload Architecture DAG
