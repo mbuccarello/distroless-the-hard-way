@@ -22,11 +22,17 @@ jobs:
           echo "Generated matrix: $STACKS_JSON"
 
   build-fleet:
+    needs: determine-stacks
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
     strategy:
       fail-fast: false
       matrix:
-        stack: [python, nodejs, java, dotnet, php, perl, static, base, cc]
-    uses: mbuccarello/distroless-the-hard-way/.github/workflows/distroless-bake-master.yml@main
+        stack: ${{ fromJson(needs.determine-stacks.outputs.matrix) }}
+    uses: ./.github/workflows/distroless-bake-master.yml
     with:
       stack: ${{ matrix.stack }}
       push: true
