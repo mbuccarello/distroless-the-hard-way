@@ -26,7 +26,7 @@ jobs:
       fail-fast: false
       matrix:
         stack: [python, nodejs, java, dotnet, php, perl, static, base, cc]
-    uses: ./.github/workflows/distroless-bake-master.yml
+    uses: mbuccarello/distroless-the-hard-way/.github/workflows/distroless-bake-master.yml@main
     with:
       stack: ${{ matrix.stack }}
       push: true
