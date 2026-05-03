@@ -1,0 +1,93 @@
+name: Distroless The Hard Way - Bootstrap Builder
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  build-bootstrap:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Authenticate to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build Static Busybox (Fedora GNU Sandbox)
+        uses: addnab/docker-run-action@4f65fabd2431ebc8d299f8e5a018d79a769ae185 # v3
+        with:
+          image: fedora:40
+          options: -v ${{ github.workspace }}:/workspace
+          run: |
+            set -e
+            dnf install -y gcc make binutils curl bzip2 glibc-static file
+            mkdir -p /workspace/build /workspace/rootfs
+            cd /workspace/build
+            curl -L -o busybox-1.36.1.tar.bz2 https://busybox.net/downloads/busybox-1.36.1.tar.bz2
+            tar -xjf busybox-1.36.1.tar.bz2
+            cd busybox-1.36.1
+            
+            # Configure and build (Total GNU Alignment)
+            make defconfig
+            # Workaround for networking/tc.o build error
+            sed -i "s/CONFIG_TC=y/# CONFIG_TC is not set/" .config
+            
+            # Force absolute static linking for the bootstrap environment
+            sed -i 's/^# CONFIG_STATIC is not set/CONFIG_STATIC=y/' .config
+            sed -i 's/^CONFIG_FEATURE_INDIVIDUAL=y/# CONFIG_FEATURE_INDIVIDUAL is not set/' .config
+            
+            # Resolve any missing dependencies non-interactively using olddefconfig
+            make olddefconfig
+            make -j$(nproc) LDFLAGS="-static"
+            
+            # Verify and stage
+            file busybox | grep "statically linked" || (echo "FAILED: Binary is not static" && exit 1)
+            cp busybox /workspace/rootfs/busybox
+            cp busybox /workspace/rootfs/tar
+            cp busybox /workspace/rootfs/sh
+            cp busybox /workspace/rootfs/mkdir
+            cp busybox /workspace/rootfs/echo
+            mkdir -p /workspace/rootfs/bin
+            cp busybox /workspace/rootfs/bin/sh
+            cp busybox /workspace/rootfs/bin/busybox
+            cp busybox /workspace/rootfs/bin/tar
+            cp busybox /workspace/rootfs/bin/ln
+            cp busybox /workspace/rootfs/bin/mkdir
+            cp busybox /workspace/rootfs/bin/chmod
+            cp busybox /workspace/rootfs/bin/chown
+            cp busybox /workspace/rootfs/bin/rm
+            cp busybox /workspace/rootfs/bin/ls
+            cp busybox /workspace/rootfs/bin/cp
+            cp busybox /workspace/rootfs/bin/mv
+            cp busybox /workspace/rootfs/bin/echo
+
+      - name: Construct Zero-Trust Bootstrap Image
+        run: |
+          cat <<EOF > Dockerfile.bootstrap
+          FROM scratch
+          COPY rootfs/busybox /busybox
+          COPY rootfs/tar /tar
+          COPY rootfs/sh /sh
+          COPY rootfs/mkdir /mkdir
+          COPY rootfs/echo /echo
+          COPY rootfs/bin /bin
+          EOF
+          docker build -t ghcr.io/${{ github.repository_owner }}/bootstrap:latest -f Dockerfile.bootstrap .
+
+
+      - name: Build and Push Bootstrap OS
+        run: |
+          docker push ghcr.io/${{ github.repository_owner }}/bootstrap:latest
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.5.0
+        
+      - name: Sign Bootstrap Distroless Core
+        run: cosign sign --yes ghcr.io/${{ github.repository_owner }}/bootstrap:latest

@@ -1,13 +1,17 @@
+# Docker Engine Artifacts
+docker-bake.hcl
+Dockerfile.cc
 
-# Private Roadmaps (if any)
-# docs/gap-analysis.md is now public documentation
+# Temporary Build Contexts
+scratch/
+tmp_pkg/
+dist/
+build/
 
-# Local Backups
-backup/
+# Local Python
+__pycache__/
+*.pyc
+.venv/
 
-# Logs and Diagnostics
+# Logs
 *.log
-*.txt
-*.xz
-payload/
-debug/**/*.log

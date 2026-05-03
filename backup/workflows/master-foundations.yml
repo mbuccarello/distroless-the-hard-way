@@ -1,0 +1,66 @@
+name: "Layer 1: Foundations (GNU-Native Builders)"
+
+# Technical Specification: Foundations Layer
+# This workflow orchestrates the source-to-payload compilation.
+# Diagram: docs/images/layered-architecture.png
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/master-foundations.yml"
+      - ".github/workflows/build-*.yml"
+      - "docs/lib-hierarchy.md"
+  workflow_dispatch:
+    inputs:
+      force_rebuild:
+        description: "Force rebuild of all foundations"
+        required: false
+        default: "false"
+        type: boolean
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+  attestations: write
+
+jobs:
+  mirror:
+    uses: ./.github/workflows/mirror-fedora.yml
+    secrets: inherit
+
+  bootstrap:
+    needs: [mirror]
+    uses: ./.github/workflows/build-bootstrap.yml
+    secrets: inherit
+
+  openssl:
+    needs: [mirror]
+    uses: ./.github/workflows/build-openssl.yml
+    secrets: inherit
+
+  zlib:
+    needs: [mirror]
+    uses: ./.github/workflows/build-zlib.yml
+    secrets: inherit
+
+  tzdata:
+    needs: [mirror]
+    uses: ./.github/workflows/build-tzdata.yml
+    secrets: inherit
+
+  cacerts:
+    needs: [mirror]
+    uses: ./.github/workflows/build-cacerts.yml
+    secrets: inherit
+
+  glibc:
+    needs: [mirror]
+    uses: ./.github/workflows/build-glibc.yml
+    secrets: inherit
+
+  gcc:
+    needs: [glibc]
+    uses: ./.github/workflows/build-gcc.yml
+    secrets: inherit
