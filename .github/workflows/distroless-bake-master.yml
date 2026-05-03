@@ -69,14 +69,12 @@ jobs:
           ls -la docker-bake.hcl
 
       - name: Build and Push with Bake
-        id: bake
-        uses: docker/bake-action@v6
-        with:
-          files: ./docker-bake.hcl
-          push: ${{ inputs.push }}
-          set: |
-            *.platforms=linux/amd64
-            *.args.REGISTRY=ghcr.io/${{ github.repository_owner }}
+        run: |
+          docker buildx bake \
+            -f docker-bake.hcl \
+            --set "*.platforms=linux/amd64" \
+            --set "*.args.REGISTRY=ghcr.io/${{ github.repository_owner }}" \
+            ${{ inputs.push == true && '--push' || '--load' }}
 
       - name: Sign Images
         if: ${{ inputs.push }}
