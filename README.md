@@ -66,12 +66,13 @@ distroless-the-hard-way/
 ├── stacks/                    # YAML-based language stack definitions
 ├── Dockerfile                 # The master hierarchy template
 ├── docs/                      # Technical System Specifications
-│   ├── architectural_changes.md # Record of architectural shifts
-│   ├── architecture.md        # Technical System Specification
-│   └── mermaid/               # Generated architecture diagrams
+│   ├── ARCHITECTURE.md        # Technical System Specification
+│   ├── OPERATIONS.md          # Maintenance & Testing Guide
+│   ├── SECURITY.md            # Security & Supply Chain Integrity
+│   └── PIPELINE_STATUS.md     # Current Fleet Health Report
 ```
 
-**[Explore the current status and architecture in the `docs/` directory.](docs/PIPELINE_STATUS.md)**
+**[Explore the full technical documentation in the `docs/` directory.](docs/ARCHITECTURE.md)**
 
 ---
 

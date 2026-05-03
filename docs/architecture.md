@@ -1,76 +1,77 @@
-[<- Back to Main README](../README.md)
+# Sovereign Distroless Architecture: Technical Specification
 
-# Technical Specification: Unified Distroless Architecture
-
-This document defines the high-assurance architecture of the **Distroless The Hard Way** project. The system is designed to provide bit-perfect reproducibility and cryptographic transparency by eliminating reliance on pre-compiled host OS distributions.
+This document defines the high-assurance architecture of the **Distroless The Hard Way** project. It combines the technical hierarchy, the dependency orchestration engine, and the sovereign supply chain principles into a single unified reference.
 
 ---
 
 ## 1. The Unified Linear Hierarchy (The 4-Layer Model)
 
-The architecture enforces a strictly linear cascading hierarchy modeled after Google's Distroless Bazel specifications. Each layer inherits only from its direct predecessor, ensuring absolute ABI stability and zero-trust supply chain isolation.
+The architecture enforces a strictly linear cascading hierarchy modeled after Google's Distroless specifications. Each layer inherits only from its direct predecessor, ensuring absolute ABI stability and zero-trust supply chain isolation.
 
-### Layer 1: System Foundations (`static`)
-The absolute root of the system. Built from `scratch`, it contains only the essential metadata and trust stores.
-*   **Root Trust**: Mozilla NSS CA-certificates.
-*   **Identity**: Minimal `passwd` and `group` definitions (root and nonroot).
-*   **Netbase**: Declarative `/etc/protocols` and `/etc/services`.
-*   **Timezone**: IANA `tzdata` database.
+| Layer | Target | Role | Inheritance | Key Components |
+| :--- | :--- | :--- | :--- | :--- |
+| **L1** | `static` | System Foundations | `FROM scratch` | CA-certs, tzdata, passwd/group (root/nonroot) |
+| **L2** | `base` | Dynamic Foundation | `FROM static` | Glibc, Dynamic Linker, NSS (DNS) |
+| **L3** | `cc` | ABI-Stabilized Base | `FROM base` | libstdc++, OpenSSL, Zlib, Libxcrypt |
+| **L4** | `runtime` | Language Stack | `FROM cc` | Python, Node.js, Java, .NET, PHP, Perl |
 
-### Layer 2: Dynamic Foundation (`base`)
-The execution foundation for dynamic binaries.
-*   **C Runtime**: GNU C Library (`glibc`).
-*   **Universal ELF Compliance**: Standardized symlinks (`/lib -> /usr/lib`, `/lib64 -> /usr/lib`) ensuring the dynamic linker can resolve dependencies across all Linux kernels.
-*   **Networking**: Name Service Switch (NSS) libraries for functional DNS resolution (`libnss_dns`, `libresolv`).
-
-### Layer 3: ABI-Stabilized Foundation (`cc`)
-The C++ and core library foundation.
-*   **Runtime Libraries**: `libgcc_s` and `libstdc++`.
-*   **Core Libraries**: ABI-stabilized versions of `openssl`, `zlib`, `libxcrypt`, and others, all built from source.
-
-### Layer 4: Language Runtimes (`runtime`)
-Language-specific execution environments (Python, Node.js, Java, .NET, PHP, Perl).
-*   **Sourcing Policy**: 
-    *   **Source-Built**: Runtimes built from upstream tarballs (e.g., Python, PHP, Perl).
-    *   **Binary Injection**: Official vendor-certified binaries (e.g., Node.js, Java, .NET) injected into our hardened foundation.
+### FHS Unification Standard
+To prevent ABI drift, all libraries are unified into `/usr/lib`. Standardized symlinks (`/lib -> /usr/lib`, `/lib64 -> /usr/lib`) ensure universal kernel compliance across all execution environments.
 
 ---
 
 ## 2. The Distroless Engine (Unified Orchestration)
 
-Build orchestration is managed by the **Distroless Engine** (`distroless_engine.py`), which replaces manual pipelines with a data-driven, metadata-first approach.
+Build orchestration is managed by the **Sovereign Engine** (`distroless_engine.py`), a data-driven build orchestrator.
 
-### 2.1 Dependency Intelligence (Arch Linux PKGBUILD)
-To avoid guessing ABI flags or dependency trees, the engine parses **Arch Linux PKGBUILD** scripts as its primary intelligence reference. This ensures that every source-built component is compiled with the most optimized and stable industry-standard flags.
+### 2.1 Dependency Intelligence
+The engine parses **Arch Linux PKGBUILD** scripts as its primary intelligence reference. This allows the project to:
+- Automatically map complex dependency trees.
+- Extract industry-standard optimized `./configure` flags.
+- Ensure ABI compatibility by forcing all source-built components to use unified `ABI_SPEC` flags.
 
 ### 2.2 Declarative Bake Orchestration
-The engine generates complex **Docker Bake (HCL)** manifests. This allows for:
-*   **Parallel Library Builds**: Independent libraries are compiled in isolated Docker contexts.
-*   **Atomic Assembly**: The final images are assembled via a single `docker buildx bake` command, ensuring a bit-perfect merge of all foundational layers.
+The engine generates complex **Docker Bake (HCL)** manifests. This allows for native parallelization of library builds and atomic assembly of the final images.
+
+### 2.3 Multi-Stage Assembly Logic
+To maintain a hardened, shell-less environment:
+- **`runtime-setup` Stage**: A tool-rich environment (Arch Linux) used to download, compile, or extract runtime binaries.
+- **`runtime` Stage**: The final production image, created by copying artifacts from `runtime-setup` into a clean distroless root.
 
 ---
 
-## 3. FHS Unification & Library discovery
+## 3. Fleet Orchestration & Deployment
 
-To prevent ABI drift and path complexity, the architecture unifies all libraries into a single location.
-*   **Primary Path**: `/usr/lib`.
-*   **Discovery**: Binaries are compiled with hardened `LDFLAGS` (`-Wl,-rpath,/usr/lib`) to ensure they prioritize our sovereign foundations over host libraries.
-*   **Security**: The use of `LD_LIBRARY_PATH` is strictly prohibited in production images.
+### **Atomic Worker: Bake Master**
+The `distroless-bake-master.yml` workflow builds a single stack atomically. It resolves the entire dependency graph in a single context, guaranteeing that every image is built against the exact same foundation layers.
 
----
-
-## 4. Security Gateways and Compliance
-
-Each layer must pass a sequential set of security checkpoints:
-1.  **License Extraction**: Automated harvesting of license files into `/usr/share/doc/`.
-2.  **Trivy SBOM**: Automated generation and attachment of SPDX manifests.
-3.  **Keyless Signing**: Cosign verification tied to GitHub OIDC identity.
-4.  **SLSA Level 3**: Immutable build provenance attestations.
+### **Fleet Orchestrator: Full Fleet Build**
+The `distroless-fleet-build.yml` provides global synchronization. It dynamically discovers all stacks in `stacks/` and triggers parallel builds. It optimizes runner usage by excluding foundation-only stacks (`static`, `base`, `cc`), as these are implicitly built by the runtimes.
 
 ---
 
-## 5. Debugging vs. Production
+## 4. Security & Supply Chain Integrity
 
-The architecture enforces a strict **Shell-Free Production** standard.
-*   **Standard Images**: Zero executables (no `sh`, `ls`, etc.).
-*   **Debug Variants**: Troubleshooting tools (Busybox) are isolated into `:debug` tagged images, created via the same linear hierarchy but including a non-root-accessible Busybox environment.
+### 4.1 Zero-Trust Principles
+- **Zero OS Extraction**: No reliance on host OS package managers.
+- **Rpath Pinning**: Binaries are compiled with `-Wl,-rpath,/usr/lib` to ensure they only load sovereign libraries.
+- **Shell-Free Production**: Standard images contain zero executables (`no sh`, `no ls`).
+
+### 4.2 Compliance & Attestation
+- **License Harvesting**: Automated extraction of licenses into `/usr/share/doc/`.
+- **Keyless Signing**: Full Sigstore/Cosign integration using GitHub OIDC identity.
+- **SLSA Level 3**: Cryptographic provenance attestations for every layer, linked to the specific image digest.
+
+### 4.3 Debugging Strategy
+Troubleshooting tools (Busybox) are strictly isolated into `:debug` tagged variants. These are generated from the same secure hierarchy but include a non-root-accessible diagnostic environment.
+
+---
+
+## 5. Architectural Evolution (Legacy Migration)
+
+The project migrated from fragmented YAML-based workflows to the unified Python-driven engine to solve:
+1. **ABI Inconsistency**: Libraries were previously built in separate jobs, leading to linker mismatches.
+2. **Maintenance Toil**: Updating a library version required manual edits across dozens of files.
+3. **Build Velocity**: Transitioned from sequential steps to native Docker Buildx graph execution.
+
+*This document serves as the authoritative technical reference for the Sovereign Distroless project.*
