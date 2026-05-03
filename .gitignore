@@ -1,7 +1,3 @@
-# Docker Engine Artifacts
-docker-bake.hcl
-Dockerfile.cc
-
 # Temporary Build Contexts
 scratch/
 tmp_pkg/
