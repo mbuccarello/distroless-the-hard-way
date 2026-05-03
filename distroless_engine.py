@@ -274,6 +274,16 @@ def main():
             with open(mermaid_path, "w") as f:
                 f.write(mermaid)
             print(f"✅ Generated {mermaid_path}")
+            
+            # New: Automatically generate PNG image
+            image_path = f"docs/images/{stack_config['name']}-distroless.png"
+            try:
+                import subprocess
+                print(f"🎨 Rendering {image_path}...")
+                subprocess.run(["npx", "-y", "@mermaid-js/mermaid-cli", "-i", mermaid_path, "-o", image_path, "-t", "dark", "-b", "transparent"], check=True, capture_output=True)
+                print(f"✅ Generated {image_path}")
+            except Exception as e:
+                print(f"⚠️ Could not generate PNG image: {e}")
 
 if __name__ == "__main__":
     main()
