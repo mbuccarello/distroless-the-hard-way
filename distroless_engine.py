@@ -133,6 +133,7 @@ class HCLGenerator:
         hcl += 'target "builder" {\n  dockerfile = "Dockerfile"\n  target = "builder"\n  context = "."\n'
         hcl += f'  platforms = ["{self.platform}"]\n}}\n\n'
 
+        # Add targets for each dependency in the graph
         for pkg, data in graph.items():
             hcl += f'target "{pkg}" {{\n'
             hcl += '  dockerfile = "Dockerfile"\n'
@@ -153,6 +154,24 @@ class HCLGenerator:
             hcl += '  }\n'
             hcl += '}\n\n'
 
+        # Add the stack itself if it's a source build
+        if self.stack.get("type") == "source_build":
+            hcl += f'target "{self.stack["name"]}" {{\n'
+            hcl += '  dockerfile = "Dockerfile"\n'
+            hcl += '  target = "lib-builder"\n'
+            hcl += '  context = "."\n'
+            hcl += f'  platforms = ["{self.platform}"]\n'
+            hcl += f'  args = {{\n'
+            hcl += f'    LIB_NAME = "{self.stack["name"]}"\n'
+            hcl += f'    LIB_URL = "{self.stack["runtime"]["source_url"]}"\n'
+            hcl += '  }\n'
+            hcl += '  contexts = {\n'
+            hcl += '    builder = "target:builder"\n'
+            for pkg in graph.keys():
+                hcl += f'    {pkg} = "target:{pkg}"\n'
+            hcl += '  }\n'
+            hcl += '}\n\n'
+
         hcl += 'target "static" {\n  dockerfile = "Dockerfile"\n  target = "static"\n  context = "."\n'
         hcl += f'  platforms = ["{self.platform}"]\n}}\n\n'
 
@@ -169,6 +188,8 @@ class HCLGenerator:
         hcl += '    builder = "target:builder"\n'
         for pkg in graph.keys():
             hcl += f'    {pkg} = "target:{pkg}"\n'
+        if self.stack.get("type") == "source_build":
+            hcl += f'    {self.stack["name"]} = "target:{self.stack["name"]}"\n'
         hcl += '  }\n}\n\n'
 
         hcl += 'target "runtime" {\n  inherits = ["cc"]\n  target = "runtime"\n  args = {\n'
@@ -184,23 +205,32 @@ class HCLGenerator:
         return hcl
 
     def generate_cc_dockerfile(self, graph):
-        df = "# syntax=docker/dockerfile:1.4\nFROM base as cc\nUSER root\n"
+        df = "# syntax=docker/dockerfile:1.4\n"
+        
+        # Intermediate setup stage (has shell/tools)
+        df += "FROM builder as runtime-setup\nUSER root\n"
+        df += "ARG RUNTIME_URL\nRUN mkdir -p /runtime-root/usr\n"
+        
+        if self.stack.get("type") == "binary_injection":
+            df += "RUN if [ -n \"$RUNTIME_URL\" ]; then \\\n"
+            df += "    curl -L \"$RUNTIME_URL\" -o /tmp/runtime.tar.gz && \\\n"
+            df += "    tar -xf /tmp/runtime.tar.gz -C /runtime-root/usr --strip-components=1; \\\n"
+            df += "    fi\n"
+        elif self.stack.get("type") == "source_build":
+            # Copy from the stack-specific build stage
+            df += f"COPY --from={self.stack['name']} /artifacts/usr /runtime-root/usr\n"
+
+        df += "\nFROM base as cc\nUSER root\n"
         df += "COPY --from=builder /usr/lib/libgcc_s.so.1 /usr/lib/\n"
         df += "COPY --from=builder /usr/lib/libstdc++.so.6 /usr/lib/\n"
         for pkg in graph.keys():
             df += f"COPY --from={pkg} /artifacts/usr /usr\n"
             df += f"COPY --from={pkg} /artifacts/usr/share/doc /usr/share/doc\n"
         
-        df += "\nFROM cc as runtime\nUSER root\nARG RUNTIME_NAME\nARG RUNTIME_VER\nARG RUNTIME_URL\nLABEL distroless.stack=\"${RUNTIME_NAME}\"\n"
-        
-        if self.stack.get("type") == "binary_injection":
-            df += "RUN --mount=type=bind,target=/src <<EOF\n"
-            df += "if [ -n \"$RUNTIME_URL\" ]; then\n"
-            df += "    curl -L \"$RUNTIME_URL\" -o /tmp/runtime.tar.gz\n"
-            df += "    tar -xf /tmp/runtime.tar.gz -C /usr --strip-components=1\n"
-            df += "fi\nEOF\n"
-        
+        df += "\nFROM cc as runtime\nUSER root\nARG RUNTIME_NAME\nARG RUNTIME_VER\nLABEL distroless.stack=\"${RUNTIME_NAME}\"\n"
+        df += "COPY --from=runtime-setup /runtime-root/usr /usr\n"
         df += "USER 65532:65532\n"
+        
         df += "\nFROM runtime as runtime-debug\nUSER root\nCOPY --from=builder /usr/bin/busybox /usr/bin/busybox\nRUN [\"/usr/bin/busybox\", \"--install\", \"-s\", \"/usr/bin\"]\nUSER 65532:65532\n"
         return df
 
