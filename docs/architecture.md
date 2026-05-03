@@ -18,6 +18,39 @@ The architecture enforces a strictly linear cascading hierarchy modeled after Go
 ### FHS Unification Standard
 To prevent ABI drift, all libraries are unified into `/usr/lib`. Standardized symlinks (`/lib -> /usr/lib`, `/lib64 -> /usr/lib`) ensure universal kernel compliance across all execution environments.
 
+### 📂 Canonical Filesystem Layout (`cc` layer)
+Every sovereign image adheres to the following layout before the language runtime is injected:
+
+```text
+/
+├── etc/
+│   ├── os-release              # OS Metadata
+│   ├── passwd                  # root(0), nonroot(65532)
+│   ├── group
+│   └── ssl/
+│       └── certs/
+│           └── ca-certificates.crt # Root Trust Store
+├── home/
+│   └── nonroot/                # Owned by UID 65532
+├── lib -> usr/lib              # Unified Library Symlink
+├── lib64 -> usr/lib            # Unified Library Symlink
+├── tmp/                        # Permissions: 1777 (Sticky)
+├── usr/
+│   ├── lib/
+│   │   ├── ld-linux-x86-64.so.2 # Glibc Dynamic Linker
+│   │   ├── libc.so.6           # Glibc Core
+│   │   ├── libcrypto.so.3      # OpenSSL
+│   │   ├── libssl.so.3         # OpenSSL
+│   │   ├── libstdc++.so.6      # GCC Runtime
+│   │   └── libz.so.1           # Zlib
+│   └── share/
+│       └── zoneinfo/           # Timezone Database
+└── var/
+    └── lib/
+        └── apt/
+            └── lists/          # Empty (Distroless spec)
+```
+
 ---
 
 ## 2. The Distroless Engine (Unified Orchestration)
