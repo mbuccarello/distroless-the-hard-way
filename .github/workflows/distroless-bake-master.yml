@@ -61,18 +61,12 @@ jobs:
 
       - name: Initialize Distroless Engine
         run: |
-          echo "Workspace: ${{ github.workspace }}"
-          echo "PWD: $(pwd)"
-          ls -la
           python3 distroless_engine.py --stack stacks/${{ inputs.stack }}.yaml --graph
-          echo "Exit Code: $?"
-          ls -la docker-bake.hcl
 
       - name: Build and Push with Bake
         run: |
           docker buildx bake \
             -f docker-bake.hcl \
-            --set "*.platforms=linux/amd64" \
             --set "*.args.REGISTRY=ghcr.io/${{ github.repository_owner }}" \
             ${{ inputs.push == true && '--push' || '--load' }}
 
