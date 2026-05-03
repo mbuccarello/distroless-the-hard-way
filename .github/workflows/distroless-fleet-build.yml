@@ -15,8 +15,11 @@ jobs:
         uses: actions/checkout@v4
       - id: set-matrix
         run: |
-          STACKS=$(ls stacks/*.yaml | xargs -n 1 basename | sed 's/.yaml//' | jq -R . | jq -s -c .)
-          echo "matrix=$STACKS" >> $GITHUB_OUTPUT
+          # Robust matrix generation
+          FILES=$(ls stacks/*.yaml)
+          STACKS_JSON=$(for f in $FILES; do basename "$f" .yaml; done | jq -R . | jq -s -c .)
+          echo "matrix=$STACKS_JSON" >> $GITHUB_OUTPUT
+          echo "Generated matrix: $STACKS_JSON"
 
   build-fleet:
     needs: determine-stacks
