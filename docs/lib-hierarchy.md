@@ -6,42 +6,7 @@ This document maps the shared libraries across the Unified Distroless hierarchy.
 
 ## 1. Architectural Hierarchy Graph
 
-```mermaid
-graph TD
-    %% Strict Dark Theme Styling
-    classDef default fill:#0d1117,stroke:#30363d,color:#c9d1d9,stroke-width:2px;
-    classDef core fill:#1f6feb,stroke:#58a6ff,color:#ffffff,font-weight:bold;
-    classDef runtime fill:#238636,stroke:#3fb950,color:#ffffff,font-weight:bold;
-    classDef lib fill:#161b22,stroke:#30363d,color:#8b949e,font-style:italic;
-
-    subgraph Hierarchy
-        S[static] --> B[base]
-        B --> C[cc]
-    end
-
-    subgraph "Core Libraries (Layer 3)"
-        openssl["openssl"]
-        zlib["zlib"]
-        libxcrypt["libxcrypt"]
-        libffi["libffi"]
-        libxml2["libxml2"]
-        icu["icu (Unicode)"]
-        krb5["krb5 (Kerberos)"]
-        ncurses["ncurses"]
-        readline["readline"]
-    end
-
-    C --> openssl & zlib & libxcrypt & libffi & libxml2 & icu & krb5 & ncurses & readline
-
-    C --> R_PY[Python 3.14]
-    C --> R_JS[Node.js 22]
-    C --> R_JV[Java 21]
-    C --> R_NET[.NET 8.0]
-
-    class S,B,C core;
-    class R_PY,R_JS,R_JV,R_NET runtime;
-    class openssl,zlib,libxcrypt,libffi,libxml2,icu,krb5,ncurses,readline lib;
-```
+![Library Hierarchy](images/lib-hierarchy.png)
 
 ## 2. Sovereignty Status: 100% Decoupled
 
