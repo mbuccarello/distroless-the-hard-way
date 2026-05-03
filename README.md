@@ -8,126 +8,76 @@ Distroless The Hard Way is a technical implementation and educational curriculum
 
 ---
 
-## System Architecture: The 4-Layer Sovereign Hierarchy
+## 🏗️ System Architecture: The Unified Distroless Hierarchy
 
-The project implements a canonical, layered inheritance model that is now **100% decoupled from Fedora RPMs**. Every binary in the stack is source-built within our high-assurance pipelines.
+The project implements a canonical, 4-layer inheritance model inspired by Google's Distroless architecture, now orchestrated by a unified, data-driven engine.
 
-### Intelligence Gathering and Arch Linux
-Because this project compiles 100% of its artifacts from raw `.tar.gz` source code, resolving the correct C-library dependency tree and exact ABI flags (like `--with-termlib` for ncurses) is an inherently difficult engineering challenge.
+### The Linear Chain
+1.  **`static`**: The absolute root. Contains CA certificates, timezone data, and basic user/group definitions. Zero executables.
+2.  **`base`**: The dynamic foundation. Adds Glibc and critical networking libraries (NSS). Standardized symlinks (`/lib`, `/lib64`) ensure universal kernel compliance.
+3.  **`cc`**: The ABI-stabilized layer. Contains the GCC runtime and core C/C++ libraries (OpenSSL, Zlib, etc.) all built from source.
+4.  **`runtime`**: The language-specific layer (Python, Node.js, Java). Supports both source-built and official binary injection strategies.
 
-To solve this, we credit **Arch Linux** as our primary intelligence source. We exclusively read Arch Linux `PKGBUILD` Git repositories to map out dependency graphs and extract the correct `./configure` flags. The straightforward, transparent nature of Arch Linux build scripts helped us realize the complexity of managing dependencies and provided an easy way to understand how raw GNU source code should be assembled. 
-
-*   **[Detailed Dependency Intelligence & Translation Protocol](docs/dependency-intelligence.md)**: A deep dive into how we translate Arch blueprints into our independent Docker Bake system.
-*   **[Sovereign Intelligence Script](scripts/generate-foundations.py)**: A proposed automation tool for programmatically syncing our foundations with upstream blueprints.
-
-*Note: We only use Arch Linux as a blueprint for intelligence gathering. We do not use their binaries, their package managers, or any vendored distroless solution. The product is 100% independent.*
-
-### Layer 1: System Foundations (GNU-Native)
-Independent source-built artifacts containing the raw DNA of the system.
-*   **cacerts**: Sovereign Root Trust Store (Mozilla NSS source).
-*   **glibc**: Core C runtime (GNU source).
-*   **openssl**: Cryptography engine (OpenSSL source).
-*   **tzdata**: Timezone database (IANA source).
-
-### Layer 1.5: Runtime Foundations (Shared Libraries)
-Sovereign library "packages" distributed as OCI artifacts.
-*   **libffi, libxml2, sqlite, ncurses, readline**: Compiled from source and linked against Layer 1.
-
-### Layer 2: Core Images (The OCI Roots)
-Atomic, bit-perfect images constructed from Layer 1/1.5 payloads.
-*   **static**: The Zero-Layer for pure static binaries.
-*   **base**: Adds glibc, openssl, and sovereign netbase.
-*   **cc**: Adds the C++ runtime and OpenMP support.
-
-### Layer 3: Language Runtimes
-Hardened execution environments utilizing the **RPATH strategy** for native library discovery.
+### ⚙️ The Distroless Engine
+All builds are orchestrated by the **Distroless Engine** (`distroless_engine.py`), which:
+*   Parses **Arch Linux PKGBUILDs** to automatically map dependency graphs and extract optimized `./configure` flags.
+*   Generates complex **Docker Bake (HCL)** workflows to ensure bit-perfect builds and ABI consistency.
+*   Enforces a strict **Debug Tagging Strategy**: standard images are shell-free; troubleshooting tools (Busybox) are isolated to `:debug` variants.
 
 ---
 
-## Execution Matrix and Docker Bake Orchestration
+## 📊 Language Support Matrix
 
-The orchestration of these layers is shifting toward **native Docker Bake** to map out the dependency graphs explicitly, without relying on third-party package managers. This ensures that the build order and ABI compatibility flags are strictly enforced across the entire dependency tree.
-
-| Runtime | Base Layer | Sovereignty | Upstream Version |
+| Runtime | Base Layer | Sourcing | Status |
 | :--- | :--- | :--- | :--- |
-| **Go (Static)** | static | Full | 1.22+ |
-| **PHP** | base | Full (Source) | 8.3.11 |
-| **Perl** | base | Full (Source) | 5.38.2 |
-| **Python 3** | cc | Full (Source) | 3.12.5 |
-| **Java** | cc | Hardened | Eclipse Temurin 21 (LTS) |
-| **Node.js** | cc | Hardened | Node.js 22 (LTS) |
-| **.NET** | cc | Hardened | .NET Runtime 8.0 (LTS) |
+| **Python** | `cc` | Source-Built (3.14) | ✅ Active |
+| **Node.js** | `cc` | Binary Injection (LTS) | ✅ Active |
+| **Java** | `cc` | Binary Injection (21 LTS) | ✅ Active |
+| **.NET** | `cc` | Binary Injection (8 LTS) | ✅ Active |
+| **Go** | `static` | Static Compilation | ✅ Active |
+| **PHP / Perl**| `cc` | Source-Built | ✅ Active |
 
 ---
 
-## Security Implementation: The Sovereign Principles
+## 🛡️ Sovereign Principles & Security
 
-- **Zero RPM Dependency**: No reliance on host OS package managers. We use the OCI registry as a distributed, high-assurance package manager.
-- **Hardened RPATH**: Binaries are "self-aware" of their library paths, eliminating `LD_LIBRARY_PATH` hacks.
-- **Keyless Signing**: Full Sigstore/Cosign integration for image verification.
-- **SLSA Level 3**: Automated provenance for every layer.
+- **Zero OS Extraction**: No reliance on host OS package managers (`apt`, `apk`). We compile from upstream source tarballs.
+- **Unified FHS**: All libraries are unified into `/usr/lib` to prevent ABI drift and path complexity.
+- **License Extraction**: Automated harvest of license files to ensure open-source compliance.
+- **Keyless Signing**: Full Sigstore/Cosign integration for non-falsifiable image verification.
+- **SLSA Level 3**: Cryptographic provenance for every layer in the hierarchy.
 
 ---
 
-## Repository Structure & Documentation Index
+## 🚀 Usage & CI/CD
 
-The project is structured logically to separate operational configuration from architectural documentation and testing.
+The project utilizes a **Unified Master Pipeline** powered by Docker Bake.
+
+*   **Manual Build**: `./distroless_engine.py --stack stacks/python.yaml && docker buildx bake runtime`
+*   **GitHub Actions**: Use the [Distroless Bake Master](.github/workflows/distroless-bake-master.yml) to build and sign any stack.
+*   **Fleet Updates**: The [Fleet Build](.github/workflows/distroless-fleet-build.yml) orchestrates weekly security updates for the entire OCI catalog.
+
+---
+
+## 📂 Repository Structure
 
 ```text
 distroless-the-hard-way/
-├── .github/workflows/         # Layered Orchestration (L1, L2, L3)
-├── app/                       # Verification applications (Go, PHP, etc.)
-├── debug/                     # Local debugging environments for each runtime
-├── docs/                      # Core Documentation Directory
+├── distroless_engine.py       # The Unified Build Orchestrator
+├── stacks/                    # YAML-based language stack definitions
+├── Dockerfile                 # The master hierarchy template
+├── docs/                      # Technical System Specifications
+│   ├── architectural_changes.md # Record of architectural shifts
 │   ├── architecture.md        # Technical System Specification
-│   ├── arch-evolution.md      # Historical context on dynamic linking challenges
-│   ├── lib-hierarchy.md       # Detailed breakdown of the sovereign libraries
-│   ├── pipelines.md           # Deep dive into the GitHub Actions orchestration
-│   ├── debugging.md           # Guide on using the local `debug/` environments
-│   ├── gap-analysis.md        # Roadmap and Google parity tracking
-│   ├── e2e-framework.md       # Functional validation framework
-│   ├── test-plan.md           # High-level E2E strategy
-│   ├── SLSA-Level-3.md        # Supply chain security compliance
-│   ├── Signing.md             # Keyless signature verification guides
-│   ├── Semgrep.md             # Static analysis configuration
-│   ├── GHCR-Token.md          # Registry authentication
-│   └── Malcontent.md          # Policy enforcement for supply chain
+│   └── mermaid/               # Generated architecture diagrams
 ```
 
-**[Explore the full documentation in the `docs/` directory.](docs/)**
-
-
----
-
-## Consumption and Verification
-
-### 1. Authenticate to GHCR
-```bash
-echo "YOUR_PAT" | docker login ghcr.io -u YOUR_USERNAME --password-stdin
-```
-
-### 2. Pull and Run Runtimes
-```bash
-# Pull and run a smoke test
-docker run --rm ghcr.io/mbuccarello/php:latest --version
-```
-
-### 3. Verify Cryptographic Signatures
-```bash
-cosign verify --certificate-identity-regexp ".*" \
-  --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
-  ghcr.io/mbuccarello/base:latest
-```
+**[Explore the full documentation in the `docs/` directory.](docs/architectural_changes.md)**
 
 ---
 
 ## Credits and Inspiration
 
-This project is a synthesis of foundational initiatives in the cloud-native and security ecosystems:
-
-- **Kubernetes The Hard Way**: The educational blueprint for understanding complex systems through manual deconstruction.
-- **Chainguard "This Shit is Hard"**: Inspiration for maintaining lean, secure, and current container operating systems. [Read the series](https://www.chainguard.dev/unchained/this-shit-is-hard-keeping-chainguard-os-lean-current-and-secure-the-power-of-garbage-collection).
-- **Google Distroless**: The architectural gold standard for minimal OCI images. This project implements the canonical hierarchy defined in their Bazel specifications:
-    - [Distroless Static BUILD](https://github.com/GoogleContainerTools/distroless/blob/main/static/BUILD)
-    - [Distroless Base README](https://github.com/GoogleContainerTools/distroless/blob/main/base/README.md)
-    - [Distroless CC README](https://github.com/GoogleContainerTools/distroless/blob/main/cc/README.md)
+- **Kubernetes The Hard Way**: The educational blueprint for manual deconstruction.
+- **Google Distroless**: The architectural gold standard for minimal OCI images.
+- **Arch Linux**: The primary intelligence source for dependency mapping and build blueprints.

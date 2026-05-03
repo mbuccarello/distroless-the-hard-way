@@ -1,0 +1,20 @@
+graph TD
+    subgraph "Orchestration Layer"
+        A[generate_bake.py] -->|1. Parse| B(Arch PKGBUILDs)
+        A -->|2. Generate| C(docker-bake.hcl)
+        A -->|3. Generate| D(Dockerfile.consolidated)
+    end
+
+    subgraph "Build Layer (Layer 1.5)"
+        C -->|4. Build| E1[ncurses]
+        C -->|4. Build| E2[readline]
+        C -->|4. Build| E3[openssl]
+        C -->|4. Build| E4[python]
+        E1 & E2 & E3 & E4 -->|5. Install| F["/artifacts/usr"]
+    end
+
+    subgraph "Final Assembly"
+        F -->|6. Merge| G["Consolidated Foundation"]
+        G -->|7. Package| H["Distroless Runtime"]
+        I["System Libs"] -->|7. Bootstrap| H
+    end

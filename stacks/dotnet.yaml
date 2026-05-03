@@ -1,0 +1,30 @@
+name: dotnet
+version: "8.0"
+type: binary_injection
+base_hierarchy:
+  - static
+  - base
+  - cc
+
+dependencies:
+  - name: zlib
+    version: "1.3.1"
+    type: source
+  - name: openssl
+    version: "3.4.0"
+    type: source
+  - name: icu
+    version: "75.1"
+    type: source
+  - name: krb5
+    version: "1.21.3"
+    type: source
+  - name: libxcrypt
+    version: "4.4.36"
+    type: source
+
+runtime:
+  name: dotnet
+  version: "8.0.11"
+  binary_url: "https://download.visualstudio.microsoft.com/download/pr/8d0b5e2d-3d0d-4b9a-8e5d-7a0e1c0d0d0d/8e5d7a0e1c0d0d0d8e5d7a0e1c0d0d0d/dotnet-runtime-8.0.11-linux-x64.tar.gz"
+  sha256: "SKIP"

@@ -1,0 +1,13 @@
+name: cc
+version: "latest"
+type: source_build
+base_hierarchy:
+  - static
+  - base
+  - cc
+
+dependencies: []
+
+runtime:
+  name: cc
+  version: "latest"

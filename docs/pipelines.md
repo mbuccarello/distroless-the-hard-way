@@ -1,63 +1,51 @@
 [<- Back to Main README](../README.md)
 
-# Pipeline Orchestration: The 4-Tier Sovereign Model
+# Pipeline Orchestration: The Unified Distroless Bake Engine
 
-Distroless The Hard Way uses a strictly sequential orchestration model to ensure that every layer is built from verified, signed, and audited components.
+Distroless The Hard Way uses a data-driven, unified orchestration model powered by the **Distroless Engine** and **Docker Bake**. This replaces the fragmented GitHub Action workflows with a single, high-assurance build process.
 
-## Overview
-The pipeline is divided into four logical layers, managed by GitHub Actions:
-
-1.  **Layer 1 (System Foundations)**: Compiles core DNA (glibc, openssl, cacerts).
-2.  **Layer 1.5 (Runtime Foundations)**: Compiles shared libraries (libxml2, libffi, ncurses).
-3.  **Layer 2 (Assembly)**: Merges payloads into Core Images (static, base, cc).
-4.  **Layer 3 (Validation)**: Automated E2E verification of final runtimes.
-
----
-
-## Layer 1: System Foundations (The Build Payloads)
-**Workflow**: `master-foundations.yml`
-
-This layer builds the absolute essentials from source.
-- **glibc**: The GNU C runtime.
-- **openssl**: The sovereign crypto engine.
-- **cacerts**: Trust bundle built from Mozilla NSS source.
-- **tzdata**: Timezone database from IANA.
+## ⚙️ The Orchestration Engine
+All builds are driven by `distroless_engine.py`, which performs:
+1.  **Dependency Resolution**: Maps the stack's dependency tree using Arch Linux PKGBUILD intelligence.
+2.  **Metadata Extraction**: Gathers optimized `./configure` flags and source URLs.
+3.  **HCL Generation**: Creates a dynamic `docker-bake.hcl` capturing the full build graph.
+4.  **DAG Visualization**: Automatically generates premium Mermaid diagrams for auditability.
 
 ---
 
-## Layer 1.5: Runtime Foundations (Shared Libraries)
-**Workflow**: `build-runtime-foundations.yml`
+## 🏗️ The 4-Tier Hierarchy
+The pipeline follows a strictly linear cascading model:
 
-This layer builds the specialized libraries required by modern language interpreters.
-- **Sovereign Linking**: These are built against the Stage 1 artifacts.
-- **OCI Packages**: Distributed as signed OCI artifacts to ensure supply chain integrity.
-- **Components**: libffi, libxml2, ncurses, readline, sqlite, oniguruma, libxcrypt.
-
----
-
-## Layer 2: Assembly (Core Image Construction)
-**Workflow**: `master-assembly.yml`
-
-Assembles the foundational payloads into the canonical Distroless hierarchy.
-1.  **assemble-static**: Root layer with sovereign trust and netbase.
-2.  **assemble-base**: Dynamic C runtime and OpenSSL.
-3.  **assemble-cc**: C++ runtime and OpenMP support.
+1.  **Layer 1 (Static)**: The minimal root (certs, users, tzdata, netbase).
+2.  **Layer 2 (Base)**: Dynamic linker (glibc) and NSS networking libraries.
+3.  **Layer 3 (CC)**: ABI-stabilized foundation (GCC runtime + source-built core libraries).
+4.  **Layer 4 (Runtime)**: Language-specific environments (Python, Node.js, Java, .NET, PHP, Perl).
 
 ---
 
-## Layer 3: Validation (E2E Test Suite)
-**Workflow**: `master-validation.yml`
+## 🚀 GitHub Actions Integration
 
-Automated functional assertions triggered after successful assembly.
-- **Connectivity**: SSL/TLS handshake verification.
-- **Integrity**: Binary self-awareness (RPATH) audit.
-- **Security**: Non-root user enforcement.
+The project has transitioned to a **Unified Master Pipeline**:
+
+*   **Workflow**: `distroless-bake-master.yml`
+*   **Capability**: Can build any stack defined in `stacks/*.yaml` using a single entrypoint.
+*   **Fleet Updates**: `distroless-fleet-build.yml` orchestrates weekly security updates for the entire catalog in parallel.
 
 ---
 
-## The Sovereign Security Gates
-Every artifact in the stack must pass through our high-assurance gate:
-1.  **Semgrep Audit**: SAST analysis of build logic.
-2.  **Trivy SBOM**: Automated generation and attachment of SPDX manifests.
-3.  **Cosign Signing**: Keyless OIDC-based signing.
-4.  **SLSA Level 3**: Generation of immutable build provenance.
+## 🛡️ Sovereign Security Gates
+Every image produced by the Bake Engine must pass through the following high-assurance gates:
+
+1.  **SLSA Level 3**: Non-falsifiable build provenance for every layer.
+2.  **Cosign Signing**: Keyless OIDC-based signatures.
+3.  **Trivy SBOM**: Automated generation and attachment of SPDX manifests.
+4.  **License Extraction**: Automatic harvest of license files to ensure open-source compliance.
+
+---
+
+## 🛠️ Local Execution
+To replicate the CI/CD environment locally:
+```bash
+./distroless_engine.py --stack stacks/python.yaml --graph
+docker buildx bake runtime
+```

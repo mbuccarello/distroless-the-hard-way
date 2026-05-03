@@ -1,0 +1,31 @@
+name: Distroless Full Fleet Build
+
+on:
+  schedule:
+    - cron: '0 0 * * 0' # Weekly on Sunday
+  workflow_dispatch:
+
+jobs:
+  determine-stacks:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - id: set-matrix
+        run: |
+          STACKS=$(ls stacks/*.yaml | xargs -n 1 basename | sed 's/.yaml//' | jq -R . | jq -s -c .)
+          echo "matrix=$STACKS" >> $GITHUB_OUTPUT
+
+  build-fleet:
+    needs: determine-stacks
+    strategy:
+      fail-fast: false
+      matrix:
+        stack: ${{ fromJson(needs.determine-stacks.outputs.matrix) }}
+    uses: ./.github/workflows/distroless-bake-master.yml
+    with:
+      stack: ${{ matrix.stack }}
+      push: true
+    secrets: inherit

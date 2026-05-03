@@ -1,0 +1,102 @@
+name: Opensource Distroless Assembly - Base
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/assemble-base.yml'
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  assemble:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Install Cosign
+        run: |
+          curl -O -L "https://github.com/sigstore/cosign/releases/download/v2.4.1/cosign-linux-amd64"
+          sudo mv cosign-linux-amd64 /usr/local/bin/cosign
+          sudo chmod +x /usr/local/bin/cosign
+
+      - name: Authenticate to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Construct Verified Foundation RootFS
+        id: push
+        run: |
+          cat <<EOF > Dockerfile
+          # Use our new static layer as the foundation
+          FROM ghcr.io/${{ github.repository_owner }}/static:latest as static
+          # Use Fedora 40 as a powerful extractor to prepare the rootfs
+          FROM fedora:40 as extractor
+          COPY --from=static / /rootfs/
+          
+          # Copy dynamic foundational layers
+          COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-glibc:latest /glibc-layer.tar.gz /
+          COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-zlib:latest /zlib-layer.tar.gz /
+          COPY --from=ghcr.io/${{ github.repository_owner }}/artifacts-openssl:latest /openssl-layer.tar.gz /
+          
+          # Extract dynamic foundations into rootfs
+          RUN tar -xzf /glibc-layer.tar.gz -C /rootfs
+          RUN tar -xzf /zlib-layer.tar.gz -C /rootfs
+          RUN tar -xzf /openssl-layer.tar.gz -C /rootfs
+          
+          # --- NATIVE LIBRARY DISCOVERY (LDCONFIG) ---
+          RUN echo '/usr/local/lib' > /rootfs/etc/ld.so.conf && \
+              echo '/usr/lib64' >> /rootfs/etc/ld.so.conf && \
+              echo '/usr/lib' >> /rootfs/etc/ld.so.conf && \
+              echo '/lib64' >> /rootfs/etc/ld.so.conf && \
+              echo '/lib' >> /rootfs/etc/ld.so.conf
+          
+          # Generate the binary cache using the host's ldconfig in the rootfs context
+          RUN ldconfig -r /rootfs
+          
+          # Update Metadata for Base variant
+          RUN sed -i 's/Static/Base (glibc)/' /rootfs/etc/os-release
+          
+          # Final Assembly: Strictly Verified Opensource Distroless Base
+          FROM scratch
+          COPY --from=extractor /rootfs /
+          USER 0:0
+          ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+          ENV TZ=UTC
+          ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+          EOF
+          docker build -t ghcr.io/${{ github.repository_owner }}/base:latest .
+          docker push ghcr.io/${{ github.repository_owner }}/base:latest
+          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "ghcr.io/${{ github.repository_owner }}/base:latest" | cut -d'@' -f2)
+          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
+          echo "image_name=ghcr.io/${{ github.repository_owner }}/base:latest" >> $GITHUB_OUTPUT
+
+      - name: Generate SBOM (Trivy)
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
+        with:
+          image-ref: 'ghcr.io/${{ github.repository_owner }}/base:latest'
+          format: 'spdx-json'
+          output: 'base-sbom.spdx.json'
+
+      - name: Attach SBOM to Image
+        run: |
+          cosign attach sbom --sbom base-sbom.spdx.json ghcr.io/${{ github.repository_owner }}/base:latest
+
+
+      - name: Sign Distroless Base
+        run: |
+          cosign sign --yes ghcr.io/${{ github.repository_owner }}/base:latest
+
+      - name: Generate SLSA Build Provenance (Level 3)
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ghcr.io/${{ github.repository_owner }}/base
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true

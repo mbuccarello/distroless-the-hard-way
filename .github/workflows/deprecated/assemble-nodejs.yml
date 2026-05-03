@@ -1,0 +1,98 @@
+name: Opensource Distroless Assembler - nodejs
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  assemble:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        
+      - name: Install Cosign (Direct Binary)
+        run: |
+          curl -O -L "https://github.com/sigstore/cosign/releases/download/v2.4.1/cosign-linux-amd64"
+          sudo mv cosign-linux-amd64 /usr/local/bin/cosign
+          sudo chmod +x /usr/local/bin/cosign
+          cosign version
+
+      - name: Download and Strip Official Node.js Binary
+        run: |
+          mkdir -p payload/raw payload/stripped
+          # Fetch Official Node.js 22 LTS (Glibc-native)
+          curl -L "https://nodejs.org/dist/v22.22.2/node-v22.22.2-linux-x64.tar.xz" -o payload/raw/node.tar.xz
+          # Strict verification (Official SHA256)
+          echo "88fd1ce767091fd8d4a99fdb2356e98c819f93f3b1f8663853a2dee9b438068a payload/raw/node.tar.xz" | sha256sum -c -
+          
+          # Strip components using full GNU tar in the runner
+          tar -xJf payload/raw/node.tar.xz -C payload/stripped --strip-components=1
+          # Repack clean tarball
+          tar -czf payload/node.tar.gz -C payload/stripped .
+          
+      - name: Authenticate to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        
+      - name: Construct Node.js Execution Environment
+        id: push
+        run: |
+          cat <<EOF > Dockerfile
+          FROM fedora:40 as extractor
+          RUN mkdir -p /rootfs
+          COPY --from=ghcr.io/${{ github.repository_owner }}/cc:latest / /rootfs/
+          COPY payload/node.tar.gz /
+          
+          RUN mkdir -p /rootfs/usr/local/lib/nodejs && tar -xzf /node.tar.gz -C /rootfs/usr/local/lib/nodejs
+          
+          # Regenerate library cache
+          RUN ldconfig -r /rootfs
+          RUN ln -sf /usr/local/lib/nodejs/bin/node /rootfs/usr/bin/node
+          RUN ln -sf /usr/local/lib/nodejs/bin/npm /rootfs/usr/bin/npm
+          
+          FROM scratch
+          COPY --from=extractor /rootfs /
+          ENV NODE_HOME=/usr/local/lib/nodejs
+          ENV PATH=\$NODE_HOME/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+          ENTRYPOINT ["/usr/bin/node"]
+          EOF
+          
+          docker build -t ghcr.io/${{ github.repository_owner }}/nodejs:latest .
+          docker push ghcr.io/${{ github.repository_owner }}/nodejs:latest
+          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "ghcr.io/${{ github.repository_owner }}/nodejs:latest" | cut -d'@' -f2)
+          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
+          echo "image_name=ghcr.io/${{ github.repository_owner }}/nodejs:latest" >> $GITHUB_OUTPUT
+
+      - name: Generate SBOM (Trivy)
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
+        with:
+          image-ref: 'ghcr.io/${{ github.repository_owner }}/nodejs:latest'
+          format: 'spdx-json'
+          output: 'nodejs-sbom.spdx.json'
+
+      - name: Attach SBOM to Image
+        run: |
+          cosign attach sbom --sbom nodejs-sbom.spdx.json ghcr.io/${{ github.repository_owner }}/nodejs:latest
+
+      - name: Sign Distroless Node.js
+        run: |
+          cosign sign --yes ghcr.io/${{ github.repository_owner }}/nodejs:latest
+          cosign verify --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ghcr.io/${{ github.repository_owner }}/nodejs:latest
+
+
+      - name: Functional Smoke Test (Verification)
+        run: |
+          docker run --rm -v $(pwd)/app:/app ghcr.io/${{ github.repository_owner }}/nodejs:latest /app/test.js
+
+      - name: Generate SLSA Build Provenance (Level 3)
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ghcr.io/${{ github.repository_owner }}/nodejs
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true

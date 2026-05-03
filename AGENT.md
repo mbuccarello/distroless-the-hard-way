@@ -9,36 +9,26 @@ The goal is an educational curriculum titled **Distroless The Hard Way**.
 It teaches users how to create distroless container images *without* relying on third-party OS ecosystems (such as extracting pre-compiled Ubuntu or Debian packages) to ensure absolute data transparency and zero-trust supply chain isolation. The tone must always remain highly technical, human, and educational ("The Hard Way" philosophy).
 
 ## 2. Core Operational Pillars
+- **The Distroless Engine:** All image assembly and dependency orchestration must be handled by the unified **Distroless Engine** (`distroless_engine.py`). Manual `COPY` chains in GitHub Actions are deprecated.
+- **Data-Driven Stacks:** New language runtimes must be defined as modular YAML files in `stacks/*.yaml`.
+- **The Google Distroless Hierarchy:** The architecture strictly enforces a linear cascading hierarchy spanning `static -> base -> cc -> runtime` specifically modeled against Google's Distroless Bazel architecture.
 - **Zero OS Extraction:** You are strictly forbidden from writing workflows that rely on precompiled `.so` library binaries from host OS packages (e.g. `apt`, `apk`).
-- **Zero Pre-Built Extraction Shims:** You must never use `alpine` or `ubuntu` containers to unpack intermediate tarballs in CI/CD. All extractions must be handled natively by our custom "Pipeline 0" bootstrap image `ghcr.io/.../bootstrap:latest`.
-- **Prohibit Vendored Distroless Ecosystems:** You are strictly forbidden from migrating the architecture to vendored declarative build systems like Chainguard, Wolfi, or Alpine Apko. The system must remain independent and orchestrated natively (e.g., via Docker Buildx Bake).
-- **Rule: The Arch Linux Dependency Graph Protocol:** Agents must **never guess** `./configure` flags or dependency trees when adding a new C-library to the distroless foundations. You are explicitly instructed to search and read Arch Linux `PKGBUILD` files as your primary intelligence reference. This guarantees correct `glibc` ABI compatibility and an accurate dependency graph.
-- **Exec-Form Invocation:** Because we extract directly into empty `scratch` containers without an OS, docker instructions must use **Exec Form** (e.g., `RUN ["/tar", "-xzf", "file.tar.gz"]`) to invoke syscall processes directly rather than relying on `/bin/sh`.
-1.  **Strict Source Compilation**: No OS extraction for Layer 3+ runtimes.
-2.  **Sovereign Foundations**: All runtimes must link against project foundations in `/usr/local/lib`.
-3.  **Atomic Verification**: Images must pass `app/test.*` smoke tests before signing.
-4.  **Standardized Debugging**: Follow the [Debugging & Diagnostics Guide](docs/debugging.md) for troubleshooting.
-- **The Google Distroless Layered Hierarchy:** The architecture strictly enforces a linear cascading hierarchy spanning `base -> cc -> java/python` specifically modeled against Google's Distroless Bazel architecture.
-- **Undistro Philosophy:** While we leverage Fedora for `glibc` and `openssl` compatibility, we do not inherit the host OS's filesystem structure. Our images are "Undistro"—minimal, standard-compliant, and agnostic to the upstream package provider. Path structures must remain "universal" (e.g., `/etc/ssl/certs/ca-certificates.crt`) rather than matching distribution-specific quirks.
-- **LTS Runtimes:** All language runtimes (Node.js, Python, PHP, Perl, .NET, Java) must use the Long Term Support (LTS) or most stable "Standard Support" version as defined by upstream providers.
-- **Layered Master Orchestration:** Agents must utilize the tiered orchestrator system (Layer 1: Foundations, Layer 2: Assembly, Layer 3: Validation) to prevent race conditions and ensure cryptographic chain-of-custody.
-- **Naming Conventions:** 
-    - `base-fedora`: Compilation Sandbox (Layer 1 Mirror). Pulls from Docker Hub, pushes to GHCR.
-    - `base`: Distroless OS Foundation (Layer 2 Assembled Product). Built from foundations.
-    - `artifacts-*`: Intermediate OCI payloads (tarballs) produced by Layer 1.
+- **Rule: The Arch Linux Dependency Graph Protocol:** Agents must **never guess** `./configure` flags or dependency trees when adding a new C-library to the distroless foundations. You are explicitly instructed to use the Distroless Engine which fetches and parses Arch Linux `PKGBUILD` files as the primary intelligence reference.
+- **FHS Unification:** The architecture unifies all shared libraries into `/usr/lib`. Standard symlinks (`/lib -> /usr/lib`, `/lib64 -> /usr/lib`) must be preserved to ensure kernel-level binary execution (ELF interpreter resolution).
+- **NSS Networking:** The `base` image must always include the Name Service Switch (NSS) libraries (`libnss_dns.so.2`, `libresolv.so.2`) to ensure functional DNS resolution in minimal environments.
+- **Debug Tagging Strategy:** Standard production images (`static`, `base`, `cc`, `runtime`) must remain **strictly zero-executable** (no shell). Troubleshooting utilities (Busybox) are only permitted in the `:debug` tagged variants.
+- **License Compliance:** Every image must include the `LICENSE` files for all compiled components under `/usr/share/doc/<package>/`. This is handled automatically by the Distroless Engine.
+- **Exec-Form Invocation:** Docker instructions must use **Exec Form** (e.g., `RUN ["/usr/bin/python", "-m", "http.server"]`) to invoke syscall processes directly.
 
 ## 3. Mandatory Security Implementations
-When generating or modifying GitHub Action assembly pipelines, you must include the following validations:
-1. **Semgrep:** Source analysis before native compilation.
-2. **Keyless Signing:** All intermediate layers and bases must be signed using Sigstore/Cosign OIDC Keyless mechanisms (e.g., `cosign sign --yes`). Do not look for "missing" private keys.
-3. **Malcontent:** Every final assembled image must run Chainguard's `malcontent analyze` to prove no arbitrary capabilities or malware were compiled into the final binary.
-4. **Trivy:** SBOM/SCA generation.
-5. **SLSA Level 3:** Non-falsifiable build attestations for every layer.
+When generating or modifying the Distroless Engine or Bake definitions, you must include the following:
+1. **ABI Spec Enforcement:** Core libraries must be compiled with hardened ABI flags (`-fstack-protector-strong`, `-D_FORTIFY_SOURCE=2`).
+2. **Linkage Guard:** Enforce global `LDFLAGS` (`-Wl,-rpath,/usr/lib`) to prioritize the project's own foundations.
+3. **Keyless Signing:** All final images and intermediate targets must be signed using Sigstore/Cosign OIDC Keyless mechanisms.
+4. **SLSA Level 3:** Non-falsifiable build attestations for every layer.
 
 ## 4. Documentation Standards
-- **Formal Engineering Tone:** Documentation must be written as objective technical specifications. Phrases such as "We discovered", "I found", or "The fix is" are strictly prohibited. Agents must describe the system state and design rationale as technical facts.
-- **Architectural Documentation Enforcement:** Each architectural shift (e.g., build host pivots, staging changes, or bootstrap modifications) is not considered complete until the corresponding `.md` documentation in `docs/` or `README.md` is updated to reflect the new technical specification.
-- **Graphical Diagrams (Mermaid):** Technical flows must be visualized using Mermaid syntax.
-- **Mermaid-to-Image Standard:** Embedded Mermaid blocks are prohibited. Diagram source must be stored in `docs/mermaid/*.mmd`, rendered to `docs/images/*.png` using the **Docker `mermaid-cli`** engine, and referenced as static assets in the documentation.
-- **No Filler Content:** Documentation must focus on the "why" and "how" of the architecture. Avoid AI-generated filler, excessive adjectives, or marketing-style language.
-- **Archived Prototype:** The old python `build.py` orchestrator in the `poc/` directory is strictly an archived prototype and must not be treated as the primary architecture. Do not cross-link new pipelines to the POC.
+- **Formal Engineering Tone:** Documentation must be written as objective technical specifications. Phrases such as "We discovered" or "I found" are strictly prohibited. 
+- **Architectural Documentation Enforcement:** Each architectural shift (documented in `docs/architectural_changes.md`) must be propagated to the reference architecture in `docs/` and the project `README.md`.
+- **Graphical Diagrams (Mermaid):** Technical flows must be visualized using Mermaid syntax and rendered to static assets.
+- **No Filler Content:** Documentation must focus on the "why" and "how" of the architecture. Avoid AI-generated filler.

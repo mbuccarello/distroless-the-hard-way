@@ -1,0 +1,11 @@
+name: static
+version: "latest"
+type: source_build
+base_hierarchy:
+  - static
+
+dependencies: []
+
+runtime:
+  name: static
+  version: "latest"

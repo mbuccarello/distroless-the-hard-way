@@ -1,0 +1,17 @@
+graph TD
+    %% Strict Dark Theme Styling
+    classDef default fill:#0d1117,stroke:#30363d,color:#c9d1d9,stroke-width:2px;
+    classDef core fill:#1f6feb,stroke:#58a6ff,color:#ffffff,font-weight:bold;
+    classDef runtime fill:#238636,stroke:#3fb950,color:#ffffff,font-weight:bold;
+    classDef dep fill:#161b22,stroke:#30363d,color:#8b949e,font-style:italic;
+
+    subgraph Hierarchy
+        S[static] --> B[base]
+        B --> C[cc]
+    end
+
+
+    C --> R[runtime:cc]
+    R --> RD[runtime-debug]
+    class S,B,C core;
+    class R,RD runtime;
