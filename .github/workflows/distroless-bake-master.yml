@@ -60,6 +60,8 @@ jobs:
         uses: sigstore/cosign-installer@v3.5.0
 
       - name: Initialize Distroless Engine
+        env:
+          RENDER_DIAGRAMS: true
         run: |
           python3 distroless_engine.py --stack stacks/${{ inputs.stack }}.yaml --graph
 
@@ -92,8 +94,10 @@ jobs:
           subject-digest: ${{ steps.digest.outputs.digest }}
           push-to-registry: true
 
-      - name: Upload Architecture DAG
+      - name: Upload Architecture DAG and Diagrams
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.stack }}-dag
-          path: docs/mermaid/${{ inputs.stack }}-distroless.mermaid
+          name: ${{ inputs.stack }}-artifacts
+          path: |
+            docs/mermaid/${{ inputs.stack }}-distroless.mermaid
+            docs/images/${{ inputs.stack }}-distroless.png
