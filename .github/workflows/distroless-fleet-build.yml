@@ -15,9 +15,14 @@ jobs:
         uses: actions/checkout@v4
       - id: set-matrix
         run: |
-          # Robust matrix generation
+          # Robust matrix generation - exclude foundations as they are built within runtimes
           FILES=$(ls stacks/*.yaml)
-          STACKS_JSON=$(for f in $FILES; do basename "$f" .yaml; done | jq -R . | jq -s -c .)
+          STACKS_JSON=$(for f in $FILES; do 
+            NAME=$(basename "$f" .yaml)
+            if [[ ! "$NAME" =~ ^(static|base|cc)$ ]]; then
+              echo "$NAME"
+            fi
+          done | jq -R . | jq -s -c .)
           echo "matrix=$STACKS_JSON" >> $GITHUB_OUTPUT
           echo "Generated matrix: $STACKS_JSON"
 

@@ -151,7 +151,20 @@ The "Brain" of the engine is a **Full-Stack Dependency & ABI Guard**.
 *   **PHP**: Fully migrated to YAML-driven engine.
 *   **Perl**: Fully migrated to YAML-driven engine.
 
-### Phase 3: Final Verification and Cleanup - IN PROGRESS
+### Phase 3: Final Verification and Cleanup - COMPLETE
 *   Perform E2E build of the entire hierarchy.
 *   Verify license extraction and FHS compliance.
 *   Retire all legacy "assemble-*" workflows (Move to `deprecated/`).
+
+## 🚢 Fleet Orchestration & Sovereign Deployment
+
+### **Atomic Worker: Bake Master**
+The core unit of build is the `distroless-bake-master.yml`. It leverages the Sovereign Engine to build a single stack atomically, ensuring that the entire dependency graph (from `static` to `runtime`) is built in a single context. This guarantees **ABI consistency** and **SLSA Level 3** provenance.
+
+### **Fleet Orchestrator: Full Fleet Build**
+The `distroless-fleet-build.yml` provides global synchronization. It dynamically discovers all language stacks and launches a parallel matrix of Bake Master builds. It is configured to exclude foundation-only stacks (`static`, `base`, `cc`) from the discovery list, as these are implicitly and more efficiently built within the language stacks themselves.
+
+### **Security & Signing**
+All images produced by the engine are:
+1.  **Signed via Cosign**: Using GitHub OIDC for keyless signing based on the image digest.
+2.  **Attested via SLSA**: Providing a verifiable record of the build process and source integrity.

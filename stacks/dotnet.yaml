@@ -25,6 +25,6 @@ dependencies:
 
 runtime:
   name: dotnet
-  version: "8.0.11"
-  binary_url: "https://download.visualstudio.microsoft.com/download/pr/8d0b5e2d-3d0d-4b9a-8e5d-7a0e1c0d0d0d/8e5d7a0e1c0d0d0d8e5d7a0e1c0d0d0d/dotnet-runtime-8.0.11-linux-x64.tar.gz"
+  version: "8.0.26"
+  binary_url: "https://builds.dotnet.microsoft.com/dotnet/Runtime/8.0.26/dotnet-runtime-8.0.26-linux-x64.tar.gz"
   sha256: "SKIP"

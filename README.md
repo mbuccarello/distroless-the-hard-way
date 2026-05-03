@@ -1,7 +1,6 @@
 # Distroless The Hard Way
 
-[![Foundations](https://github.com/mbuccarello/distroless-the-hard-way/actions/workflows/master-foundations.yml/badge.svg)](https://github.com/mbuccarello/distroless-the-hard-way/actions/workflows/master-foundations.yml)
-[![Assembly](https://github.com/mbuccarello/distroless-the-hard-way/actions/workflows/master-assembly.yml/badge.svg)](https://github.com/mbuccarello/distroless-the-hard-way/actions/workflows/master-assembly.yml)
+[![Distroless Full Fleet Build](https://github.com/mbuccarello/distroless-the-hard-way/actions/workflows/distroless-fleet-build.yml/badge.svg)](https://github.com/mbuccarello/distroless-the-hard-way/actions/workflows/distroless-fleet-build.yml)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/mbuccarello/distroless-the-hard-way/badge)](https://securityscorecards.dev/viewer/?uri=github.com/mbuccarello/distroless-the-hard-way)
 
 Distroless The Hard Way is a technical implementation and educational curriculum for constructing secure, minimal OCI container images from upstream source code. The project implements a zero-trust supply chain architecture that eliminates reliance on pre-compiled distributions.
@@ -72,7 +71,7 @@ distroless-the-hard-way/
 │   └── mermaid/               # Generated architecture diagrams
 ```
 
-**[Explore the full documentation in the `docs/` directory.](docs/architectural_changes.md)**
+**[Explore the current status and architecture in the `docs/` directory.](docs/PIPELINE_STATUS.md)**
 
 ---
 
