@@ -108,7 +108,7 @@ class HCLGenerator:
         hcl += 'target "builder" {\n  dockerfile = "Dockerfile"\n  target = "builder"\n  context = "."\n'
         hcl += f'  platforms = ["{self.platform}"]\n}}\n\n'
 
-        # Library targets (now point to Dockerfile.cc)
+        # Library targets
         for pkg, meta in graph.items():
             hcl += f'target "{pkg}" {{\n'
             hcl += '  dockerfile = "Dockerfile.cc"\n'
@@ -133,14 +133,13 @@ class HCLGenerator:
             hcl += '  }\n'
             hcl += '  contexts = {\n'
             hcl += '    builder = "target:builder"\n'
-            # Add dependency contexts
             for dep in meta['depends']:
                 if dep in graph:
                     hcl += f'    {dep} = "target:{dep}"\n'
             hcl += '  }\n'
             hcl += '}\n\n'
 
-        # Stack-specific target (if any)
+        # Stack-specific target
         if self.has_stack_target:
             hcl += f'target "{self.stack["name"]}" {{\n'
             hcl += '  dockerfile = "Dockerfile.cc"\n'
@@ -192,43 +191,38 @@ class HCLGenerator:
         
         # Template for library builders
         for pkg, meta in graph.items():
-            df += f"\nFROM builder as {pkg}-builder\n"
+            df += f"\nFROM builder AS {pkg}-builder\n"
             df += f"ARG LIB_NAME={pkg}\nARG LIB_URL\nARG LIB_CONFIG\n"
             
-            # Use /opt/distroless as the build-time prefix to avoid breaking system tools in /usr
             for dep in meta['depends']:
                 if dep in graph:
                     df += f"COPY --from={dep} /artifacts/usr /opt/distroless\n"
             
             df += "WORKDIR /build\n"
-            df += "RUN if [ -n \"$LIB_URL\" ] && [ \"$LIB_URL\" != \"SKIP\" ]; then \\\n"
+            df += "RUN set -ex && if [ -n \"$LIB_URL\" ] && [ \"$LIB_URL\" != \"SKIP\" ]; then \\\n"
             df += "    curl -L \"$LIB_URL\" -o source.tar.gz && \\\n"
             df += "    mkdir src && tar -xf source.tar.gz -C src --strip-components=1 && \\\n"
             df += "    cd src && \\\n"
-            # Point to our built dependencies
             df += "    export CPPFLAGS=\"-I/opt/distroless/include\" && \\\n"
             df += "    export LDFLAGS=\"-L/opt/distroless/lib -L/opt/distroless/lib64 -Wl,-rpath,/usr/lib\" && \\\n"
             df += "    export PKG_CONFIG_PATH=\"/opt/distroless/lib/pkgconfig:/opt/distroless/lib64/pkgconfig\" && \\\n"
-            
-            # Smart build command
             df += "    if [ -f ./configure ]; then ./configure --prefix=/usr $LIB_CONFIG; \\\n"
             df += "    elif [ -f ./Configure ]; then ./Configure --prefix=/usr $LIB_CONFIG; \\\n"
             df += "    fi && \\\n"
-            # Bzip2 needs special install
             df += "    if [ \"$LIB_NAME\" = \"bzip2\" ]; then make -j$(nproc) PREFIX=/usr && make DESTDIR=/artifacts PREFIX=/usr install; \\\n"
             df += "    else make -j$(nproc) && make DESTDIR=/artifacts install; fi; \\\n"
-            df += "    fi\n"
-            df += "RUN mkdir -p /artifacts/usr\n"
+            df += "    fi && mkdir -p /artifacts/usr\n"
 
         # Stack builder stage
         if self.has_stack_target:
-            df += f"\nFROM builder as stack-builder\n"
+            df += f"\nFROM builder AS stack-builder\n"
             df += "ARG STACK_NAME\nARG STACK_URL\nARG STACK_CONFIG\n"
             for pkg in graph.keys():
                 df += f"COPY --from={pkg} /artifacts/usr /opt/distroless\n"
             
             df += "WORKDIR /build\n"
-            df += "RUN if [ -n \"$STACK_URL\" ] && [ \"$STACK_URL\" != \"SKIP\" ]; then \\\n"
+            df += "RUN set -ex && echo \"Building $STACK_NAME from $STACK_URL\" && \\\n"
+            df += "    if [ -n \"$STACK_URL\" ] && [ \"$STACK_URL\" != \"SKIP\" ]; then \\\n"
             df += "    curl -L \"$STACK_URL\" -o source.tar.xz && \\\n"
             df += "    mkdir src && tar -xf source.tar.xz -C src --strip-components=1 && \\\n"
             df += "    cd src && \\\n"
@@ -238,17 +232,17 @@ class HCLGenerator:
             df += "    ./configure --prefix=/usr $STACK_CONFIG && \\\n"
             df += "    make -j$(nproc) && \\\n"
             df += "    make DESTDIR=/artifacts install; \\\n"
-            df += "    fi\n"
+            df += "    fi && mkdir -p /artifacts/usr\n"
 
         # Intermediate setup stage
-        df += "\nFROM builder as runtime-setup\nUSER root\n"
+        df += "\nFROM builder AS runtime-setup\nUSER root\n"
         df += "RUN mkdir -p /runtime-root/usr\n"
         for pkg in graph.keys():
             df += f"COPY --from={pkg} /artifacts/usr /runtime-root/usr\n"
         
         if self.runtime.get("type") == "binary_injection":
             df += "ARG RUNTIME_URL\n"
-            df += "RUN mkdir -p /tmp/py && curl -L \"$RUNTIME_URL\" -o /tmp/runtime.tar.gz && \\\n"
+            df += "RUN set -ex && mkdir -p /tmp/py && curl -L \"$RUNTIME_URL\" -o /tmp/runtime.tar.gz && \\\n"
             df += "    tar -xf /tmp/runtime.tar.gz -C /tmp/py && \\\n"
             df += "    PY_DIR=$(find /tmp/py -name bin -type d | head -n 1 | xargs dirname) && \\\n"
             df += "    cp -rv $PY_DIR/* /runtime-root/usr/\n"
@@ -256,17 +250,17 @@ class HCLGenerator:
             df += f"COPY --from=stack-builder /artifacts/usr /runtime-root/usr\n"
 
         # Final CC image
-        df += "\nFROM base as cc\nUSER root\n"
+        df += "\nFROM base AS cc\nUSER root\n"
         df += "COPY --from=builder /usr/lib64/libgcc_s.so.1 /usr/lib/\n"
         df += "COPY --from=builder /usr/lib64/libstdc++.so.6 /usr/lib/\n"
         for pkg in graph.keys():
             df += f"COPY --from={pkg} /artifacts/usr /usr\n"
         
-        df += "\nFROM cc as runtime\nUSER root\nARG RUNTIME_NAME\nARG RUNTIME_VER\nLABEL distroless.stack=\"${RUNTIME_NAME}\"\n"
+        df += "\nFROM cc AS runtime\nUSER root\nARG RUNTIME_NAME\nARG RUNTIME_VER\nLABEL distroless.stack=\"${RUNTIME_NAME}\"\n"
         df += "COPY --from=runtime-setup /runtime-root/usr/ /usr/\n"
         df += "USER 65532:65532\n"
         
-        df += "\nFROM runtime as runtime-debug\nUSER root\n"
+        df += "\nFROM runtime AS runtime-debug\nUSER root\n"
         df += "COPY --from=builder /usr/bin/busybox /usr/bin/busybox\n"
         df += "RUN [\"/usr/bin/busybox\", \"--install\", \"-s\", \"/usr/bin\"]\nUSER 65532:65532\n"
         
