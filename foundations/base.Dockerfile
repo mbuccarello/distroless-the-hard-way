@@ -11,7 +11,8 @@ FROM static as base
 COPY --from=builder /usr/bin/busybox /usr/bin/busybox
 
 # Setup essential FHS structure using JSON form (since no shell exists yet)
-RUN ["/usr/bin/busybox", "mkdir", "-p", "/usr/lib64", "/lib64", "/usr/lib", "/lib", "/bin", "/etc/ld.so.conf.d"]
+# We create the parents but NOT the symlink targets themselves to avoid conflicts
+RUN ["/usr/bin/busybox", "mkdir", "-p", "/usr/lib", "/usr/lib64", "/usr/bin", "/bin", "/etc/ld.so.conf.d"]
 RUN ["/usr/bin/busybox", "ln", "-s", "/usr/lib", "/lib"]
 RUN ["/usr/bin/busybox", "ln", "-s", "/usr/lib64", "/lib64"]
 RUN ["/usr/bin/busybox", "ln", "-s", "/usr/bin/busybox", "/bin/sh"]
