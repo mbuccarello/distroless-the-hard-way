@@ -103,7 +103,7 @@ class HCLGenerator:
             for pkg, meta in graph.items():
                 hcl += f'target "{pkg}" {{\n'
                 hcl += '  dockerfile = "foundations/runtime.Dockerfile"\n'
-                hcl += f'  target = "{pkg}-builder"\n'
+                hcl += f'  target = "{pkg}"\n'
                 hcl += '  context = "."\n'
                 hcl += f'  platforms = ["{self.platform}"]\n'
                 hcl += '  args = {\n'
@@ -151,7 +151,7 @@ class HCLGenerator:
         for pkg, meta in graph.items():
             hcl += f'target "{pkg}" {{\n'
             hcl += '  dockerfile = "foundations/runtime.Dockerfile"\n'
-            hcl += f'  target = "{pkg}-builder"\n'
+            hcl += f'  target = "{pkg}"\n'
             hcl += '  context = "."\n'
             hcl += f'  platforms = ["{self.platform}"]\n'
             hcl += '  args = {\n'
@@ -205,7 +205,7 @@ class HCLGenerator:
     def generate_runtime_dockerfile(self, graph):
         df = ""
         for pkg, meta in graph.items():
-            df += f"\nFROM builder AS {pkg}-builder\n"
+            df += f"\nFROM builder AS {pkg}\n"
             df += f"ARG LIB_NAME={pkg}\nARG LIB_URL\nARG LIB_CONFIG\n"
             for dep in meta['depends']:
                 if dep in graph: df += f"COPY --from={dep} /artifacts/usr /opt/distroless\n"
