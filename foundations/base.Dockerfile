@@ -21,6 +21,7 @@ COPY --from=builder /usr/lib64/librt.so.1 /usr/lib64/
 COPY --from=builder /usr/lib64/libpthread.so.0 /usr/lib64/
 COPY --from=builder /usr/lib64/libdl.so.2 /usr/lib64/
 COPY --from=builder /usr/lib64/libresolv.so.2 /usr/lib64/
+COPY --from=builder /usr/lib64/libutil.so.1 /usr/lib64/
 COPY --from=builder /usr/lib64/ld-linux-x86-64.so.2 /usr/lib64/
 
 # Configure the dynamic linker
