@@ -59,9 +59,14 @@ Every sovereign image adheres to the following layout before the language runtim
 
 ---
 
-## 2. The Distroless Engine (Unified Orchestration)
+## 2. The Distroless Engine (Modular Orchestration)
 
-Build orchestration is managed by the **Sovereign Engine** (`distroless_engine.py`), a data-driven build orchestrator.
+Build orchestration is managed by the **Distroless Engine** ([engine/engine.py](engine/engine.py)), a modular orchestration layer.
+
+### 2.1 Targeted Operating Modes
+The engine operates in two distinct modes to support the tiered architecture:
+- **`--mode foundation`**: Generates `foundations/foundations.hcl`. This manifest defines the core infrastructure layers (L1-L3) and their shared C/C++ library dependencies.
+- **`--mode runtime`**: Generates specialized stack manifests (e.g., `foundations/python.hcl`). This "Apko-style" manifest assembles the final application runtime using the pre-built foundations.
 
 ### 2.1 Dependency Intelligence
 The engine parses **Arch Linux PKGBUILD** scripts as its primary intelligence reference. This allows the project to:
@@ -86,13 +91,29 @@ To maintain a hardened, shell-less environment:
 
 ---
 
-## 3. Fleet Orchestration & Deployment
+## 3. Tiered Pipeline Hierarchy
 
-### **Atomic Worker: Bake Master**
-The `distroless-bake-master.yml` workflow builds a single stack atomically. It resolves the entire dependency graph in a single context, guaranteeing that every image is built against the exact same foundation layers.
+The project implements a strict, sequential build chain managed by GitHub Actions. This ensures that any change in foundational libraries (e.g., Glibc, OpenSSL) automatically triggers a rebuild of all downstream layers while maximizing cache efficiency.
 
-### **Fleet Orchestrator: Full Fleet Build**
-The `distroless-fleet-build.yml` provides global synchronization. It dynamically discovers all stacks in `stacks/` and triggers parallel builds. It optimizes runner usage by excluding foundation-only stacks (`static`, `base`, `cc`), as these are implicitly built by the runtimes.
+### **Sequential Chain**
+1. **[Foundation: Static (L1)](.github/workflows/distroless-foundation-static.yml)**: Builds the minimal rootfs.
+2. **[Foundation: Base (L2)](.github/workflows/distroless-foundation-base.yml)**: Injects Glibc and NSS.
+3. **[Foundation: CC (L3)](.github/workflows/distroless-foundation-cc.yml)**: Compiles and assembles core C/C++ libraries.
+4. **[Stack: Runtime Assembly](.github/workflows/distroless-stack-runtime.yml)**: The "Apko" layer. Assembles the final language stack (Python, Java, etc.) using the L3 foundation.
+
+### **Manual Build Workflow**
+Developers can replicate the tiered build locally using the engine's targeted generation:
+```bash
+# 1. Generate Foundation Manifest
+python3 engine/engine.py --mode foundation
+# 2. Build CC foundation
+docker buildx bake -f foundations/foundations.hcl cc
+
+# 3. Generate Runtime Manifest
+python3 engine/engine.py --mode runtime --stack stacks/python.yaml
+# 4. Assemble Final Image
+docker buildx bake -f foundations/python.hcl python
+```
 
 ---
 

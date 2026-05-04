@@ -18,9 +18,10 @@ The project implements a canonical, 4-layer inheritance model inspired by Google
 4.  **`runtime`**: The language-specific layer (Python, Node.js, Java). Supports both source-built and official binary injection strategies.
 
 ### ⚙️ The Distroless Engine
-All builds are orchestrated by the **Distroless Engine** (`distroless_engine.py`), which:
+All builds are orchestrated by the **Distroless Engine** ([engine/engine.py](engine/engine.py)), which:
+*   Operates in **targeted modes**: `--mode foundation` for core infrastructure and `--mode runtime` for language stacks.
 *   Parses **Arch Linux PKGBUILDs** to automatically map dependency graphs and extract optimized `./configure` flags.
-*   Generates complex **Docker Bake (HCL)** workflows to ensure bit-perfect builds and ABI consistency.
+*   Generates specialized **Docker Bake (HCL)** manifests ([foundations/*.hcl](foundations/)) to ensure bit-perfect builds and ABI consistency.
 *   Enforces a strict **Debug Tagging Strategy**: standard images are shell-free; troubleshooting tools (Busybox) are isolated to `:debug` variants.
 
 ---
@@ -50,11 +51,15 @@ All builds are orchestrated by the **Distroless Engine** (`distroless_engine.py`
 
 ## 🚀 Usage & CI/CD
 
-The project utilizes a **Unified Master Pipeline** powered by Docker Bake.
+The project utilizes a **Tiered Pipeline Hierarchy** powered by specialized Docker Bake manifests.
 
-*   **Manual Build**: `./distroless_engine.py --stack stacks/python.yaml && docker buildx bake runtime`
-*   **GitHub Actions**: Use the [Distroless Bake Master](.github/workflows/distroless-bake-master.yml) to build and sign any stack.
-*   **Fleet Updates**: The [Fleet Build](.github/workflows/distroless-fleet-build.yml) orchestrates weekly security updates for the entire OCI catalog.
+*   **Foundation Build**: `python3 engine/engine.py --mode foundation && docker buildx bake -f foundations/foundations.hcl cc`
+*   **Runtime Assembly**: `python3 engine/engine.py --mode runtime --stack stacks/python.yaml && docker buildx bake -f foundations/python.hcl python`
+*   **GitHub Actions**: Specialized workflows handle the sequential chain:
+    *   [Foundation: Static (L1)](.github/workflows/distroless-foundation-static.yml)
+    *   [Foundation: Base (L2)](.github/workflows/distroless-foundation-base.yml)
+    *   [Foundation: CC (L3)](.github/workflows/distroless-foundation-cc.yml)
+    *   [Stack: Runtime Assembly](.github/workflows/distroless-stack-runtime.yml)
 
 ---
 
@@ -62,14 +67,18 @@ The project utilizes a **Unified Master Pipeline** powered by Docker Bake.
 
 ```text
 distroless-the-hard-way/
-├── distroless_engine.py       # The Unified Build Orchestrator
+├── engine/                    # The Modular Build Orchestrator
+│   └── engine.py              # Core logic for HCL/Dockerfile generation
+├── foundations/               # The OCI Hierarchy Blueprints
+│   ├── static.Dockerfile      # L1: Rootfs Skeleton
+│   ├── base.Dockerfile        # L2: Glibc & NSS
+│   ├── cc.Dockerfile          # L3: ABI-stabilized C/C++ Layer
+│   └── runtime.Dockerfile     # L4: Final Assembly Template
 ├── stacks/                    # YAML-based language stack definitions
-├── Dockerfile                 # The master hierarchy template
 ├── docs/                      # Technical System Specifications
-│   ├── ARCHITECTURE.md        # Technical System Specification
-│   ├── OPERATIONS.md          # Maintenance & Testing Guide
-│   ├── SECURITY.md            # Security & Supply Chain Integrity
-│   └── PIPELINE_STATUS.md     # Current Fleet Health Report
+│   ├── architecture.md        # Technical System Specification
+│   ├── security.md            # Security & Supply Chain Integrity
+│   └── pipeline_status.md     # Current Fleet Health Report
 ```
 
 **[Explore the full technical documentation in the `docs/` directory.](docs/ARCHITECTURE.md)**
