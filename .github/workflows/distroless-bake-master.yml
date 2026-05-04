@@ -80,13 +80,6 @@ jobs:
           DIGEST=$(jq -r '.runtime["containerimage.digest"]' metadata.json)
           echo "digest=$DIGEST" >> $GITHUB_OUTPUT
 
-      - name: Extract Digest
-        id: digest
-        if: ${{ inputs.push }}
-        run: |
-          DIGEST=$(jq -r '.runtime["containerimage.digest"]' metadata.json)
-          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
-
     outputs:
       digest: ${{ steps.digest.outputs.digest }}
 
