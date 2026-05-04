@@ -105,13 +105,17 @@ class HCLGenerator:
         hcl += '}\n\n'
 
         # Base builder target
-        hcl += 'target "builder" {\n  dockerfile = "Dockerfile"\n  target = "builder"\n  context = "."\n'
+        hcl += 'target "builder" {\n  dockerfile = "foundations/builder.Dockerfile"\n  target = "builder"\n  context = "."\n'
         hcl += f'  platforms = ["{self.platform}"]\n}}\n\n'
 
-        # Library targets
+        # Static and Base foundations
+        hcl += 'target "static" {\n  dockerfile = "foundations/base.Dockerfile"\n  target = "static"\n  context = "."\n  contexts = {\n    builder = "target:builder"\n  }\n}\n\n'
+        hcl += 'target "base" {\n  dockerfile = "foundations/base.Dockerfile"\n  target = "base"\n  context = "."\n  contexts = {\n    builder = "target:builder"\n    static = "target:static"\n  }\n}\n\n'
+
+        # Library targets (using runtime.Dockerfile)
         for pkg, meta in graph.items():
             hcl += f'target "{pkg}" {{\n'
-            hcl += '  dockerfile = "Dockerfile.cc"\n'
+            hcl += '  dockerfile = "foundations/runtime.Dockerfile"\n'
             hcl += f'  target = "{pkg}-builder"\n'
             hcl += '  context = "."\n'
             hcl += f'  platforms = ["{self.platform}"]\n'
@@ -142,7 +146,7 @@ class HCLGenerator:
         # Stack-specific target
         if self.has_stack_target:
             hcl += f'target "{self.stack["name"]}" {{\n'
-            hcl += '  dockerfile = "Dockerfile.cc"\n'
+            hcl += '  dockerfile = "foundations/runtime.Dockerfile"\n'
             hcl += f'  target = "stack-builder"\n'
             hcl += '  context = "."\n'
             hcl += f'  platforms = ["{self.platform}"]\n'
@@ -158,11 +162,8 @@ class HCLGenerator:
             hcl += '  }\n'
             hcl += '}\n\n'
 
-        # Final images
-        hcl += 'target "static" {\n  dockerfile = "Dockerfile"\n  target = "static"\n  context = "."\n}\n\n'
-        hcl += 'target "base" {\n  dockerfile = "Dockerfile"\n  target = "base"\n  context = "."\n}\n\n'
-
-        hcl += 'target "cc" {\n  dockerfile = "Dockerfile.cc"\n  target = "cc"\n  context = "."\n'
+        # Final CC and Runtime targets
+        hcl += 'target "cc" {\n  dockerfile = "foundations/runtime.Dockerfile"\n  target = "cc"\n  context = "."\n'
         hcl += '  contexts = {\n    base = "target:base"\n    builder = "target:builder"\n'
         for pkg in graph.keys():
             hcl += f'    {pkg} = "target:{pkg}"\n'
@@ -186,8 +187,8 @@ class HCLGenerator:
 
         return hcl
 
-    def generate_cc_dockerfile(self, graph):
-        df = ""
+    def generate_runtime_dockerfile(self, graph):
+        df = "# syntax=docker/dockerfile:1.4\n"
         
         # Template for library builders
         for pkg, meta in graph.items():
@@ -290,9 +291,9 @@ def main():
         with open("docker-bake.hcl", "w") as f:
             f.write(hcl)
 
-        df_cc = generator.generate_cc_dockerfile(resolver.graph)
-        with open("Dockerfile.cc", "w") as f:
-            f.write(df_cc)
+        df_runtime = generator.generate_runtime_dockerfile(resolver.graph)
+        with open("foundations/runtime.Dockerfile", "w") as f:
+            f.write(df_runtime)
 
 if __name__ == "__main__":
     main()

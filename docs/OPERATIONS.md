@@ -23,9 +23,11 @@ Security patches are applied through a weekly synchronization:
 ## 2. Testing & Verification
 
 ### 2.1 E2E Verification Framework
-The project uses a localized smoke test strategy in the `app/` directory:
+The project uses a dedicated, automated E2E testing pipeline:
+- **Dedicated Workflow**: [`.github/workflows/distroless-e2e.yml`](file:///Users/michele.buccarello/distroless-the-hard-way/.github/workflows/distroless-e2e.yml) handles the validation of every built image.
 - **Test Matrix**: Every language stack has a corresponding test script (e.g., `test.py`, `test.js`, `test.java`).
 - **Logic**: Tests verify that the runtime can execute basic code, load core libraries (ABI check), and access the root trust store (SSL check).
+- **Trigger**: The E2E tests are automatically triggered after every successful build in the `Bake Master` pipeline, but can also be run manually for verification.
 
 ### 2.2 Debugging Strategy
 Since production images are shell-less, debugging is performed using the `:debug` variants:

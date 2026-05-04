@@ -1,0 +1,1355 @@
+build-fleet (dotnet) / build	UNKNOWN STEP	﻿2026-05-03T20:32:25.6573759Z Current runner version: '2.334.0'
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:25.6607124Z ##[group]Runner Image Provisioner
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:25.6608099Z Hosted Compute Agent
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:25.6608624Z Version: 20260213.493
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:25.6609223Z Commit: 5c115507f6dd24b8de37d8bbe0bb4509d0cc0fa3
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:25.6609971Z Build Date: 2026-02-13T00:28:41Z
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:25.6610673Z Worker ID: {47361ecc-724a-4241-894f-4fb1e42dc7bb}
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:25.6611330Z Azure Region: northcentralus
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:25.6611982Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:25.6613320Z ##[group]Operating System
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:25.6614114Z Ubuntu
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:25.6614704Z 24.04.4
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:25.6615170Z LTS
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:25.6615673Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:25.6616164Z ##[group]Runner Image
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:25.6616740Z Image: ubuntu-24.04
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:25.6617221Z Version: 20260413.86.1
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:25.6618521Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260413.86/images/ubuntu/Ubuntu2404-Readme.md
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:25.6619910Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260413.86
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:25.6620859Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:25.6622073Z ##[group]GITHUB_TOKEN Permissions
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:25.6624365Z Attestations: write
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:25.6624960Z Contents: read
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:25.6625481Z Metadata: read
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:25.6625925Z Packages: write
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:25.6626514Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:25.6628649Z Secret source: Actions
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:25.6629338Z Prepare workflow directory
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:25.7059759Z Prepare all required actions
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:25.7113428Z Getting action download info
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:26.1687252Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:26.3151399Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:26.4799084Z Download action repository 'docker/setup-buildx-action@v3' (SHA:8d2750c68a42422c14e847fe6c8ac0403b4cbd6f)
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:27.1171972Z Download action repository 'docker/login-action@v3' (SHA:c94ce9fb468520275223c153574b00df6fe4bcc9)
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:27.6559698Z Download action repository 'sigstore/cosign-installer@v3.5.0' (SHA:59acb6260d9c0ba8f4a2f9d9b48431a222b68e20)
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:27.9066499Z Download action repository 'actions/attest-build-provenance@v2' (SHA:e8998f949152b193b063cb0ec769d69d929409be)
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:28.2851729Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:28.5911522Z Getting action download info
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:28.8019246Z Download action repository 'actions/attest-build-provenance@1176ef556905f349f669722abf30bce1a6e16e01' (SHA:1176ef556905f349f669722abf30bce1a6e16e01)
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.1632215Z Download action repository 'actions/attest@ce27ba3b4a9a139d9a20a4a07d69fabb52f1e5bc' (SHA:ce27ba3b4a9a139d9a20a4a07d69fabb52f1e5bc)
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.5878080Z Uses: mbuccarello/distroless-the-hard-way/.github/workflows/distroless-bake-master.yml@refs/heads/main (43ee0c448f54d85c6188f6be6ec509b0fe8d8fb6)
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.5882206Z ##[group] Inputs
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.5882566Z   stack: dotnet
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.5883374Z   push: true
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.5883665Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.5884262Z Complete job name: build-fleet (dotnet) / build
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.6726128Z ##[group]Run actions/checkout@v4
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.6726716Z with:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.6726966Z   repository: mbuccarello/distroless-the-hard-way
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.6727534Z   token: ***
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.6727722Z   ssh-strict: true
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.6727926Z   ssh-user: git
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.6728124Z   persist-credentials: true
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.6728366Z   clean: true
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.6728572Z   sparse-checkout-cone-mode: true
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.6728820Z   fetch-depth: 1
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.6729012Z   fetch-tags: false
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.6729236Z   show-progress: true
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.6729436Z   lfs: false
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.6729931Z   submodules: false
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.6730160Z   set-safe-directory: true
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.6730558Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.7952567Z Syncing repository: mbuccarello/distroless-the-hard-way
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.7954396Z ##[group]Getting Git version info
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.7955000Z Working directory is '/home/runner/work/distroless-the-hard-way/distroless-the-hard-way'
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.7955666Z [command]/usr/bin/git version
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.7996243Z git version 2.53.0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8022634Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8037738Z Temporarily overriding HOME='/home/runner/work/_temp/f31d33eb-6abe-4c73-bda8-289ac7919f0b' before making global git config changes
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8038614Z Adding repository directory to the temporary git global config as a safe directory
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8052513Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/distroless-the-hard-way/distroless-the-hard-way
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8089416Z Deleting the contents of '/home/runner/work/distroless-the-hard-way/distroless-the-hard-way'
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8092899Z ##[group]Initializing the repository
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8097558Z [command]/usr/bin/git init /home/runner/work/distroless-the-hard-way/distroless-the-hard-way
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8192184Z hint: Using 'master' as the name for the initial branch. This default branch name
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8193183Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8194261Z hint: to use in all of your new repositories, which will suppress this warning,
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8194841Z hint: call:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8195100Z hint:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8195951Z hint: 	git config --global init.defaultBranch <name>
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8196399Z hint:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8196907Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8197737Z hint: 'development'. The just-created branch can be renamed via this command:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8198315Z hint:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8198625Z hint: 	git branch -m <name>
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8198943Z hint:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8199491Z hint: Disable this message with "git config set advice.defaultBranchName false"
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8200565Z Initialized empty Git repository in /home/runner/work/distroless-the-hard-way/distroless-the-hard-way/.git/
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8207202Z [command]/usr/bin/git remote add origin https://github.com/mbuccarello/distroless-the-hard-way
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8248268Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8249013Z ##[group]Disabling automatic garbage collection
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8254246Z [command]/usr/bin/git config --local gc.auto 0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8289811Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8290390Z ##[group]Setting up auth
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8297981Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8334593Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8646839Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8680963Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8926022Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.8970677Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.9216640Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.9253948Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.9254567Z ##[group]Fetching the repository
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:29.9262640Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +43ee0c448f54d85c6188f6be6ec509b0fe8d8fb6:refs/remotes/origin/main
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.3717295Z From https://github.com/mbuccarello/distroless-the-hard-way
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.3718583Z  * [new ref]         43ee0c448f54d85c6188f6be6ec509b0fe8d8fb6 -> origin/main
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.3750318Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.3750863Z ##[group]Determining the checkout info
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.3752934Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.3760044Z [command]/usr/bin/git sparse-checkout disable
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.3805262Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.3840221Z ##[group]Checking out the ref
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.3848014Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.4117885Z Switched to a new branch 'main'
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.4119098Z branch 'main' set up to track 'origin/main'.
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.4128931Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.4178393Z [command]/usr/bin/git log -1 --format=%H
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.4206583Z 43ee0c448f54d85c6188f6be6ec509b0fe8d8fb6
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.4450568Z ##[group]Run actions/setup-python@v5
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.4450865Z with:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.4451060Z   python-version: 3.10
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.4451288Z   check-latest: false
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.4451635Z   token: ***
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.4451841Z   update-environment: true
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.4452075Z   allow-prereleases: false
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.4452311Z   freethreaded: false
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.4452516Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.6216227Z ##[group]Installed versions
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.6334664Z Successfully set up CPython (3.10.20)
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.6335858Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.6457391Z ##[group]Run pip install pyyaml
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.6457752Z [36;1mpip install pyyaml[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.6495599Z shell: /usr/bin/bash -e {0}
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.6495855Z env:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.6496119Z   pythonLocation: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.6496586Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.10.20/x64/lib/pkgconfig
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.6497005Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.6497368Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.6497717Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.6498067Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.10.20/x64/lib
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:30.6498363Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:31.8061350Z Collecting pyyaml
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:31.8638331Z   Downloading pyyaml-6.0.3-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.4 kB)
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:31.8716646Z Downloading pyyaml-6.0.3-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (770 kB)
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:31.9086577Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 770.3/770.3 kB 48.9 MB/s  0:00:00
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:31.9405976Z Installing collected packages: pyyaml
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:31.9963571Z Successfully installed pyyaml-6.0.3
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.0914725Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.0915282Z [notice] A new release of pip is available: 26.0.1 -> 26.1
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.0915715Z [notice] To update, run: pip install --upgrade pip
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.1556859Z ##[group]Run docker/setup-buildx-action@v3
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.1557153Z with:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.1557342Z   driver: docker-container
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.1557552Z   use: true
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.1557727Z   keep-state: false
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.1557921Z   cache-binary: true
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.1558138Z   cleanup: true
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.1558310Z   install: false
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.1558502Z env:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.1558736Z   pythonLocation: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.1559157Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.10.20/x64/lib/pkgconfig
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.1559546Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.1559912Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.1560444Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.1560789Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.10.20/x64/lib
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.1561087Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.4163220Z ##[group]Docker info
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.4188865Z [command]/usr/bin/docker version
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.4566786Z Client: Docker Engine - Community
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.4567171Z  Version:           28.0.4
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.4567449Z  API version:       1.48
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.4567689Z  Go version:        go1.23.7
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.4567955Z  Git commit:        b8034c0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.4568202Z  Built:             Tue Mar 25 15:07:16 2025
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.4569152Z  OS/Arch:           linux/amd64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.4569485Z  Context:           default
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.4569619Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.4569735Z Server: Docker Engine - Community
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.4570004Z  Engine:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.4570218Z   Version:          28.0.4
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.4570458Z   API version:      1.48 (minimum version 1.24)
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.4570732Z   Go version:       go1.23.7
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.4571154Z   Git commit:       6430e49
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.4571584Z   Built:            Tue Mar 25 15:07:16 2025
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.4572074Z   OS/Arch:          linux/amd64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.4572560Z   Experimental:     false
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.4572996Z  containerd:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.4573350Z   Version:          v2.2.2
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.4574006Z   GitCommit:        301b2dac98f15c27117da5c8af12118a041a31d9
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.4574498Z  runc:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.4574757Z   Version:          1.3.4
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.4575171Z   GitCommit:        v1.3.4-0-gd6d73eb8
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.4575543Z  docker-init:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.4575993Z   Version:          0.19.0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.4576222Z   GitCommit:        de40ad0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:32.4631728Z [command]/usr/bin/docker info
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6917441Z Client: Docker Engine - Community
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6929629Z  Version:    28.0.4
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6930056Z  Context:    default
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6930531Z  Debug Mode: false
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6930884Z  Plugins:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6931231Z   buildx: Docker Buildx (Docker Inc.)
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6931636Z     Version:  v0.33.0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6932027Z     Path:     /usr/libexec/docker/cli-plugins/docker-buildx
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6932492Z   compose: Docker Compose (Docker Inc.)
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6932840Z     Version:  v2.38.2
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6933197Z     Path:     /usr/libexec/docker/cli-plugins/docker-compose
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6933512Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6933602Z Server:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6934495Z  Containers: 0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6934775Z   Running: 0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6935011Z   Paused: 0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6935264Z   Stopped: 0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6935487Z  Images: 6
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6935716Z  Server Version: 28.0.4
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6936037Z  Storage Driver: overlay2
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6936383Z   Backing Filesystem: extfs
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6936705Z   Supports d_type: true
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6936987Z   Using metacopy: false
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6937290Z   Native Overlay Diff: false
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6937584Z   userxattr: false
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6938403Z  Logging Driver: json-file
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6938732Z  Cgroup Driver: systemd
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6939031Z  Cgroup Version: 2
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6939326Z  Plugins:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6939603Z   Volume: local
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6939941Z   Network: bridge host ipvlan macvlan null overlay
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6940497Z   Log: awslogs fluentd gcplogs gelf journald json-file local splunk syslog
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6941245Z  Swarm: inactive
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6941557Z  Runtimes: io.containerd.runc.v2 runc
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6941955Z  Default Runtime: runc
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6942260Z  Init Binary: docker-init
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6942705Z  containerd version: 301b2dac98f15c27117da5c8af12118a041a31d9
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6943210Z  runc version: v1.3.4-0-gd6d73eb8
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6944233Z  init version: de40ad0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6945478Z  Security Options:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6945784Z   apparmor
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6946047Z   seccomp
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6946302Z    Profile: builtin
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6946612Z   cgroupns
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6946900Z  Kernel Version: 6.17.0-1010-azure
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6947297Z  Operating System: Ubuntu 24.04.4 LTS
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6947679Z  OSType: linux
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6947959Z  Architecture: x86_64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6948260Z  CPUs: 4
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6948517Z  Total Memory: 15.61GiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6948827Z  Name: runnervmeorf1
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6949154Z  ID: e27c7740-8587-4822-9bec-fa47c65630a3
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6949563Z  Docker Root Dir: /var/lib/docker
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6949910Z  Debug Mode: false
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6950212Z  Username: githubactions
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6950541Z  Experimental: false
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6950839Z  Insecure Registries:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6951277Z   ::1/128
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6951502Z   127.0.0.0/8
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6951784Z  Live Restore Enabled: false
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6973146Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.6973991Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.7515907Z ##[group]Buildx version
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.7544416Z [command]/usr/bin/docker buildx version
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.8137045Z github.com/docker/buildx v0.33.0 f7897eba028583e0071642db3c011e860444f8cf
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.8169817Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.8331332Z ##[group]Inspecting default docker context
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.8482566Z [
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.8483029Z   {
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.8483265Z     "Name": "default",
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.8483516Z     "Metadata": {},
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.8483720Z     "Endpoints": {
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.8484090Z       "docker": {
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.8484313Z         "Host": "unix:///var/run/docker.sock",
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.8484601Z         "SkipTLSVerify": false
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.8484814Z       }
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.8484977Z     },
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.8485155Z     "TLSMaterial": {},
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.8485390Z     "Storage": {
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.8485594Z       "MetadataPath": "<IN MEMORY>",
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.8485837Z       "TLSPath": "<IN MEMORY>"
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.8486044Z     }
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.8486228Z   }
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.8486392Z ]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.8486952Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.8487291Z ##[group]Creating a new builder instance
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:33.9792262Z [command]/usr/bin/docker buildx create --name builder-4f8b4b46-d5bc-478a-b374-6fb5d8eca41a --driver docker-container --buildkitd-flags --allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host --use
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:34.0334558Z builder-4f8b4b46-d5bc-478a-b374-6fb5d8eca41a
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:34.0371629Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:34.0372123Z ##[group]Booting builder
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:34.0403520Z [command]/usr/bin/docker buildx inspect --bootstrap --builder builder-4f8b4b46-d5bc-478a-b374-6fb5d8eca41a
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:34.0924659Z #1 [internal] booting buildkit
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:34.2432188Z #1 pulling image moby/buildkit:buildx-stable-1
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.3608062Z #1 pulling image moby/buildkit:buildx-stable-1 2.3s done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.5123333Z #1 creating container buildx_buildkit_builder-4f8b4b46-d5bc-478a-b374-6fb5d8eca41a0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7177411Z #1 creating container buildx_buildkit_builder-4f8b4b46-d5bc-478a-b374-6fb5d8eca41a0 0.4s done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7189682Z #1 DONE 2.6s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7536699Z Name:          builder-4f8b4b46-d5bc-478a-b374-6fb5d8eca41a
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7537595Z Driver:        docker-container
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7538191Z Last Activity: 2026-05-03 20:32:34 +0000 UTC
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7548337Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7548724Z Nodes:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7549206Z Name:                  builder-4f8b4b46-d5bc-478a-b374-6fb5d8eca41a0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7549786Z Endpoint:              unix:///var/run/docker.sock
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7550229Z Status:                running
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7551079Z BuildKit daemon flags: --allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7552363Z BuildKit version:      v0.29.0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7552853Z Platforms:             linux/amd64, linux/amd64/v2, linux/amd64/v3, linux/386
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7553393Z Labels:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7553930Z  org.mobyproject.buildkit.worker.executor:         oci
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7554563Z  org.mobyproject.buildkit.worker.hostname:         389f8489cb8a
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7555209Z  org.mobyproject.buildkit.worker.network:          host
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7555815Z  org.mobyproject.buildkit.worker.oci.process-mode: sandbox
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7556442Z  org.mobyproject.buildkit.worker.selinux.enabled:  false
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7557016Z  org.mobyproject.buildkit.worker.snapshotter:      overlayfs
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7557473Z GC Policy rule#0:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7557739Z  All:            false
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7558200Z  Filters:        type==source.local,type==exec.cachemount,type==source.git.checkout
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7558768Z  Keep Duration:  48h0m0s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7559106Z  Max Used Space: 488.3MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7559438Z GC Policy rule#1:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7559707Z  All:            false
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7560012Z  Keep Duration:  1440h0m0s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7560346Z  Reserved Space: 9.313GiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7560699Z  Max Used Space: 93.13GiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7561001Z  Min Free Space: 27.01GiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7561293Z GC Policy rule#2:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7561526Z  All:            false
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7561797Z  Reserved Space: 9.313GiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7562091Z  Max Used Space: 93.13GiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7562381Z  Min Free Space: 27.01GiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7562665Z GC Policy rule#3:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7562973Z  All:            true
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7563242Z  Reserved Space: 9.313GiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7563530Z  Max Used Space: 93.13GiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7564028Z  Min Free Space: 27.01GiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.7589393Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8506144Z ##[group]Inspect builder
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8508512Z {
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8509148Z   "nodes": [
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8509846Z     {
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8510809Z       "name": "builder-4f8b4b46-d5bc-478a-b374-6fb5d8eca41a0",
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8520513Z       "endpoint": "unix:///var/run/docker.sock",
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8520983Z       "status": "running",
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8521647Z       "buildkitd-flags": "--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host",
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8522308Z       "buildkit": "v0.29.0",
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8522759Z       "platforms": "linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/386",
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8523279Z       "features": {
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8523753Z         "Automatically load images to the Docker Engine image store": true,
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8524770Z         "Cache export": true,
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8525119Z         "Direct push": true,
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8525446Z         "Docker exporter": true,
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8525814Z         "Multi-platform build": true,
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8526058Z         "OCI exporter": true
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8526272Z       },
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8526441Z       "labels": {
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8526691Z         "org.mobyproject.buildkit.worker.executor": "oci",
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8527471Z         "org.mobyproject.buildkit.worker.hostname": "389f8489cb8a",
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8527839Z         "org.mobyproject.buildkit.worker.network": "host",
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8528238Z         "org.mobyproject.buildkit.worker.oci.process-mode": "sandbox",
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8528652Z         "org.mobyproject.buildkit.worker.selinux.enabled": "false",
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8529054Z         "org.mobyproject.buildkit.worker.snapshotter": "overlayfs"
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8529402Z       },
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8529562Z       "gcPolicy": [
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8529742Z         {
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8529912Z           "all": false,
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8530110Z           "filter": [
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8530307Z             "type==source.local",
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8530714Z             "type==exec.cachemount",
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8530958Z             "type==source.git.checkout"
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8531189Z           ],
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8531366Z           "keepDuration": "48h0m0s",
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8531603Z           "maxUsedSpace": "488.3MiB"
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8531818Z         },
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8531976Z         {
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8532137Z           "all": false,
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8532336Z           "keepDuration": "1440h0m0s",
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8532574Z           "reservedSpace": "9.313GiB",
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8532802Z           "maxUsedSpace": "93.13GiB",
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8533045Z           "minFreeSpace": "27.01GiB"
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8533257Z         },
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8533416Z         {
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8533573Z           "all": false,
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8533952Z           "reservedSpace": "9.313GiB",
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8534317Z           "maxUsedSpace": "93.13GiB",
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8534548Z           "minFreeSpace": "27.01GiB"
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8534759Z         },
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8534908Z         {
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8535075Z           "all": true,
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8535269Z           "reservedSpace": "9.313GiB",
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8535542Z           "maxUsedSpace": "93.13GiB",
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8535762Z           "minFreeSpace": "27.01GiB"
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8535976Z         }
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8536123Z       ]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8536282Z     }
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8536431Z   ],
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8536660Z   "name": "builder-4f8b4b46-d5bc-478a-b374-6fb5d8eca41a",
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8536966Z   "driver": "docker-container",
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8537227Z   "lastActivity": "2026-05-03T20:32:34.000Z"
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8537498Z }
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8537917Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8538268Z ##[group]BuildKit version
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8538561Z builder-4f8b4b46-d5bc-478a-b374-6fb5d8eca41a0: v0.29.0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8539007Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8662086Z ##[group]Run docker/login-action@v3
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8662361Z with:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8662532Z   registry: ghcr.io
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8662747Z   username: mbuccarello
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8663376Z   password: ***
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8663574Z   logout: true
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8663757Z env:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8664350Z   pythonLocation: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8664766Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.10.20/x64/lib/pkgconfig
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8665152Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8665512Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8665867Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8666210Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.10.20/x64/lib
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:36.8666509Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.1765712Z Logging into ghcr.io...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4530807Z Login Succeeded!
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4760077Z ##[group]Run sigstore/cosign-installer@v3.5.0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4760411Z with:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4760599Z   cosign-release: v2.2.4
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4760819Z   install-dir: $HOME/.cosign
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4761034Z   use-sudo: false
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4761209Z env:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4761450Z   pythonLocation: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4761854Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.10.20/x64/lib/pkgconfig
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4762262Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4762613Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4762947Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4763291Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.10.20/x64/lib
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4763587Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4862875Z ##[group]Run #!/bin/bash
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4863587Z [36;1m#!/bin/bash[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4864124Z [36;1m# cosign install script[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4864621Z [36;1mshopt -s expand_aliases[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4864863Z [36;1mif [ -z "$NO_COLOR" ]; then[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4865179Z [36;1m  alias log_info="echo -e \"\033[1;32mINFO\033[0m:\""[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4865553Z [36;1m  alias log_error="echo -e \"\033[1;31mERROR\033[0m:\""[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4865841Z [36;1melse[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4866060Z [36;1m  alias log_info="echo \"INFO:\""[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4866343Z [36;1m  alias log_error="echo \"ERROR:\""[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4866582Z [36;1mfi[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4866757Z [36;1mset -e[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4866928Z [36;1m[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4867117Z [36;1mmkdir -p $HOME/.cosign[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4867337Z [36;1m[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4867512Z [36;1mif [[ v2.2.4 == "main" ]]; then[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4867860Z [36;1m  log_info "installing cosign via 'go install' from its main version"[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4868263Z [36;1m  GOBIN=$(go env GOPATH)/bin[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4868593Z [36;1m  go install github.com/sigstore/cosign/cmd/cosign@main[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4868937Z [36;1m  ln -s $GOBIN/cosign $HOME/.cosign/cosign[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4869204Z [36;1m  exit 0[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4869375Z [36;1mfi[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4869543Z [36;1m[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4869703Z [36;1mshaprog() {[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4869903Z [36;1m  case Linux in[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4870108Z [36;1m    Linux|linux)[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4870335Z [36;1m      sha256sum $1 | cut -d' ' -f1[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4870581Z [36;1m      ;;[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4870749Z [36;1m    macOS|macos)[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4870975Z [36;1m      shasum -a256 $1 | cut -d' ' -f1[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4871208Z [36;1m      ;;[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4871390Z [36;1m    Windows|windows)[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4871856Z [36;1m      powershell -command "(Get-FileHash $1 -Algorithm SHA256 | Select-Object -ExpandProperty Hash).ToLower()"[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4872330Z [36;1m      ;;[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4872496Z [36;1m    *)[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4872702Z [36;1m      log_error "unsupported OS Linux"[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4872960Z [36;1m      exit 1[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4873141Z [36;1m      ;;[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4873309Z [36;1m  esac[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4873472Z [36;1m}[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4873637Z [36;1m[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4873943Z [36;1mbootstrap_version='v2.2.4'[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4874396Z [36;1mbootstrap_linux_amd64_sha='97a6a1e15668a75fc4ff7a4dc4cb2f098f929cbea2f12faa9de31db6b42b17d7'[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4875028Z [36;1mbootstrap_linux_arm_sha='ad0338117c8c97a555e48ee194f400aad56803aaa1f39f537a3ede9261bc9aa7'[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4875666Z [36;1mbootstrap_linux_arm64_sha='658087351e1d4f9c396b5f59ee5437461c06128f4ce80ba899ccaa1c0b6a8a62'[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4876284Z [36;1mbootstrap_darwin_amd64_sha='0e5a77a86115e4c00ba4243db01abceacb13cc06981c45e53ee71f2e1db8ce25'[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4877124Z [36;1mbootstrap_darwin_arm64_sha='fcd310e64ecddc1eaa13fe814ac1c9fc02f6f9eacd9a58480ab8160eb8ca381e'[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4877773Z [36;1mbootstrap_windows_amd64_sha='9e9b71bd3fa2a6abfa903b5f784d9ca0fbc29c563d2b084c1a82c593c2bab001'[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4878228Z [36;1mcosign_executable_name=cosign[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4878455Z [36;1m[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4878639Z [36;1mtrap "popd >/dev/null" EXIT[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4878865Z [36;1m[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4879043Z [36;1mpushd $HOME/.cosign > /dev/null[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4879270Z [36;1m[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4879440Z [36;1mcase Linux in[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4879642Z [36;1m  Linux|linux)[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4879847Z [36;1m    case X64 in[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4880038Z [36;1m      X64|amd64)[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4880288Z [36;1m        bootstrap_filename='cosign-linux-amd64'[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4880622Z [36;1m        bootstrap_sha=${bootstrap_linux_amd64_sha}[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4880962Z [36;1m        desired_cosign_filename='cosign-linux-amd64'[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4881491Z [36;1m        # v0.6.0 had different filename structures from all other releases[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4881863Z [36;1m        if [[ v2.2.4 == 'v0.6.0' ]]; then[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4882223Z [36;1m          desired_cosign_filename='cosign_linux_amd64_0.6.0_linux_amd64'[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4882698Z [36;1m          desired_cosign_v060_signature='cosign_linux_amd64_0.6.0_linux_amd64.sig'[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4883055Z [36;1m        fi[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4883240Z [36;1m        ;;[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4883409Z [36;1m[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4883575Z [36;1m      ARM|arm)[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4883922Z [36;1m        bootstrap_filename='cosign-linux-arm'[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4884242Z [36;1m        bootstrap_sha=${bootstrap_linux_arm_sha}[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4884569Z [36;1m        desired_cosign_filename='cosign-linux-arm'[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4884860Z [36;1m        if [[ v2.2.4 == 'v0.6.0' ]]; then[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4885186Z [36;1m          log_error "linux-arm build not available at v0.6.0"[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4885491Z [36;1m          exit 1[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4885678Z [36;1m        fi[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4885844Z [36;1m        ;;[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4886013Z [36;1m[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4886173Z [36;1m      ARM64|arm64)[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4886420Z [36;1m        bootstrap_filename='cosign-linux-arm64'[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4886730Z [36;1m        bootstrap_sha=${bootstrap_linux_arm64_sha}[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4887042Z [36;1m        desired_cosign_filename='cosign-linux-arm64'[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4887332Z [36;1m        if [[ v2.2.4 == 'v0.6.0' ]]; then[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4887633Z [36;1m          log_error "linux-arm64 build not available at v0.6.0"[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4887941Z [36;1m          exit 1[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4888123Z [36;1m        fi[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4888292Z [36;1m        ;;[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4888462Z [36;1m[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4888616Z [36;1m      *)[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4888842Z [36;1m        log_error "unsupported architecture X64"[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4889105Z [36;1m        exit 1[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4889288Z [36;1m        ;;[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4889463Z [36;1m    esac[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4889644Z [36;1m    ;;[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4889808Z [36;1m[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4889976Z [36;1m  macOS|macos)[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4890171Z [36;1m    case X64 in[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4890372Z [36;1m      X64|amd64)[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4890616Z [36;1m        bootstrap_filename='cosign-darwin-amd64'[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4890941Z [36;1m        bootstrap_sha=${bootstrap_darwin_amd64_sha}[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4891283Z [36;1m        desired_cosign_filename='cosign-darwin-amd64'[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4891668Z [36;1m        # v0.6.0 had different filename structures from all other releases[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4892031Z [36;1m        if [[ v2.2.4 == 'v0.6.0' ]]; then[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4892527Z [36;1m          desired_cosign_filename='cosign_darwin_amd64_0.6.0_darwin_amd64'[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4893018Z [36;1m          desired_cosign_v060_signature='cosign_darwin_amd64_0.6.0_darwin_amd64.sig'[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4893387Z [36;1m        fi[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4893585Z [36;1m        ;;[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4893761Z [36;1m[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4894162Z [36;1m      ARM64|arm64)[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4894463Z [36;1m        bootstrap_filename='cosign-darwin-arm64'[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4894805Z [36;1m        bootstrap_sha=${bootstrap_darwin_arm64_sha}[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4895138Z [36;1m        desired_cosign_filename='cosign-darwin-arm64'[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4895534Z [36;1m        # v0.6.0 had different filename structures from all other releases[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4895892Z [36;1m        if [[ v2.2.4 == 'v0.6.0' ]]; then[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4896244Z [36;1m          desired_cosign_filename='cosign_darwin_arm64_0.6.0_darwin_arm64'[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4896782Z [36;1m          desired_cosign_v060_signature='cosign_darwin_arm64_0.6.0_darwin_arm64.sig'[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4897295Z [36;1m        fi[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4897470Z [36;1m        ;;[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4897645Z [36;1m[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4897801Z [36;1m      *)[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4898045Z [36;1m        log_error "unsupported architecture X64"[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4898320Z [36;1m        exit 1[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4898507Z [36;1m        ;;[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4898682Z [36;1m    esac[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4898847Z [36;1m    ;;[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4899021Z [36;1m[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4899184Z [36;1m  Windows|windows)[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4899396Z [36;1m    case X64 in[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4899591Z [36;1m      X64|amd64)[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4899853Z [36;1m        bootstrap_filename='cosign-windows-amd64.exe'[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4900188Z [36;1m        bootstrap_sha=${bootstrap_windows_amd64_sha}[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4900552Z [36;1m        desired_cosign_filename='cosign-windows-amd64.exe'[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4900898Z [36;1m        cosign_executable_name=cosign.exe[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4901245Z [36;1m        # v0.6.0 had different filename structures from all other releases[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4901598Z [36;1m        if [[ v2.2.4 == 'v0.6.0' ]]; then[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4901952Z [36;1m          desired_cosign_filename='cosign_windows_amd64_0.6.0_windows_amd64.exe'[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4902471Z [36;1m          desired_cosign_v060_signature='cosign_windows_amd64_0.6.0_windows_amd64.exe.sig'[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4902865Z [36;1m        fi[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4903043Z [36;1m        ;;[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4903217Z [36;1m      *)[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4903437Z [36;1m        log_error "unsupported architecture X64"[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4903717Z [36;1m        exit 1[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4904153Z [36;1m        ;;[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4904332Z [36;1m    esac[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4904507Z [36;1m    ;;[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4904685Z [36;1m  *)[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4904879Z [36;1m    log_error "unsupported os Linux"[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4905128Z [36;1m    exit 1[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4905305Z [36;1m    ;;[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4905465Z [36;1mesac[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4905631Z [36;1m[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4905786Z [36;1mSUDO=[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4906044Z [36;1mif [[ "false" == "true" ]] && command -v sudo >/dev/null; then[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4906348Z [36;1m  SUDO=sudo[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4906532Z [36;1mfi[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4906689Z [36;1m[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4906924Z [36;1mexpected_bootstrap_version_digest=${bootstrap_sha}[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4907805Z [36;1mlog_info "Downloading bootstrap version '${bootstrap_version}' of cosign to verify version to be installed...\n      https://github.com/sigstore/cosign/releases/download/${bootstrap_version}/${bootstrap_filename}"[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4909086Z [36;1m$SUDO curl -sL https://github.com/sigstore/cosign/releases/download/${bootstrap_version}/${bootstrap_filename} -o ${cosign_executable_name}[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4909750Z [36;1mshaBootstrap=$(shaprog ${cosign_executable_name});[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4910145Z [36;1mif [[ $shaBootstrap != ${expected_bootstrap_version_digest} ]]; then[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4910561Z [36;1m  log_error "Unable to validate cosign version: 'v2.2.4'"[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4910869Z [36;1m  exit 1[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4911037Z [36;1mfi[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4911238Z [36;1m$SUDO chmod +x ${cosign_executable_name}[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4911492Z [36;1m[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4911791Z [36;1m# If the bootstrap and specified `cosign` releases are the same, we're done.[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4912201Z [36;1mif [[ v2.2.4 == ${bootstrap_version} ]]; then[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4912690Z [36;1m  log_info "bootstrap version successfully verified and matches requested version so nothing else to do"[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4913154Z [36;1m  exit 0[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4913316Z [36;1mfi[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4913607Z [36;1m[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4914043Z [36;1msemver='^v([0-9]+\.){0,2}(\*|[0-9]+)(-?r?c?)(\.[0-9]+)$'[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4914352Z [36;1mif [[ v2.2.4 =~ $semver ]]; then[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4914649Z [36;1m  log_info "Custom cosign version 'v2.2.4' requested"[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4914924Z [36;1melse[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4915197Z [36;1m  log_error "Unable to validate requested cosign version: 'v2.2.4'"[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4915521Z [36;1m  exit 1[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4915693Z [36;1mfi[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4915845Z [36;1m[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4916020Z [36;1m# Download custom cosign[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4916662Z [36;1mlog_info "Downloading platform-specific version 'v2.2.4' of cosign...\n      https://github.com/sigstore/cosign/releases/download/v2.2.4/${desired_cosign_filename}"[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4917563Z [36;1m$SUDO curl -sL https://github.com/sigstore/cosign/releases/download/v2.2.4/${desired_cosign_filename} -o cosign_v2.2.4[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4918095Z [36;1mshaCustom=$(shaprog cosign_v2.2.4);[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4918330Z [36;1m[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4918524Z [36;1m# same hash means it is the same release[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4918856Z [36;1mif [[ $shaCustom != $shaBootstrap ]]; then[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4919307Z [36;1m  if [[ v2.2.4 == 'v0.6.0' && Linux == 'Linux' ]]; then[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4919672Z [36;1m    # v0.6.0's linux release has a dependency on `libpcsclite1`[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4920070Z [36;1m    log_info "Installing libpcsclite1 package if necessary..."[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4920388Z [36;1m    set +e[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4920596Z [36;1m    sudo dpkg -s libpcsclite1[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4920847Z [36;1m    if [ $? -eq 0 ]; then[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4921136Z [36;1m        log_info "libpcsclite1 package is already installed"[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4921441Z [36;1m    else[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4921757Z [36;1m         log_info "libpcsclite1 package is not installed, installing it now."[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4922142Z [36;1m         sudo apt-get update -q -q[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4922443Z [36;1m         sudo apt-get install -yq libpcsclite1[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4922702Z [36;1m    fi[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4922880Z [36;1m    set -e[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4923056Z [36;1m  fi[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4923229Z [36;1m[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4923413Z [36;1m  if [[ v2.2.4 == 'v0.6.0' ]]; then[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4924234Z [36;1m    log_info "Downloading detached signature for platform-specific 'v2.2.4' of cosign...\n      https://github.com/sigstore/cosign/releases/download/v2.2.4/${desired_cosign_v060_signature}"[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4925272Z [36;1m    $SUDO curl -sL https://github.com/sigstore/cosign/releases/download/v2.2.4/${desired_cosign_v060_signature} -o ${desired_cosign_filename}.sig[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4925830Z [36;1m  else[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4926609Z [36;1m    log_info "Downloading detached signature for platform-specific 'v2.2.4' of cosign...\n      https://github.com/sigstore/cosign/releases/download/v2.2.4/${desired_cosign_filename}.sig"[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4927556Z [36;1m    $SUDO curl -sLO https://github.com/sigstore/cosign/releases/download/v2.2.4/${desired_cosign_filename}.sig[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4928017Z [36;1m  fi[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4928185Z [36;1m[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4928359Z [36;1m  if [[ v2.2.4 < 'v0.6.0' ]]; then[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4928969Z [36;1m    log_info "Downloading cosign public key 'v2.2.4' of cosign...\n    https://raw.githubusercontent.com/sigstore/cosign/v2.2.4/.github/workflows/cosign.pub"[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4929818Z [36;1m    RELEASE_COSIGN_PUB_KEY=https://raw.githubusercontent.com/sigstore/cosign/v2.2.4/.github/workflows/cosign.pub[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4930298Z [36;1m  else[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4930838Z [36;1m    log_info "Downloading cosign public key 'v2.2.4' of cosign...\n    https://raw.githubusercontent.com/sigstore/cosign/v2.2.4/release/release-cosign.pub"[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4931795Z [36;1m    RELEASE_COSIGN_PUB_KEY=https://raw.githubusercontent.com/sigstore/cosign/v2.2.4/release/release-cosign.pub[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4932263Z [36;1m  fi[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4932438Z [36;1m[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4932744Z [36;1m  log_info "Using bootstrap cosign to verify signature of desired cosign version"[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4933440Z [36;1m  ./cosign verify-blob --insecure-ignore-tlog --key $RELEASE_COSIGN_PUB_KEY --signature ${desired_cosign_filename}.sig cosign_v2.2.4[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4934248Z [36;1m[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4934413Z [36;1m  $SUDO rm cosign[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4934682Z [36;1m  $SUDO mv cosign_v2.2.4 ${cosign_executable_name}[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4934991Z [36;1m  $SUDO chmod +x ${cosign_executable_name}[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4935280Z [36;1m  log_info "Installation complete!"[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4935530Z [36;1mfi[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4962597Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4962938Z env:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4963186Z   pythonLocation: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4963585Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.10.20/x64/lib/pkgconfig
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4964136Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4964482Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4964834Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4965175Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.10.20/x64/lib
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.4965473Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.5033527Z [1;32mINFO[0m: Downloading bootstrap version 'v2.2.4' of cosign to verify version to be installed...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:37.5034426Z       https://github.com/sigstore/cosign/releases/download/v2.2.4/cosign-linux-amd64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:38.1271069Z [1;32mINFO[0m: bootstrap version successfully verified and matches requested version so nothing else to do
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:38.1319129Z ##[group]Run echo "$HOME/.cosign" >> $GITHUB_PATH
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:38.1319506Z [36;1mecho "$HOME/.cosign" >> $GITHUB_PATH[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:38.1342202Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:38.1342516Z env:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:38.1342765Z   pythonLocation: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:38.1343155Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.10.20/x64/lib/pkgconfig
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:38.1343544Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:38.1344090Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:38.1344428Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:38.1344771Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.10.20/x64/lib
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:38.1345066Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:38.1441281Z ##[group]Run python3 distroless_engine.py --stack stacks/dotnet.yaml --graph
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:38.1441852Z [36;1mpython3 distroless_engine.py --stack stacks/dotnet.yaml --graph[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:38.1465362Z shell: /usr/bin/bash -e {0}
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:38.1465612Z env:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:38.1465868Z   pythonLocation: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:38.1466281Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.10.20/x64/lib/pkgconfig
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:38.1466674Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:38.1467024Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:38.1467360Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:38.1467709Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.10.20/x64/lib
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:38.1468011Z   RENDER_DIAGRAMS: true
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:32:38.1468219Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:05.8077747Z 🚀 Initializing Distroless Engine for dotnet...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:05.8078412Z 🔍 Resolving zlib...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:05.8078741Z 🔍 Resolving openssl...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:05.8079056Z 🔍 Resolving icu...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:05.8079342Z 🔍 Resolving krb5...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:05.8081942Z 🔍 Resolving libxcrypt...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:05.8082301Z ✅ Generated docker-bake.hcl
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:05.8082659Z ✅ Generated Dockerfile.cc
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:05.8083084Z ✅ Generated docs/mermaid/dotnet-distroless.mermaid
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:05.8083636Z 🎨 Rendering docs/images/dotnet-distroless.png...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:05.8085441Z ⚠️ Could not generate PNG image: Command '['npx', '-y', '@mermaid-js/mermaid-cli', '-i', 'docs/mermaid/dotnet-distroless.mermaid', '-o', 'docs/images/dotnet-distroless.png', '-t', 'dark', '-b', 'transparent']' returned non-zero exit status 1.
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:05.8207923Z ##[group]Run docker buildx bake \
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:05.8208215Z [36;1mdocker buildx bake \[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:05.8208459Z [36;1m  -f docker-bake.hcl \[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:05.8208760Z [36;1m  --set "*.args.REGISTRY=ghcr.io/mbuccarello" \[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:05.8209083Z [36;1m  --metadata-file metadata.json \[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:05.8209341Z [36;1m  --push[0m
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:05.8232453Z shell: /usr/bin/bash -e {0}
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:05.8232690Z env:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:05.8232943Z   pythonLocation: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:05.8233352Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.10.20/x64/lib/pkgconfig
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:05.8233755Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:05.8234307Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:05.8234650Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.20/x64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:05.8235037Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.10.20/x64/lib
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:05.8235323Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:05.8866753Z #0 building with "builder-4f8b4b46-d5bc-478a-b374-6fb5d8eca41a" instance using docker-container driver
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:05.8867815Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:05.8868224Z #1 [internal] load local bake definitions
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.0374773Z #1 reading docker-bake.hcl 2.89kB / 2.89kB done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.0375742Z #1 DONE 0.0s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.2865739Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.2866415Z #2 [builder internal] load build definition from Dockerfile
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.2866863Z #2 transferring dockerfile: 3.88kB done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.2867113Z #2 DONE 0.0s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.2867220Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.2867396Z #3 [auth] docker/dockerfile:pull token for registry-1.docker.io
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.2867699Z #3 DONE 0.0s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.2867802Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.2868063Z #4 [builder] resolve image config for docker-image://docker.io/docker/dockerfile:1.4
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.7100416Z #4 DONE 0.5s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.7100984Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.7101846Z #5 [builder] docker-image://docker.io/docker/dockerfile:1.4@sha256:9ba7531bd80fb0a858632727cf7a112fbfd19b17e94c4e84ced81e24ef1a0dbc
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.7103535Z #5 resolve docker.io/docker/dockerfile:1.4@sha256:9ba7531bd80fb0a858632727cf7a112fbfd19b17e94c4e84ced81e24ef1a0dbc done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.7105067Z #5 sha256:1328b32c40fca9bcf9d70d8eccb72eb873d1124d72dadce04db8badbe7b08546 9.94MB / 9.94MB 0.1s done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.7106357Z #5 extracting sha256:1328b32c40fca9bcf9d70d8eccb72eb873d1124d72dadce04db8badbe7b08546 0.1s done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.8127483Z #5 extracting sha256:1328b32c40fca9bcf9d70d8eccb72eb873d1124d72dadce04db8badbe7b08546 0.1s done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.8128178Z #5 DONE 0.2s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.8128510Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.8128763Z #6 [base internal] load .dockerignore
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.8129375Z #6 transferring context: 2B done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.8129742Z #6 DONE 0.0s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.8130064Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.8130372Z #7 [builder internal] load build definition from Dockerfile
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.8131041Z #7 transferring dockerfile: 3.88kB done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.8132171Z #7 DONE 0.0s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.8134236Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.8134576Z #8 [builder internal] load .dockerignore
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.8135837Z #8 transferring context: 2B done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.8136223Z #8 DONE 0.0s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.8136443Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.8136788Z #9 [base internal] load build definition from Dockerfile
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.8137626Z #9 transferring dockerfile: 3.88kB done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.8138045Z #9 DONE 0.0s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.8138268Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.8138569Z #10 [builder internal] load metadata for docker.io/library/archlinux:latest
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.9852965Z #10 ...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.9853202Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.9853537Z #11 [auth] library/archlinux:pull token for registry-1.docker.io
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.9854133Z #11 DONE 0.0s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.9854250Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:06.9855057Z #10 [base internal] load metadata for docker.io/library/archlinux:latest
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:07.2921876Z #10 DONE 0.3s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:09.9559642Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:09.9561160Z #2 [zlib internal] load build definition from Dockerfile
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:09.9561747Z #2 transferring dockerfile: 3.88kB done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:09.9562131Z #2 DONE 0.0s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.1657031Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.1658036Z #2 [libxcrypt internal] load build definition from Dockerfile
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.1659209Z #2 transferring dockerfile: 3.88kB done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.1659965Z #2 DONE 0.0s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.1660158Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.1660846Z #5 [zlib] docker-image://docker.io/docker/dockerfile:1.4@sha256:9ba7531bd80fb0a858632727cf7a112fbfd19b17e94c4e84ced81e24ef1a0dbc
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.1662448Z #5 resolve docker.io/docker/dockerfile:1.4@sha256:9ba7531bd80fb0a858632727cf7a112fbfd19b17e94c4e84ced81e24ef1a0dbc done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.1663648Z #5 sha256:1328b32c40fca9bcf9d70d8eccb72eb873d1124d72dadce04db8badbe7b08546 9.94MB / 9.94MB 0.1s done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.1665058Z #5 extracting sha256:1328b32c40fca9bcf9d70d8eccb72eb873d1124d72dadce04db8badbe7b08546 0.1s done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.1665763Z #5 DONE 0.2s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.1665921Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.1666277Z #4 [krb5] resolve image config for docker-image://docker.io/docker/dockerfile:1.4
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.1666863Z #4 DONE 0.6s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2772040Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2773524Z #12 [openssl internal] load .dockerignore
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2775060Z #12 transferring context: 2B done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2775470Z #12 DONE 0.0s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2775647Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2775883Z #13 [openssl internal] load build definition from Dockerfile
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2776416Z #13 transferring dockerfile: 3.88kB done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2776792Z #13 DONE 0.0s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2776947Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2777157Z #14 [zlib internal] load build definition from Dockerfile
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2777631Z #14 transferring dockerfile: 3.88kB done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2778012Z #14 DONE 0.0s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2778166Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2778463Z #15 [zlib internal] load .dockerignore
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2778864Z #15 transferring context: 2B done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2779207Z #15 DONE 0.0s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2779352Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2779502Z #16 [libxcrypt internal] load .dockerignore
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2779921Z #16 transferring context: 2B done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2780244Z #16 DONE 0.0s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2780399Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2780549Z #17 [krb5 internal] load .dockerignore
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2780927Z #17 transferring context: 2B done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2781264Z #17 DONE 0.0s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2781408Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2781620Z #18 [krb5 internal] load build definition from Dockerfile
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2782097Z #18 transferring dockerfile: 3.88kB done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2782471Z #18 DONE 0.0s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2782623Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2782857Z #19 [libxcrypt internal] load build definition from Dockerfile
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2783373Z #19 transferring dockerfile: 3.88kB done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2783741Z #19 DONE 0.0s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2784123Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2784245Z #20 [icu internal] load .dockerignore
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2784587Z #20 transferring context: 2B done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2785088Z #20 DONE 0.0s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2785239Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2785450Z #21 [icu internal] load build definition from Dockerfile
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2785918Z #21 transferring dockerfile: 3.88kB done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2786793Z #21 DONE 0.0s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2786944Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.2787212Z #22 [runtime-debug internal] load build definition from Dockerfile.cc
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.4389144Z #22 transferring dockerfile: 1.29kB done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.4389951Z #22 DONE 0.0s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.4390374Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.4391440Z #5 [runtime] docker-image://docker.io/docker/dockerfile:1.4@sha256:9ba7531bd80fb0a858632727cf7a112fbfd19b17e94c4e84ced81e24ef1a0dbc
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.4393128Z #5 resolve docker.io/docker/dockerfile:1.4@sha256:9ba7531bd80fb0a858632727cf7a112fbfd19b17e94c4e84ced81e24ef1a0dbc done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.4395203Z #5 sha256:1328b32c40fca9bcf9d70d8eccb72eb873d1124d72dadce04db8badbe7b08546 9.94MB / 9.94MB 0.1s done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.4396450Z #5 extracting sha256:1328b32c40fca9bcf9d70d8eccb72eb873d1124d72dadce04db8badbe7b08546 0.1s done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.4397121Z #5 DONE 0.4s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.4397291Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.4397650Z #4 [runtime] resolve image config for docker-image://docker.io/docker/dockerfile:1.4
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.4398659Z #4 DONE 0.6s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.5557680Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.5561584Z #23 [runtime internal] load build definition from Dockerfile.cc
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.5564102Z #23 transferring dockerfile: 1.29kB done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.5564860Z #23 DONE 0.0s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.5566217Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.5566756Z #24 [runtime-debug internal] load build definition from Dockerfile.cc
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.5568464Z #24 transferring dockerfile: 1.29kB done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.5570175Z #24 DONE 0.0s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.5570759Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.5571183Z #25 [runtime-debug internal] load .dockerignore
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.5571873Z #25 transferring context: 2B done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.5572446Z #25 DONE 0.0s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.5572816Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.5573174Z #26 [runtime internal] load .dockerignore
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.5574021Z #26 transferring context: 2B done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.5574608Z #26 DONE 0.0s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.5574975Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.5575836Z #27 [builder builder  1/11] FROM docker.io/library/archlinux:latest@sha256:5ba8bb318666baef4d33afefc0e65db80f38b23503cb8e7b150d315cc2d4d5da
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.5577469Z #27 resolve docker.io/library/archlinux:latest@sha256:5ba8bb318666baef4d33afefc0e65db80f38b23503cb8e7b150d315cc2d4d5da done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.6632445Z #27 sha256:ab6ef42a20b3561e23c409877f7f8f4b01e22f927b8755bfc78b5e24a5e9cce5 8.66kB / 8.66kB 0.1s done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.7651330Z #27 sha256:1dd624a5d250d23d3790c8017dc38ec1c1abcba105a256f751dd76fefead5bd0 19.92MB / 129.46MB 0.2s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.8673386Z #27 sha256:1dd624a5d250d23d3790c8017dc38ec1c1abcba105a256f751dd76fefead5bd0 54.53MB / 129.46MB 0.3s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.9831728Z #27 ...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.9833717Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.9834316Z #28 [krb5 internal] load build context
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.9834727Z #28 transferring context: 6.13MB 0.4s done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.9835089Z #28 DONE 0.9s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.9835271Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.9835443Z #29 [runtime-debug internal] load build context
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.9835928Z #29 transferring context: 6.13MB 0.4s done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.9836290Z #29 DONE 0.9s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.9836439Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.9836605Z #30 [runtime-debug internal] load build context
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.9836969Z #30 transferring context: 6.13MB 0.4s done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.9837208Z #30 DONE 0.9s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.9837310Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.9837410Z #31 [libxcrypt internal] load build context
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.9837870Z #31 transferring context: 6.13MB 0.4s done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:10.9838245Z #31 DONE 0.9s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:11.1413023Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:11.1415109Z #32 [runtime-debug internal] load build context
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:11.1415714Z #32 transferring context: 6.13MB 0.4s done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:11.1416153Z #32 DONE 0.9s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:11.1416320Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:11.1416861Z #27 [builder builder  1/11] FROM docker.io/library/archlinux:latest@sha256:5ba8bb318666baef4d33afefc0e65db80f38b23503cb8e7b150d315cc2d4d5da
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:11.1418128Z #27 sha256:1dd624a5d250d23d3790c8017dc38ec1c1abcba105a256f751dd76fefead5bd0 95.42MB / 129.46MB 0.5s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:11.1419645Z #27 sha256:1dd624a5d250d23d3790c8017dc38ec1c1abcba105a256f751dd76fefead5bd0 129.46MB / 129.46MB 0.6s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:11.2966735Z #27 sha256:1dd624a5d250d23d3790c8017dc38ec1c1abcba105a256f751dd76fefead5bd0 129.46MB / 129.46MB 0.6s done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:11.2984788Z #27 extracting sha256:1dd624a5d250d23d3790c8017dc38ec1c1abcba105a256f751dd76fefead5bd0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.0756696Z #27 extracting sha256:1dd624a5d250d23d3790c8017dc38ec1c1abcba105a256f751dd76fefead5bd0 2.9s done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.2896509Z #27 extracting sha256:1dd624a5d250d23d3790c8017dc38ec1c1abcba105a256f751dd76fefead5bd0 2.9s done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.2897206Z #27 extracting sha256:ab6ef42a20b3561e23c409877f7f8f4b01e22f927b8755bfc78b5e24a5e9cce5 done
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.2897626Z #27 DONE 7.1s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.2897760Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.2897968Z #33 [icu builder  2/11] RUN pacman -Syu --noconfirm base-devel git busybox
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.2898397Z #33 4.294 :: Synchronizing package databases...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.5834932Z #33 4.588  core downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.5835353Z #33 4.588  extra downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7915160Z #33 4.779 :: Starting full system upgrade...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7915702Z #33 4.782 resolving dependencies...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7916160Z #33 4.786 looking for conflicting packages...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7916548Z #33 4.793 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7917064Z #33 4.793 Package (66)                  Old Version                  New Version                 Net Change  Download Size
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7917718Z #33 4.793 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7918254Z #33 4.793 core/archlinux-keyring        20260409-1                   20260420-1                    0.01 MiB       1.21 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7919091Z #33 4.793 core/autoconf                                              2.73-1                        2.25 MiB       0.64 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7919851Z #33 4.793 core/automake                                              1.18.1-1                      1.64 MiB       0.62 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7920655Z #33 4.793 core/binutils                 2.46-1                       2.46+r70+g155188ea10a7-1      0.62 MiB       8.15 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7921453Z #33 4.793 core/bison                                                 3.8.2-8                       2.52 MiB       0.75 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7922307Z #33 4.793 core/ca-certificates-mozilla  3.122-1                      3.123.1-1                    -0.08 MiB       0.36 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7923166Z #33 4.793 core/coreutils                9.10-1                       9.11-1                        1.16 MiB       2.92 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7924101Z #33 4.793 core/curl                     8.19.0-1                     8.20.0-3                      0.01 MiB       1.23 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7925120Z #33 4.793 core/db5.3                                                 5.3.28-7                      6.48 MiB       1.26 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7925865Z #33 4.793 core/debugedit                                             5.2-1                         0.11 MiB       0.05 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7926663Z #33 4.793 core/device-mapper            2.03.39-1                    2.03.40-1                     0.02 MiB       0.29 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7927501Z #33 4.793 core/diffutils                                             3.12-2                        1.50 MiB       0.33 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7928784Z #33 4.793 core/expat                    2.7.5-1                      2.8.0-1                       0.01 MiB       0.12 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7929439Z #33 4.793 core/fakeroot                                              1.37.2-1                      0.14 MiB       0.08 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7929924Z #33 4.793 core/flex                                                  2.6.4-6                       0.84 MiB       0.29 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7930551Z #33 4.793 core/gc                                                    8.2.12-1                      0.76 MiB       0.23 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7931726Z #33 4.793 core/gcc                                                   16.1.1+r12+g301eb08fa2c5-1  218.35 MiB      57.33 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7932458Z #33 4.793 core/gcc-libs                 15.2.1+r604+g0b99615a8aef-1  16.1.1+r12+g301eb08fa2c5-1    0.00 MiB       0.00 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7933371Z #33 4.793 core/glib2                    2.88.0-1                     2.88.1-1                      0.40 MiB       5.05 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7935156Z #33 4.793 core/glibc                    2.43+r5+g856c426a7534-1      2.43+r22+g8362e8ce10b2-2      1.44 MiB      10.32 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7936102Z #33 4.793 core/gnutls                   3.8.12-2                     3.8.13-1                      0.07 MiB       1.79 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7936899Z #33 4.793 core/groff                                                 1.24.1-1                      9.01 MiB       2.40 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7937600Z #33 4.793 core/guile                                                 3.0.11-1                     54.49 MiB       8.39 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7938387Z #33 4.793 core/iana-etc                 20260409-1                   20260425-1                    0.00 MiB       0.39 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7939271Z #33 4.793 core/libasan                  15.2.1+r604+g0b99615a8aef-1  16.1.1+r12+g301eb08fa2c5-1    0.09 MiB       0.51 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7940123Z #33 4.793 core/libatomic                15.2.1+r604+g0b99615a8aef-1  16.1.1+r12+g301eb08fa2c5-1    0.00 MiB       0.01 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7940920Z #33 4.793 core/libbpf                   1.6.2-1                      1.7.0-1                       0.02 MiB       0.26 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7952999Z #33 4.793 core/libgcc                   15.2.1+r604+g0b99615a8aef-1  16.1.1+r12+g301eb08fa2c5-1    0.00 MiB       0.08 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7954202Z #33 4.793 core/libgfortran              15.2.1+r604+g0b99615a8aef-1  16.1.1+r12+g301eb08fa2c5-1    0.06 MiB       0.91 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7955495Z #33 4.793 core/libgomp                  15.2.1+r604+g0b99615a8aef-1  16.1.1+r12+g301eb08fa2c5-1    0.02 MiB       0.23 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7980790Z #33 4.793 core/libgpg-error             1.59-1                       1.60-1                        0.01 MiB       0.27 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7981716Z #33 4.793 core/libisl                                                0.27-1                        5.75 MiB       0.87 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7982592Z #33 4.793 core/liblsan                  15.2.1+r604+g0b99615a8aef-1  16.1.1+r12+g301eb08fa2c5-1    0.02 MiB       0.22 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7983516Z #33 4.793 core/libmpc                                                1.4.1-1                       0.19 MiB       0.09 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7985008Z #33 4.793 core/libnetfilter_conntrack   1.0.9-2                      1.1.1-1                       0.01 MiB       0.05 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7985885Z #33 4.793 core/libnghttp2               1.68.1-1                     1.69.0-1                      0.00 MiB       0.09 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7986785Z #33 4.793 core/libobjc                  15.2.1+r604+g0b99615a8aef-1  16.1.1+r12+g301eb08fa2c5-1    0.00 MiB       0.04 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7987749Z #33 4.793 core/libquadmath              15.2.1+r604+g0b99615a8aef-1  16.1.1+r12+g301eb08fa2c5-1    0.00 MiB       0.16 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7988695Z #33 4.793 core/libstdc++                15.2.1+r604+g0b99615a8aef-1  16.1.1+r12+g301eb08fa2c5-1    0.24 MiB       0.84 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7989608Z #33 4.793 extra/libsysprof-capture      50.0-1                       50.0-2                        0.00 MiB       0.05 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7990439Z #33 4.793 core/libtool                                               2.6.0+r23+gb08cb0a0-1         2.34 MiB       0.42 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7991298Z #33 4.793 core/libtsan                  15.2.1+r604+g0b99615a8aef-1  16.1.1+r12+g301eb08fa2c5-1    0.04 MiB       0.45 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7992719Z #33 4.793 core/libubsan                 15.2.1+r604+g0b99615a8aef-1  16.1.1+r12+g301eb08fa2c5-1    0.02 MiB       0.20 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7994064Z #33 4.793 core/libxml2                  2.15.2-1                     2.15.3-1                      0.00 MiB       0.75 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7995131Z #33 4.793 core/m4                                                    1.4.21-2                      0.71 MiB       0.27 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7995857Z #33 4.793 core/make                                                  4.4.1-3                       1.66 MiB       0.51 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7996820Z #33 4.793 core/openssl                  3.6.2-1                      3.6.2-2                       0.03 MiB       5.37 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7997609Z #33 4.793 core/patch                                                 2.8-1                         0.17 MiB       0.08 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7998306Z #33 4.793 core/perl                                                  5.42.2-1                     70.11 MiB      20.44 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7998788Z #33 4.793 extra/perl-error                                           0.17030-3                     0.04 MiB       0.02 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.7999530Z #33 4.793 extra/perl-mailtools                                       2.22-3                        0.10 MiB       0.06 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.8000343Z #33 4.793 extra/perl-timedate                                        2.35-1                        0.15 MiB       0.06 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.8001149Z #33 4.793 core/pkgconf                                               2.5.1-1                       0.20 MiB       0.07 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.8001917Z #33 4.793 core/sed                      4.9-3                        4.10-1                        0.08 MiB       0.24 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.8002616Z #33 4.793 core/sudo                                                  1.9.17.p2-2                   7.83 MiB       1.84 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.8003480Z #33 4.793 core/systemd                  260.1-1                      260.1-2                       0.06 MiB       9.69 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.8006811Z #33 4.793 core/systemd-libs             260.1-1                      260.1-2                       0.00 MiB       1.27 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.8007641Z #33 4.793 core/systemd-sysvcompat       260.1-1                      260.1-2                       0.00 MiB       0.01 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.8008316Z #33 4.793 core/texinfo                                               7.3-1                        12.67 MiB       2.12 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.8009069Z #33 4.793 core/tzdata                   2026a-1                      2026b-1                       0.00 MiB       0.30 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.8009782Z #33 4.793 core/which                                                 2.23-1                        0.03 MiB       0.02 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.8010400Z #33 4.793 extra/xxhash                                               0.8.3-1                       0.39 MiB       0.10 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.8011091Z #33 4.793 extra/zlib-ng                                              2.3.3-1                       0.28 MiB       0.11 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.8011938Z #33 4.793 core/base-devel                                            1-2                           0.00 MiB       0.00 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.8012742Z #33 4.793 extra/busybox                                              1.36.1-4                      1.76 MiB       0.83 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.8013499Z #33 4.793 extra/git                                                  2.54.0-1                     30.26 MiB       6.93 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.8014176Z #33 4.793 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.8014447Z #33 4.793 Total Download Size:   161.04 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.8014874Z #33 4.793 Total Installed Size:  683.17 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.8015266Z #33 4.793 Net Upgrade Size:      437.11 MiB
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.8015645Z #33 4.793 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.8015981Z #33 4.793 :: Proceed with installation? [Y/n] 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:14.8016416Z #33 4.794 :: Retrieving packages...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5024672Z #33 5.514  gcc-16.1.1+r12+g301eb08fa2c5-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5028381Z #33 5.514  perl-5.42.2-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5029707Z #33 5.514  glibc-2.43+r22+g8362e8ce10b2-2-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5030296Z #33 5.514  systemd-260.1-2-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5030754Z #33 5.514  guile-3.0.11-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5031227Z #33 5.514  binutils-2.46+r70+g155188ea10a7-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5031744Z #33 5.514  git-2.54.0-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5032158Z #33 5.514  openssl-3.6.2-2-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5032595Z #33 5.514  glib2-2.88.1-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5033382Z #33 5.514  coreutils-9.11-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5034293Z #33 5.514  groff-1.24.1-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5034705Z #33 5.514  texinfo-7.3-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5035319Z #33 5.514  sudo-1.9.17.p2-2-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5035906Z #33 5.514  gnutls-3.8.13-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5036315Z #33 5.514  systemd-libs-260.1-2-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5036939Z #33 5.514  db5.3-5.3.28-7-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5037203Z #33 5.514  curl-8.20.0-3-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5037569Z #33 5.514  archlinux-keyring-20260420-1-any downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5038025Z #33 5.514  libgfortran-16.1.1+r12+g301eb08fa2c5-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5038451Z #33 5.514  libisl-0.27-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5038829Z #33 5.514  libstdc++-16.1.1+r12+g301eb08fa2c5-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5039231Z #33 5.514  busybox-1.36.1-4-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5039559Z #33 5.514  libxml2-2.15.3-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5039823Z #33 5.514  bison-3.8.2-8-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5040193Z #33 5.514  autoconf-2.73-1-any downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5040474Z #33 5.514  automake-1.18.1-1-any downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5040846Z #33 5.514  libasan-16.1.1+r12+g301eb08fa2c5-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5041228Z #33 5.514  make-4.4.1-3-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5041537Z #33 5.514  libtsan-16.1.1+r12+g301eb08fa2c5-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5042016Z #33 5.514  libtool-2.6.0+r23+gb08cb0a0-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5042346Z #33 5.514  iana-etc-20260425-1-any downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5042799Z #33 5.514  ca-certificates-mozilla-3.123.1-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5043129Z #33 5.514  diffutils-3.12-2-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5043508Z #33 5.514  tzdata-2026b-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5043989Z #33 5.514  device-mapper-2.03.40-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5044328Z #33 5.514  flex-2.6.4-6-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5044588Z #33 5.514  m4-1.4.21-2-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5044959Z #33 5.514  libgpg-error-1.60-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5045248Z #33 5.514  libbpf-1.7.0-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5045540Z #33 5.514  sed-4.10-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5045913Z #33 5.514  gc-8.2.12-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5046393Z #33 5.514  libgomp-16.1.1+r12+g301eb08fa2c5-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5046762Z #33 5.514  liblsan-16.1.1+r12+g301eb08fa2c5-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5047239Z #33 5.514  libubsan-16.1.1+r12+g301eb08fa2c5-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5047635Z #33 5.514  libquadmath-16.1.1+r12+g301eb08fa2c5-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5048071Z #33 5.514  expat-2.8.0-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5048396Z #33 5.514  zlib-ng-2.3.3-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5048838Z #33 5.514  xxhash-0.8.3-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5049428Z #33 5.514  libnghttp2-1.69.0-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5049932Z #33 5.514  libmpc-1.4.1-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5050403Z #33 5.514  patch-2.8-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5050884Z #33 5.514  libgcc-16.1.1+r12+g301eb08fa2c5-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5051661Z #33 5.514  fakeroot-1.37.2-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5052102Z #33 5.514  pkgconf-2.5.1-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5052559Z #33 5.514  perl-timedate-2.35-1-any downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5053027Z #33 5.514  perl-mailtools-2.22-3-any downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5053346Z #33 5.514  libsysprof-capture-50.0-2-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5053702Z #33 5.514  libnetfilter_conntrack-1.1.1-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5054556Z #33 5.514  debugedit-5.2-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5055028Z #33 5.514  libobjc-16.1.1+r12+g301eb08fa2c5-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5055512Z #33 5.514  perl-error-0.17030-3-any downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5055932Z #33 5.514  which-2.23-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5056413Z #33 5.514  libatomic-16.1.1+r12+g301eb08fa2c5-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5056998Z #33 5.514  systemd-sysvcompat-260.1-2-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5057579Z #33 5.514  gcc-libs-16.1.1+r12+g301eb08fa2c5-1-x86_64 downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5058087Z #33 5.514  base-devel-1-2-any downloading...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.5058473Z #33 5.514 checking keyring...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:15.6532012Z #33 5.658 checking package integrity...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:17.3207971Z #33 7.347 loading package files...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:17.4715689Z #33 7.446 checking for file conflicts...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:17.4716247Z #33 7.476 :: Processing package changes...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:17.4716700Z #33 7.476 upgrading tzdata...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:17.7532368Z #33 7.747 upgrading iana-etc...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:17.7532735Z #33 7.758 upgrading glibc...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:18.0172136Z #33 8.029 Generating locales...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:18.0172806Z #33 8.037 Generation complete.
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:18.0173157Z #33 8.062 upgrading libgcc...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:18.0173505Z #33 8.069 upgrading libstdc++...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:18.0174018Z #33 8.079 upgrading openssl...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:18.0174411Z #33 8.172 upgrading libnghttp2...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:18.1345113Z #33 8.178 upgrading libgpg-error...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:18.1345621Z #33 8.189 upgrading systemd-libs...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:18.1346191Z #33 8.210 upgrading coreutils...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:18.1346879Z #33 8.255 upgrading ca-certificates-mozilla...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:18.1347559Z #33 8.259 upgrading gnutls...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:18.3253190Z #33 8.290 upgrading curl...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:18.3253635Z #33 8.307 upgrading device-mapper...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:18.3254203Z #33 8.317 upgrading expat...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:18.3254464Z #33 8.324 upgrading sed...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:18.3254678Z #33 8.330 upgrading systemd...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:18.6670409Z #33 8.667 upgrading libgomp...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:18.6670913Z #33 8.672 upgrading libxml2...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:18.6671317Z #33 8.692 upgrading libsysprof-capture...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:18.6671757Z #33 8.698 upgrading glib2...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:18.7755911Z #33 8.822 upgrading binutils...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:18.9266696Z #33 8.931 upgrading archlinux-keyring...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:19.1107476Z #33 9.090 ==> ERROR: There is no secret key available to sign with.
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:19.1108180Z #33 9.091 ==> Use 'pacman-key --init' to generate a default secret key.
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:19.1108782Z #33 9.092 error: command failed to execute correctly
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:19.1109225Z #33 9.092 installing m4...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:19.1109551Z #33 9.095 installing diffutils...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:19.1109902Z #33 9.100 installing db5.3...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:19.1110225Z #33 9.115 installing perl...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:19.4306029Z #33 9.475 installing autoconf...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:19.4306666Z #33 9.485 installing automake...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:19.4307126Z #33 9.499 installing bison...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:19.4307534Z #33 9.509 installing xxhash...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:19.4307927Z #33 9.512 installing debugedit...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:19.4308344Z #33 9.513 installing fakeroot...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:19.6279627Z #33 9.586 installing flex...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:19.6280214Z #33 9.591 upgrading libasan...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:19.6280468Z #33 9.599 upgrading liblsan...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:19.6280693Z #33 9.603 upgrading libtsan...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:19.6280926Z #33 9.611 upgrading libubsan...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:19.6281169Z #33 9.615 installing libisl...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:19.6281387Z #33 9.631 installing libmpc...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:19.6281618Z #33 9.632 installing gcc...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.1883356Z #33 10.24 Optional dependencies for gcc
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.1884157Z #33 10.24     lib32-gcc-libs: for generating code for 32-bit ABI
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.1885561Z #33 10.24 installing groff...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.1885960Z #33 10.31 Optional dependencies for groff
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.1886360Z #33 10.31     netpbm: for use together with man -H command interaction in browsers
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.1886864Z #33 10.31     psutils: for use together with man -H command interaction in browsers
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.1887264Z #33 10.31     libxaw: for gxditview
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.1887536Z #33 10.31     perl-file-homedir: for use with glilypond
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.1887836Z #33 10.31 installing libtool...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.1888061Z #33 10.32 upgrading libatomic...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.1888297Z #33 10.33 upgrading libgfortran...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.1888529Z #33 10.34 upgrading libobjc...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.1888781Z #33 10.34 upgrading libquadmath...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.3456216Z #33 10.34 upgrading gcc-libs...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.3456661Z #33 10.34 installing gc...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.3457004Z #33 10.35 installing guile...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.4868753Z #33 10.54 installing make...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.4869580Z #33 10.54 installing patch...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.4870481Z #33 10.54 Optional dependencies for patch
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.4871321Z #33 10.54     ed: for patch -e functionality
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.4872037Z #33 10.54 installing pkgconf...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.4872387Z #33 10.54 installing sudo...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.4872952Z #33 10.56 installing texinfo...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.6485340Z #33 10.64 Optional dependencies for texinfo
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.6486319Z #33 10.64     perl-archive-zip: EPUB file output via texi2any
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.6487056Z #33 10.64 installing which...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.6487309Z #33 10.64 installing base-devel...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.6487545Z #33 10.64 installing perl-error...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.6487792Z #33 10.64 installing perl-timedate...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.6488038Z #33 10.65 installing perl-mailtools...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.6488280Z #33 10.65 installing zlib-ng...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.6488495Z #33 10.66 installing git...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.8214945Z #33 10.80 Optional dependencies for git
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.8215392Z #33 10.80     git-zsh-completion: upstream zsh completion
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.8215719Z #33 10.80     tk: gitk and git gui
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.8215991Z #33 10.80     openssh: ssh transport and crypto
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.8216297Z #33 10.80     man: show help with `git command --help`
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.8216588Z #33 10.80     perl-libwww: git svn
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.8216907Z #33 10.80     perl-term-readkey: git svn and interactive.singlekey setting
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.8217330Z #33 10.80     perl-io-socket-ssl: git send-email TLS support
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.8217689Z #33 10.80     perl-authen-sasl: git send-email TLS support
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.8218011Z #33 10.80     perl-cgi: gitweb (web interface) support
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.8218306Z #33 10.80     python: git svn & git p4
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.8218553Z #33 10.80     subversion: git svn
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.8218854Z #33 10.80     org.freedesktop.secrets: keyring credential helper
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.8219213Z #33 10.80     libsecret: libsecret credential helper [installed]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.8219546Z #33 10.80     less: the default pager for git
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.8219816Z #33 10.80 installing busybox...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.8220048Z #33 10.81 upgrading libbpf...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.8220296Z #33 10.82 upgrading libnetfilter_conntrack...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:20.8220558Z #33 10.83 upgrading systemd-sysvcompat...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:22.2043240Z #33 12.22 :: Running post-transaction hooks...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:22.2044619Z #33 12.22 ( 1/13) Creating system user accounts...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:22.2045080Z #33 12.29 Creating group 'git' with GID 969.
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:22.2045670Z #33 12.29 Creating user 'git' (git daemon user) with UID 969 and GID 969.
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:22.2046204Z #33 12.29 ( 2/13) Creating temporary files...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:22.3051852Z #33 12.36 /usr/lib/tmpfiles.d/journal-nocow.conf:26: Failed to resolve specifier: uninitialized /etc/ detected, skipping.
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:22.3053222Z #33 12.36 All rules containing unresolvable specifiers will be skipped.
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:22.3054126Z #33 12.38 ( 3/13) Updating journal message catalog...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:22.4553451Z #33 12.46 ( 4/13) Updating udev hardware database...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:22.7511137Z #33 12.91 ( 5/13) Applying kernel sysctl settings...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:22.8859662Z #33 12.98   Skipped: Current root is not booted.
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:22.8860215Z #33 12.98 ( 6/13) Reloading system manager configuration...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:23.0199323Z #33 13.04   Skipped: Current root is not booted.
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:23.0202383Z #33 13.04 ( 7/13) Reloading user manager configuration...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:23.0202932Z #33 13.11   Skipped: Current root is not booted.
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:23.0204227Z #33 13.11 ( 8/13) Enqueuing marked services...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:23.1485047Z #33 13.17   Skipped: Current root is not booted.
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:23.1485875Z #33 13.17 ( 9/13) Reloading device manager configuration...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:23.1486521Z #33 13.24   Skipped: Current root is not booted.
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:23.1487148Z #33 13.24 (10/13) Arming ConditionNeedsUpdate...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:23.2992987Z #33 13.30 (11/13) Rebuilding certificate stores...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:24.2242174Z #33 14.16 (12/13) Reloading system bus configuration...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:24.2242729Z #33 14.23   Skipped: Current root is not booted.
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:24.2243309Z #33 14.23 (13/13) Checking for old perl modules...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:25.6364468Z #33 DONE 15.6s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:25.6366019Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:25.6367232Z #34 [libxcrypt builder  3/11] RUN mkdir -p /rootfs/etc/ssl/certs /rootfs/etc/pki/tls/certs /rootfs/usr/lib /rootfs/usr/share/zoneinfo /rootfs/tmp /rootfs/home/nonroot /rootfs/var/lib/apt/lists
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:25.7483061Z #34 DONE 0.3s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:25.7483533Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:25.7485704Z #35 [krb5 builder  4/11] RUN chmod 1777 /rootfs/tmp
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:25.7486304Z #35 DONE 0.1s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:25.7486605Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:25.7487158Z #36 [zlib builder  5/11] RUN <<EOF (echo "root:x:0:0:root:/root:/sbin/nologin" > /rootfs/etc/passwd...)
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:25.8564944Z #36 DONE 0.1s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:25.8565600Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:25.8566396Z #37 [builder builder  6/11] RUN <<EOF (echo 'tcp 6/TCP' > /rootfs/etc/protocols...)
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:25.8567466Z #37 DONE 0.1s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:25.8567638Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:25.8568303Z #38 [icu builder  7/11] RUN ln -s usr/lib /rootfs/lib && ln -s usr/lib /rootfs/lib64
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.0089394Z #38 DONE 0.1s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.0089694Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.0090037Z #39 [icu builder  8/11] RUN cp -r /usr/share/zoneinfo /rootfs/usr/share/zoneinfo
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.1702145Z #39 DONE 0.4s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.1702394Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.1702989Z #40 [runtime builder  9/11] RUN cp /etc/ssl/certs/ca-certificates.crt /rootfs/etc/ssl/certs/ca-certificates.crt
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.1703734Z #40 DONE 0.1s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.1708372Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.1709568Z #41 [libxcrypt builder 10/11] RUN cp /etc/os-release /rootfs/etc/os-release
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.2880655Z #41 DONE 0.1s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.2881863Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.2883186Z #42 [icu builder 11/11] RUN ln -sf /etc/ssl/certs/ca-certificates.crt /rootfs/etc/ssl/cert.pem &&     ln -sf /etc/ssl/certs/ca-certificates.crt /rootfs/etc/pki/tls/certs/ca-bundle.crt &&     ln -sf /etc/ssl/certs/ca-certificates.crt /rootfs/etc/pki/tls/cert.pem
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.2885772Z #42 DONE 0.1s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.2887904Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.2888139Z #43 [runtime-debug lib-builder 1/2] WORKDIR /build
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.2889291Z #43 DONE 0.0s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.2889459Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.2889652Z #44 [builder] resolving provenance for metadata file
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.4133252Z #44 DONE 0.0s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.4134357Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.4135063Z #45 [krb5 lib-builder 2/2] RUN --mount=type=bind,target=/deps <<EOF (if [ -d /deps ]; then...)
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.5166476Z #45 0.158  
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.5167334Z #45 ...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.5167685Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.5168144Z #46 [runtime-debug runtime-setup 1/3] RUN mkdir -p /runtime-root/usr
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.5169082Z #46 DONE 0.2s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.5169249Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.5169495Z #47 [runtime runtime-setup 1/3] RUN mkdir -p /runtime-root/usr
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.5169959Z #47 DONE 0.2s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.5170117Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.5170482Z #45 [krb5 lib-builder 2/2] RUN --mount=type=bind,target=/deps <<EOF (if [ -d /deps ]; then...)
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.5171289Z #45 0.158   % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.5171933Z #45 0.166                                  Dload  Upload  Total   Spent   Left   Speed
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.5172380Z #45 0.171 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.6540960Z   0      0   0      0   0      0      0      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.6541521Z #45 ...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.6541669Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.6542479Z #48 [runtime-debug runtime-setup 2/3] RUN if [ -n "$RUNTIME_URL" ]; then     curl -L "$RUNTIME_URL" -o /tmp/runtime.tar.gz &&     tar -xf /tmp/runtime.tar.gz -C /runtime-root/usr --strip-components=1;     fi
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.6543304Z #48 DONE 0.1s
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.7548047Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.7549020Z #49 [runtime-debug lib-builder 2/2] RUN --mount=type=bind,target=/deps <<EOF (if [ -d /deps ]; then...)
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.7550097Z #49 0.280   % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.7551064Z #49 0.312                                  Dload  Upload  Total   Spent   Left   Speed
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.7551688Z #49 0.327 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.7552344Z   0      0   0      0   0      0      0      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.7553050Z   0      0   0      0   0      0      0      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.7553608Z   0      0   0      0   0      0      0      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.7554549Z #49 0.434 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8773418Z   0      0   0      0   0      0      0      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8778721Z #49 ...
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8779047Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8781789Z #50 [runtime runtime-setup 2/3] RUN if [ -n "https://download.visualstudio.microsoft.com/download/pr/8d0b5e2d-3d0d-4b9a-8e5d-7a0e1c0d0d0d/8e5d7a0e1c0d0d0d8e5d7a0e1c0d0d0d/dotnet-runtime-8.0.11-linux-x64.tar.gz" ]; then     curl -L "https://download.visualstudio.microsoft.com/download/pr/8d0b5e2d-3d0d-4b9a-8e5d-7a0e1c0d0d0d/8e5d7a0e1c0d0d0d8e5d7a0e1c0d0d0d/dotnet-runtime-8.0.11-linux-x64.tar.gz" -o /tmp/runtime.tar.gz &&     tar -xf /tmp/runtime.tar.gz -C /runtime-root/usr --strip-components=1;     fi
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8785458Z #50 0.223   % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8786227Z #50 0.224                                  Dload  Upload  Total   Spent   Left   Speed
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8787212Z #50 0.224 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8787633Z   0      0   0      0   0      0      0      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8788279Z 100     24   0     24   0      0    132      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8789146Z 100     24   0     24   0      0    132      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8789735Z 100     24   0     24   0      0    132      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8790352Z #50 0.303 tar: This does not look like a tar archive
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8790969Z #50 0.305 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8791403Z #50 0.305 gzip: stdin: not in gzip format
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8813997Z #50 0.306 tar: Child returned status 1
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8814734Z #50 0.306 tar: Error is not recoverable: exiting now
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8816218Z #50 ERROR: process "/bin/sh -c if [ -n \"$RUNTIME_URL\" ]; then     curl -L \"$RUNTIME_URL\" -o /tmp/runtime.tar.gz &&     tar -xf /tmp/runtime.tar.gz -C /runtime-root/usr --strip-components=1;     fi" did not complete successfully: exit code: 2
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8817414Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8817839Z #51 [runtime-debug lib-builder 2/2] RUN --mount=type=bind,target=/deps <<EOF (if [ -d /deps ]; then...)
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8819094Z #51 0.462   % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8819799Z #51 0.463                                  Dload  Upload  Total   Spent   Left   Speed
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8820315Z #51 0.463 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8820653Z   0      0   0      0   0      0      0      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8821178Z 100    355 100    355   0      0   1277      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8821724Z 100    355 100    355   0      0   1277      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8822248Z 100    355 100    355   0      0   1276      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8822774Z #51 0.544 tar: This does not look like a tar archive
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8823190Z #51 0.546 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8823462Z #51 0.546 gzip: stdin: not in gzip format
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8825536Z #51 0.549 tar: Child returned status 1
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8826027Z #51 0.551 tar: Error is not recoverable: exiting now
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8826583Z #51 0.554 /bin/sh: line 13: ./configure: No such file or directory
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8832426Z #51 0.564 make: *** No targets specified and no makefile found.  Stop.
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8833625Z #51 CANCELED
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8835865Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8836286Z #49 [icu lib-builder 2/2] RUN --mount=type=bind,target=/deps <<EOF (if [ -d /deps ]; then...)
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:26.8836910Z #49 0.434 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0432313Z   0      0   0      0   0      0      0      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0432842Z #49 CANCELED
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0432983Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0433643Z #45 [runtime-debug lib-builder 2/2] RUN --mount=type=bind,target=/deps <<EOF (if [ -d /deps ]; then...)
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0434664Z #45 0.171 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0435010Z   0      0   0      0   0      0      0      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0435450Z #45 CANCELED
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0435606Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0436080Z #52 [runtime-debug lib-builder 2/2] RUN --mount=type=bind,target=/deps <<EOF (if [ -d /deps ]; then...)
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0436965Z #52 4.498   % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0437639Z #52 4.499                                  Dload  Upload  Total   Spent   Left   Speed
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0438116Z #52 4.501 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0438437Z   0      0   0      0   0      0      0      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0438973Z 100    169 100    169   0      0    811      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0439512Z 100    169 100    169   0      0    811      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0439955Z #52 4.673 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0440264Z   0      0   0      0   0      0      0      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0440746Z   0      0   0      0   0      0      0      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0441229Z   0      0   0      0   0      0      0      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0441648Z #52 4.801 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0441954Z   0      0   0      0   0      0      0      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0442377Z #52 CANCELED
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0442529Z 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0442935Z #53 [runtime-debug lib-builder 2/2] RUN --mount=type=bind,target=/deps <<EOF (if [ -d /deps ]; then...)
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0443957Z #53 0.199   % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0445039Z #53 0.200                                  Dload  Upload  Total   Spent   Left   Speed
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0445530Z #53 0.200 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0445844Z   0      0   0      0   0      0      0      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0446337Z   0      0   0      0   0      0      0      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0446915Z   0      0   0      0   0      0      0      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0447336Z #53 0.330 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0447955Z   0      0   0      0   0      0      0      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0448572Z 100 609.4k 100 609.4k   0      0  2.92M      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0449140Z 100 609.4k 100 609.4k   0      0  2.92M      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0449689Z 100 609.4k 100 609.4k   0      0  2.92M      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0450631Z #53 0.484 checking for a BSD-compatible install... /usr/bin/install -c
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0451353Z #53 0.495 checking whether build environment is sane... yes
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0452055Z #53 0.516 checking for a race-free mkdir -p... /usr/sbin/mkdir -p
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0452593Z #53 0.523 checking for gawk... gawk
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0453009Z #53 0.523 checking whether make sets $(MAKE)... yes
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0453429Z #53 4.807 yes
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0453684Z #53 CANCELED
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0454083Z ------
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0456910Z  > [runtime runtime-setup 2/3] RUN if [ -n "https://download.visualstudio.microsoft.com/download/pr/8d0b5e2d-3d0d-4b9a-8e5d-7a0e1c0d0d0d/8e5d7a0e1c0d0d0d8e5d7a0e1c0d0d0d/dotnet-runtime-8.0.11-linux-x64.tar.gz" ]; then     curl -L "https://download.visualstudio.microsoft.com/download/pr/8d0b5e2d-3d0d-4b9a-8e5d-7a0e1c0d0d0d/8e5d7a0e1c0d0d0d8e5d7a0e1c0d0d0d/dotnet-runtime-8.0.11-linux-x64.tar.gz" -o /tmp/runtime.tar.gz &&     tar -xf /tmp/runtime.tar.gz -C /runtime-root/usr --strip-components=1;     fi:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0461764Z 0.223   % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0462467Z 0.224                                  Dload  Upload  Total   Spent   Left   Speed
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0463110Z 0.224 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0463442Z   0      0   0      0   0      0      0      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0465001Z 100     24   0     24   0      0    132      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0465607Z 100     24   0     24   0      0    132      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0465982Z 100     24   0     24   0      0    132      0                              0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0466436Z 0.303 tar: This does not look like a tar archive
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0466719Z 0.305 
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0466981Z 0.305 gzip: stdin: not in gzip format
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0467344Z 0.306 tar: Child returned status 1
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0467749Z 0.306 tar: Error is not recoverable: exiting now
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0468181Z ------
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0517338Z ERROR: target runtime: failed to solve: process "/bin/sh -c if [ -n \"$RUNTIME_URL\" ]; then     curl -L \"$RUNTIME_URL\" -o /tmp/runtime.tar.gz &&     tar -xf /tmp/runtime.tar.gz -C /runtime-root/usr --strip-components=1;     fi" did not complete successfully: exit code: 2
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0570250Z ##[error]Process completed with exit code 1.
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.0665409Z Post job cleanup.
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.3870873Z ##[group]Logout from ghcr.io
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.3920274Z [command]/usr/bin/docker logout ghcr.io
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.4055028Z Removing login credentials for ghcr.io
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.4085180Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.4085747Z ##[group]Post cache
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.4086957Z State not set
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.4087496Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.4249889Z Post job cleanup.
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.6855430Z ##[group]Removing builder
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:27.7889087Z [command]/usr/bin/docker buildx rm builder-4f8b4b46-d5bc-478a-b374-6fb5d8eca41a
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:28.8527175Z builder-4f8b4b46-d5bc-478a-b374-6fb5d8eca41a removed
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:28.8565597Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:28.8566190Z ##[group]Cleaning up certificates
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:28.8573513Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:28.8574221Z ##[group]Post cache
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:28.8578319Z State not set
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:28.8579253Z ##[endgroup]
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:28.8726630Z Post job cleanup.
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:28.9754103Z [command]/usr/bin/git version
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:28.9792252Z git version 2.53.0
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:28.9834355Z Temporarily overriding HOME='/home/runner/work/_temp/3df6875f-e3f9-4fe0-9bc7-b4bd38d33ddc' before making global git config changes
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:28.9835554Z Adding repository directory to the temporary git global config as a safe directory
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:28.9848983Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/distroless-the-hard-way/distroless-the-hard-way
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:28.9887818Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:28.9923712Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:29.0171275Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:29.0195243Z http.https://github.com/.extraheader
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:29.0209151Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:29.0242246Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:29.0486169Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:29.0519214Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:29.0904341Z Cleaning up orphan processes
+build-fleet (dotnet) / build	UNKNOWN STEP	2026-05-03T20:33:29.1237484Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4, actions/setup-python@v5, docker/login-action@v3, docker/setup-buildx-action@v3. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Node.js 20 will be removed from the runner on September 16th, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
