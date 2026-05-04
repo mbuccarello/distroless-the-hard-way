@@ -93,8 +93,9 @@ class DAGResolver:
 class HCLGenerator:
     def __init__(self, stack_config):
         self.stack = stack_config
+        self.runtime = stack_config.get("runtime", {})
         self.platform = "linux/amd64"
-        self.has_stack_target = stack_config.get("type") == "source_build"
+        self.has_stack_target = self.runtime.get("type") == "source_build"
 
     def generate(self, graph):
         hcl = 'variable "REGISTRY" {\n  default = "ghcr.io/mbuccarello"\n}\n\n'
@@ -139,6 +140,25 @@ class HCLGenerator:
             hcl += '  }\n'
             hcl += '}\n\n'
 
+        # Stack-specific target (if any)
+        if self.has_stack_target:
+            hcl += f'target "{self.stack["name"]}" {{\n'
+            hcl += '  dockerfile = "Dockerfile.cc"\n'
+            hcl += f'  target = "stack-builder"\n'
+            hcl += '  context = "."\n'
+            hcl += f'  platforms = ["{self.platform}"]\n'
+            hcl += '  args = {\n'
+            hcl += f'    STACK_NAME = "{self.stack["name"]}"\n'
+            hcl += f'    STACK_URL = "{self.runtime["source_url"]}"\n'
+            hcl += f'    STACK_CONFIG = "{ " ".join(self.runtime.get("build_flags", [])) }"\n'
+            hcl += '  }\n'
+            hcl += '  contexts = {\n'
+            hcl += '    builder = "target:builder"\n'
+            for pkg in graph.keys():
+                hcl += f'    {pkg} = "target:{pkg}"\n'
+            hcl += '  }\n'
+            hcl += '}\n\n'
+
         # Final images
         hcl += 'target "static" {\n  dockerfile = "Dockerfile"\n  target = "static"\n  context = "."\n}\n\n'
         hcl += 'target "base" {\n  dockerfile = "Dockerfile"\n  target = "base"\n  context = "."\n}\n\n'
@@ -153,10 +173,12 @@ class HCLGenerator:
         hcl += '  args = {\n'
         hcl += f'    RUNTIME_NAME = "{self.stack["name"]}"\n'
         hcl += f'    RUNTIME_VER = "{self.stack["version"]}"\n'
-        if self.stack.get("type") == "binary_injection":
-            hcl += f'    RUNTIME_URL = "{self.stack["runtime"]["binary_url"]}"\n'
+        if self.runtime.get("type") == "binary_injection":
+            hcl += f'    RUNTIME_URL = "{self.runtime["binary_url"]}"\n'
         hcl += '  }\n'
         hcl += '  contexts = {\n'
+        if self.has_stack_target:
+            hcl += f'    {self.stack["name"]} = "target:{self.stack["name"]}"\n'
         hcl += '  }\n'
         hcl += '  tags = ["${REGISTRY}/' + self.stack["name"] + '-distroless:latest"]\n}\n\n'
 
@@ -189,11 +211,29 @@ class HCLGenerator:
             # openssl uses Configure (capital C)
             df += "    elif [ -f ./Configure ]; then ./Configure --prefix=/usr $LIB_CONFIG; \\\n"
             df += "    fi && \\\n"
+            # Bzip2 needs special install
             df += "    if [ \"$LIB_NAME\" = \"bzip2\" ]; then make -j$(nproc) PREFIX=/usr && make DESTDIR=/artifacts PREFIX=/usr install; \\\n"
             df += "    else make -j$(nproc) && make DESTDIR=/artifacts install; fi; \\\n"
             df += "    fi\n"
             # Ensure artifacts/usr exists even if build skipped
             df += "RUN mkdir -p /artifacts/usr\n"
+
+        # Stack builder stage
+        if self.has_stack_target:
+            df += f"\nFROM builder as stack-builder\n"
+            df += "ARG STACK_NAME\nARG STACK_URL\nARG STACK_CONFIG\n"
+            for pkg in graph.keys():
+                df += f"COPY --from={pkg} /artifacts/usr /usr\n"
+            
+            df += "WORKDIR /build\n"
+            df += "RUN if [ -n \"$STACK_URL\" ] && [ \"$STACK_URL\" != \"SKIP\" ]; then \\\n"
+            df += "    curl -L \"$STACK_URL\" -o source.tar.xz && \\\n"
+            df += "    mkdir src && tar -xf source.tar.xz -C src --strip-components=1 && \\\n"
+            df += "    cd src && \\\n"
+            df += "    ./configure --prefix=/usr $STACK_CONFIG && \\\n"
+            df += "    make -j$(nproc) && \\\n"
+            df += "    make DESTDIR=/artifacts install; \\\n"
+            df += "    fi\n"
 
         # Intermediate setup stage (for validation)
         df += "\nFROM builder as runtime-setup\nUSER root\n"
@@ -201,16 +241,15 @@ class HCLGenerator:
         for pkg in graph.keys():
             df += f"COPY --from={pkg} /artifacts/usr /runtime-root/usr\n"
         
-        if self.stack.get("type") == "binary_injection":
+        if self.runtime.get("type") == "binary_injection":
             df += "ARG RUNTIME_URL\n"
             # Robust extraction: find where python is and move it to /runtime-root/usr
             df += "RUN mkdir -p /tmp/py && curl -L \"$RUNTIME_URL\" -o /tmp/runtime.tar.gz && \\\n"
             df += "    tar -xf /tmp/runtime.tar.gz -C /tmp/py && \\\n"
-            df += "    echo \"Content of /tmp/py:\" && ls -R /tmp/py && \\\n"
-            # Find the bin directory (it might be inside a python/ directory)
             df += "    PY_DIR=$(find /tmp/py -name bin -type d | head -n 1 | xargs dirname) && \\\n"
-            df += "    echo \"Identified PY_DIR: $PY_DIR\" && \\\n"
             df += "    cp -rv $PY_DIR/* /runtime-root/usr/\n"
+        elif self.has_stack_target:
+            df += f"COPY --from=stack-builder /artifacts/usr /runtime-root/usr\n"
 
         # Automated Linkage Validation & Debug
         df += "RUN ls -F /runtime-root/usr/bin/ || true\n"
@@ -263,8 +302,6 @@ def main():
         print(f"✅ Generated docker-bake.hcl")
 
         df_cc = generator.generate_cc_dockerfile(resolver.graph)
-        print(f"DEBUG: stack type is {stack_config.get('type')}")
-        print(f"DEBUG: Generated Dockerfile.cc:\n{df_cc}")
         with open("Dockerfile.cc", "w") as f:
             f.write(df_cc)
         print(f"✅ Generated Dockerfile.cc")
