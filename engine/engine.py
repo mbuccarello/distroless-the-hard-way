@@ -156,7 +156,8 @@ class HCLGenerator:
         hcl = self._header()
         name = stack_config["name"]
         runtime = stack_config.get("runtime", {})
-        has_source = runtime.get("type") == "source_build"
+        stack_type = stack_config.get("type", "source_build")
+        has_source = stack_type == "source_build"
         
         hcl += 'group "default" {\n  targets = ["runtime", "runtime-debug"]\n}\n\n'
         
@@ -212,7 +213,7 @@ class HCLGenerator:
         hcl += '  args = {\n'
         hcl += f'    RUNTIME_NAME = "{name}"\n'
         hcl += f'    RUNTIME_VER = "{stack_config["version"]}"\n'
-        if runtime.get("type") == "binary_injection":
+        if stack_type == "binary_injection":
             hcl += f'    RUNTIME_URL = "{runtime["binary_url"]}"\n'
         hcl += '  }\n'
         hcl += '  contexts = {\n'
@@ -238,7 +239,8 @@ class HCLGenerator:
             df += "    export CPPFLAGS=\"-I/opt/distroless/include\" && \\\n"
             df += "    export LDFLAGS=\"-L/opt/distroless/lib -L/opt/distroless/lib64 -Wl,-rpath,/usr/lib\" && \\\n"
             df += "    export PKG_CONFIG_PATH=\"/opt/distroless/lib/pkgconfig:/opt/distroless/lib64/pkgconfig\" && \\\n"
-            df += "    if [ -f ./configure ]; then ./configure --prefix=/usr $LIB_CONFIG; elif [ -f ./Configure ]; then ./Configure --prefix=/usr $LIB_CONFIG; fi && \\\n"
+            df += "    if [ -f ./configure ]; then ./configure --prefix=/usr $LIB_CONFIG; elif [ -f ./Configure ]; then ./Configure --prefix=/usr $LIB_CONFIG; "
+            df += "elif [ -f ./CMakeLists.txt ]; then cmake -DCMAKE_INSTALL_PREFIX=/usr $LIB_CONFIG .; fi && \\\n"
             df += "    if [ \"$LIB_NAME\" = \"bzip2\" ]; then make -j$(nproc) PREFIX=/usr && make DESTDIR=/artifacts PREFIX=/usr install; else make -j$(nproc) && make DESTDIR=/artifacts install; fi; \\\n"
             df += "    fi && mkdir -p /artifacts/usr\n"
 
