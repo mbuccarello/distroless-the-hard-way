@@ -124,6 +124,7 @@ class HCLGenerator:
             if pkg == "openssl": lib_config = "shared zlib"
             if pkg == "ncurses": lib_config = "--with-shared --enable-widec --enable-pc-files --with-termlib"
             if pkg == "readline": lib_config = "--with-curses"
+            if pkg == "libxcrypt": lib_config = "--disable-werror"
             
             if lib_config:
                 hcl += f'    LIB_CONFIG = "{lib_config}"\n'
