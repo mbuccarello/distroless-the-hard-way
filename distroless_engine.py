@@ -214,12 +214,9 @@ class HCLGenerator:
         df += "FROM builder as runtime-setup\nUSER root\n"
         df += "ARG RUNTIME_URL\nRUN mkdir -p /runtime-root/usr\n"
         
-        # Add dependencies to runtime-setup for consistency
+        # Add dependencies to runtime-setup for consistency (ISOLATED from builder /usr)
         for pkg in graph.keys():
-            df += f"COPY --from={pkg} /artifacts/usr /usr\n"
-
-        # Update linker cache in setup stage
-        df += "RUN ldconfig\n"
+            df += f"COPY --from={pkg} /artifacts/usr /runtime-root/usr\n"
 
         if self.stack.get("type") == "binary_injection":
             df += "RUN if [ -n \"$RUNTIME_URL\" ]; then \\\n"
@@ -230,9 +227,9 @@ class HCLGenerator:
             # Copy from the stack-specific build stage
             df += f"COPY --from={self.stack['name']} /artifacts/usr /runtime-root/usr\n"
 
-        # Automated Linkage Validation
-        df += "RUN if [ -f /runtime-root/usr/bin/python3 ]; then ldd /runtime-root/usr/bin/python3; fi\n"
-        df += "RUN if [ -f /runtime-root/usr/bin/node ]; then ldd /runtime-root/usr/bin/node; fi\n"
+        # Automated Linkage Validation (using isolated environment)
+        df += "RUN if [ -f /runtime-root/usr/bin/python3 ]; then LD_LIBRARY_PATH=/runtime-root/usr/lib ldd /runtime-root/usr/bin/python3; fi\n"
+        df += "RUN if [ -f /runtime-root/usr/bin/node ]; then LD_LIBRARY_PATH=/runtime-root/usr/lib ldd /runtime-root/usr/bin/node; fi\n"
 
         df += "\nFROM base as cc\nUSER root\n"
         df += "COPY --from=builder /usr/lib/libgcc_s.so.1 /usr/lib/\n"
