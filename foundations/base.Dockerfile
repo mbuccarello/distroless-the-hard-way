@@ -10,11 +10,11 @@ FROM static as base
 # Copy Busybox for essential filesystem tasks
 COPY --from=builder /usr/bin/busybox /usr/bin/busybox
 
-# Setup essential glibc libraries (ABI-stable bridges)
-# Fedora 40 uses /usr/lib64, but we need to ensure they are found in /lib64 for legacy binaries
-RUN mkdir -p /usr/lib64 /lib64 && \
-    ["/usr/bin/busybox", "ln", "-s", "/usr/lib", "/lib"] && \
-    ["/usr/bin/busybox", "ln", "-s", "/usr/lib64", "/lib64"]
+# Setup essential FHS structure using JSON form (since no shell exists yet)
+RUN ["/usr/bin/busybox", "mkdir", "-p", "/usr/lib64", "/lib64", "/usr/lib", "/lib", "/bin", "/etc/ld.so.conf.d"]
+RUN ["/usr/bin/busybox", "ln", "-s", "/usr/lib", "/lib"]
+RUN ["/usr/bin/busybox", "ln", "-s", "/usr/lib64", "/lib64"]
+RUN ["/usr/bin/busybox", "ln", "-s", "/usr/bin/busybox", "/bin/sh"]
 
 # Inject essential glibc shared objects from the builder
 COPY --from=builder /usr/lib64/libc.so.6 /usr/lib64/
@@ -25,7 +25,7 @@ COPY --from=builder /usr/lib64/libdl.so.2 /usr/lib64/
 COPY --from=builder /usr/lib64/libresolv.so.2 /usr/lib64/
 COPY --from=builder /usr/lib64/ld-linux-x86-64.so.2 /usr/lib64/
 
-# Configure the dynamic linker
+# Configure the dynamic linker (now we have /bin/sh via busybox)
 RUN echo "/usr/lib" > /etc/ld.so.conf && \
     echo "/usr/lib64" >> /etc/ld.so.conf && \
     echo "include /etc/ld.so.conf.d/*.conf" >> /etc/ld.so.conf
