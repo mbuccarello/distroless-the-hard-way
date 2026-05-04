@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:1.4
 
 FROM builder AS zlib-builder
 ARG LIB_NAME=zlib

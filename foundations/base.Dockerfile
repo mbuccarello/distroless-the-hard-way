@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:1.4
 
 # --- STAGE 1: STATIC (The Minimal Root) ---
 FROM scratch as static

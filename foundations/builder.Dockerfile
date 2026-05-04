@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:1.4
 
 # --- STAGE 0: BUILDER (The Source Compiler) ---
 FROM fedora:40 as builder
