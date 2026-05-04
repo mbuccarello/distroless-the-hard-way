@@ -33,9 +33,18 @@ COPY --from=builder /usr/lib64/librt.so.1 /usr/lib/
 COPY --from=builder /usr/lib64/libpthread.so.0 /usr/lib/
 COPY --from=builder /usr/lib64/libresolv.so.2 /usr/lib/
 COPY --from=builder /usr/lib64/libutil.so.1 /usr/lib/
+COPY --from=builder /usr/lib64/libcrypt.so.2 /usr/lib/
 
-# Setup standard symlinks
+# Setup standard symlinks for maximum compatibility
 RUN ["/usr/bin/busybox", "mkdir", "-p", "/lib64"]
 RUN ["/usr/bin/busybox", "ln", "-s", "/usr/lib/ld-linux-x86-64.so.2", "/lib64/ld-linux-x86-64.so.2"]
+RUN ["/usr/bin/busybox", "ln", "-s", "/usr/lib/libc.so.6", "/lib64/libc.so.6"]
+RUN ["/usr/bin/busybox", "ln", "-s", "/usr/lib/libm.so.6", "/lib64/libm.so.6"]
+RUN ["/usr/bin/busybox", "ln", "-s", "/usr/lib/libdl.so.2", "/lib64/libdl.so.2"]
+RUN ["/usr/bin/busybox", "ln", "-s", "/usr/lib/librt.so.1", "/lib64/librt.so.1"]
+RUN ["/usr/bin/busybox", "ln", "-s", "/usr/lib/libpthread.so.0", "/lib64/libpthread.so.0"]
+RUN ["/usr/bin/busybox", "ln", "-s", "/usr/lib/libresolv.so.2", "/lib64/libresolv.so.2"]
+RUN ["/usr/bin/busybox", "ln", "-s", "/usr/lib/libutil.so.1", "/lib64/libutil.so.1"]
+RUN ["/usr/bin/busybox", "ln", "-s", "/usr/lib/libcrypt.so.2", "/lib64/libcrypt.so.2"]
 
 USER 65532:65532
