@@ -245,10 +245,13 @@ class HCLGenerator:
         elif self.has_stack_target:
             df += f"COPY --from=stack-builder /artifacts/usr /runtime-root/usr\n"
 
-        # Automated Linkage Validation
+        # Automated Linkage Validation & Debug
+        df += "RUN find /runtime-root/usr/bin -name \"*python*\" || true\n"
         df += "RUN find /runtime-root/usr/lib -maxdepth 2 || true\n"
-        df += "RUN if [ -f /runtime-root/usr/bin/python3 ]; then LD_LIBRARY_PATH=/runtime-root/usr/lib /lib64/ld-linux-x86-64.so.2 --list /runtime-root/usr/bin/python3; fi\n"
-        df += "RUN if [ -f /runtime-root/usr/bin/node ]; then LD_LIBRARY_PATH=/runtime-root/usr/lib /lib64/ld-linux-x86-64.so.2 --list /runtime-root/usr/bin/node; fi\n"
+        # Harden finding python3
+        df += "RUN if [ -f /runtime-root/usr/bin/python3 ]; then P3=/runtime-root/usr/bin/python3; \\\n"
+        df += "    elif [ -f /runtime-root/usr/python/bin/python3 ]; then P3=/runtime-root/usr/python/bin/python3; \\\n"
+        df += "    fi && if [ -n \"$P3\" ]; then LD_LIBRARY_PATH=/runtime-root/usr/lib /lib64/ld-linux-x86-64.so.2 --list \"$P3\"; fi\n"
 
         # Final CC image
         df += "\nFROM base as cc\nUSER root\n"
@@ -259,7 +262,8 @@ class HCLGenerator:
             df += f"COPY --from={pkg} /artifacts/usr /usr\n"
         
         df += "\nFROM cc as runtime\nUSER root\nARG RUNTIME_NAME\nARG RUNTIME_VER\nLABEL distroless.stack=\"${RUNTIME_NAME}\"\n"
-        df += "COPY --from=runtime-setup /runtime-root/usr /usr\n"
+        # Ensure we copy correctly based on extraction result
+        df += "COPY --from=runtime-setup /runtime-root/usr/ /usr/\n"
         df += "USER 65532:65532\n"
         
         df += "\nFROM runtime as runtime-debug\nUSER root\n"
