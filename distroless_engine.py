@@ -203,9 +203,12 @@ class HCLGenerator:
             df += "    curl -L \"$LIB_URL\" -o source.tar.gz && \\\n"
             df += "    mkdir src && tar -xf source.tar.gz -C src --strip-components=1 && \\\n"
             df += "    cd src && \\\n"
-            df += "    ./configure --prefix=/usr $LIB_CONFIG && \\\n"
-            df += "    make -j$(nproc) && \\\n"
-            df += "    make DESTDIR=/artifacts install; \\\n"
+            # Smart build command
+            df += "    if [ -f ./configure ]; then ./configure --prefix=/usr $LIB_CONFIG; \\\n"
+            df += "    elif [ -f ./Configure ]; then ./Configure --prefix=/usr $LIB_CONFIG; \\\n"
+            df += "    fi && \\\n"
+            df += "    if [ \"$LIB_NAME\" = \"bzip2\" ]; then make -j$(nproc) PREFIX=/usr && make DESTDIR=/artifacts PREFIX=/usr install; \\\n"
+            df += "    else make -j$(nproc) && make DESTDIR=/artifacts install; fi; \\\n"
             df += "    fi\n"
             # Ensure artifacts/usr exists even if build skipped
             df += "RUN mkdir -p /artifacts/usr\n"

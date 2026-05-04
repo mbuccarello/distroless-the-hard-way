@@ -3,9 +3,9 @@
 # --- STAGE 0: ARCH BUILDER (The Source Compiler) ---
 FROM archlinux:latest as builder
 # Install base tools and initialize keyring
-RUN pacman -Syu --noconfirm && \
-    pacman-key --init && \
+RUN pacman-key --init && \
     pacman-key --populate archlinux && \
+    pacman -Syu --noconfirm && \
     pacman -S --noconfirm base-devel git cmake curl busybox
 
 # Create standard Distroless RootFS
