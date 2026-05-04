@@ -298,7 +298,12 @@ def main():
             manager = MetadataManager(tmpdir)
             resolver = DAGResolver(manager)
             deps = stack_config.get('dependencies', [])
-            if deps: resolver.resolve([d['name'] for d in deps])
+            initial_deps = [d['name'] for d in deps]
+            # Always ensure core foundation libraries are present for the CC layer
+            for core_dep in ["zlib", "openssl", "libxcrypt"]:
+                if core_dep not in initial_deps:
+                    initial_deps.append(core_dep)
+            resolver.resolve(initial_deps)
             
             hcl = generator.generate_runtime_hcl(stack_config, resolver.graph)
             with open(f"foundations/{stack_config['name']}.hcl", "w") as f: f.write(hcl)
