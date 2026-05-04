@@ -214,6 +214,10 @@ class HCLGenerator:
         df += "FROM builder as runtime-setup\nUSER root\n"
         df += "ARG RUNTIME_URL\nRUN mkdir -p /runtime-root/usr\n"
         
+        # Add dependencies to runtime-setup for diagnostics and consistency
+        for pkg in graph.keys():
+            df += f"COPY --from={pkg} /artifacts/usr /usr\n"
+
         if self.stack.get("type") == "binary_injection":
             df += "RUN if [ -n \"$RUNTIME_URL\" ]; then \\\n"
             df += "    curl -L \"$RUNTIME_URL\" -o /tmp/runtime.tar.gz && \\\n"
@@ -223,14 +227,16 @@ class HCLGenerator:
             # Copy from the stack-specific build stage
             df += f"COPY --from={self.stack['name']} /artifacts/usr /runtime-root/usr\n"
 
+        # Diagnostic: check linkage in setup stage
+        df += "RUN if [ -f /runtime-root/usr/bin/python3 ]; then ldd /runtime-root/usr/bin/python3; fi || true\n"
+        df += "RUN ls -l /usr/lib/libz* || true\n"
+
         df += "\nFROM base as cc\nUSER root\n"
         df += "COPY --from=builder /usr/lib/libgcc_s.so.1 /usr/lib/\n"
         df += "COPY --from=builder /usr/lib/libstdc++.so.6 /usr/lib/\n"
         for pkg in graph.keys():
             df += f"COPY --from={pkg} /artifacts/usr /usr\n"
             df += f"COPY --from={pkg} /artifacts/usr/share/doc /usr/share/doc\n"
-        
-        df += "RUN ls -l /usr/lib/libz* || true\n"
         
         df += "\nFROM cc as runtime\nUSER root\nARG RUNTIME_NAME\nARG RUNTIME_VER\nLABEL distroless.stack=\"${RUNTIME_NAME}\"\n"
         df += "COPY --from=runtime-setup /runtime-root/usr /usr\n"
