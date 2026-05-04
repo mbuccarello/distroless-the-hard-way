@@ -12,7 +12,7 @@ class MetadataManager:
     def __init__(self, cache_dir):
         self.cache_dir = cache_dir
         self.hardcoded_sources = {
-            "zlib": "https://zlib.net/current/zlib.tar.gz",
+            "zlib": "https://github.com/madler/zlib/archive/refs/tags/v1.3.1.tar.gz",
             "openssl": "https://github.com/openssl/openssl/releases/download/openssl-3.4.0/openssl-3.4.0.tar.gz",
             "ncurses": "https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.5.tar.gz",
             "readline": "https://ftp.gnu.org/pub/gnu/readline/readline-8.2.tar.gz",
@@ -241,7 +241,7 @@ class HCLGenerator:
             df += "RUN curl -L \"$RUNTIME_URL\" -o /tmp/runtime.tar.gz && \\\n"
             df += "    tar -xf /tmp/runtime.tar.gz -C /runtime-root/usr --strip-components=1\n"
         elif self.has_stack_target:
-            df += f"COPY --from={self.stack['name']} /artifacts/usr /runtime-root/usr\n"
+            df += f"COPY --from=stack-builder /artifacts/usr /runtime-root/usr\n"
 
         # Automated Linkage Validation
         df += "RUN find /runtime-root/usr/lib -maxdepth 2 || true\n"
