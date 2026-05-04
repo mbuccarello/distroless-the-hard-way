@@ -9,9 +9,9 @@ The goal is an educational curriculum titled **Distroless The Hard Way**.
 It teaches users how to create distroless container images *without* relying on third-party OS ecosystems (such as extracting pre-compiled Ubuntu or Debian packages) to ensure absolute data transparency and zero-trust supply chain isolation. The tone must always remain highly technical, human, and educational ("The Hard Way" philosophy).
 
 ## 2. Core Operational Pillars
-- **The Distroless Engine:** All image assembly and dependency orchestration must be handled by the unified **Distroless Engine** (`distroless_engine.py`). Manual `COPY` chains in GitHub Actions are deprecated.
+- **The Distroless Engine:** All image assembly and dependency orchestration must be handled by the specialized **Distroless Engine** (`engine/engine.py`). It operates in targeted modes (foundation/runtime).
 - **Data-Driven Stacks:** New language runtimes must be defined as modular YAML files in `stacks/*.yaml`.
-- **The Google Distroless Hierarchy:** The architecture strictly enforces a linear cascading hierarchy spanning `static -> base -> cc -> runtime` specifically modeled against Google's Distroless Bazel architecture.
+- **Targeted Assembly (Melange/Apko Style):** The architecture strictly enforces a modular 3-tier foundation hierarchy (`static -> base -> cc`) followed by a specialized runtime assembly. Each stage is atomic and versioned.
 - **Zero OS Extraction:** You are strictly forbidden from writing workflows that rely on precompiled `.so` library binaries from host OS packages (e.g. `apt`, `apk`).
 - **Rule: The Arch Linux Dependency Graph Protocol:** Agents must **never guess** `./configure` flags or dependency trees when adding a new C-library to the distroless foundations. You are explicitly instructed to use the Distroless Engine which fetches and parses Arch Linux `PKGBUILD` files as the primary intelligence reference.
 - **FHS Unification:** The architecture unifies all shared libraries into `/usr/lib`. Standard symlinks (`/lib -> /usr/lib`, `/lib64 -> /usr/lib`) must be preserved to ensure kernel-level binary execution (ELF interpreter resolution).

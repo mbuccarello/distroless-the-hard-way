@@ -8,12 +8,13 @@ This document defines the high-assurance architecture of the **Distroless The Ha
 
 The architecture enforces a strictly linear cascading hierarchy modeled after Google's Distroless specifications. Each layer inherits only from its direct predecessor, ensuring absolute ABI stability and zero-trust supply chain isolation.
 
-| Layer | Target | Role | Inheritance | Key Components |
-| :--- | :--- | :--- | :--- | :--- |
-| **L1** | `static` | System Foundations | `FROM scratch` | CA-certs, tzdata, passwd/group (root/nonroot) |
-| **L2** | `base` | Dynamic Foundation | `FROM static` | Glibc, Dynamic Linker, NSS (DNS) |
-| **L3** | `cc` | ABI-Stabilized Base | `FROM base` | libstdc++, OpenSSL, Zlib, Libxcrypt |
-| **L4** | `runtime` | Language Stack | `FROM cc` | Python, Node.js, Java, .NET, PHP, Perl |
+| Layer | Target | Role | Pipeline | Source | Inheritance |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **L0** | `builder` | Toolchain Foundation | Shared | `foundations/builder.Dockerfile` | `fedora:40` |
+| **L1** | `static` | System Foundations | `foundation-static` | `foundations/static.Dockerfile` | `scratch` |
+| **L2** | `base` | Dynamic Foundation | `foundation-base` | `foundations/base.Dockerfile` | `static:latest` |
+| **L3** | `cc` | ABI-Stabilized Base | `foundation-cc` | `foundations/cc.Dockerfile` | `base:latest` |
+| **L4** | `runtime` | Language Stack | `stack-runtime` | `foundations/runtime.Dockerfile` | `cc:latest` |
 
 ### FHS Unification Standard
 To prevent ABI drift, all libraries are unified into `/usr/lib`. Standardized symlinks (`/lib -> /usr/lib`, `/lib64 -> /usr/lib`) ensure universal kernel compliance across all execution environments.
@@ -24,6 +25,7 @@ Every sovereign image adheres to the following layout before the language runtim
 ```text
 /
 ├── etc/
+│   ├── ld.so.conf              # Dynamic Linker Configuration
 │   ├── os-release              # OS Metadata
 │   ├── passwd                  # root(0), nonroot(65532)
 │   ├── group
@@ -32,11 +34,15 @@ Every sovereign image adheres to the following layout before the language runtim
 │           └── ca-certificates.crt # Root Trust Store
 ├── home/
 │   └── nonroot/                # Owned by UID 65532
-├── lib -> usr/lib              # Unified Library Symlink
-├── lib64 -> usr/lib            # Unified Library Symlink
+├── lib -> usr/lib              # Legacy Library Symlink
+├── lib64 -> usr/lib64          # 64-bit ABI Symlink (Fedora compat)
 ├── tmp/                        # Permissions: 1777 (Sticky)
 ├── usr/
-│   ├── lib/
+│   ├── bin/
+│   │   └── busybox             # Only in :debug variants
+│   ├── lib/                    # Standard Library Path
+│   │   └── (32-bit/Universal)
+│   ├── lib64/                  # Primary 64-bit Library Path
 │   │   ├── ld-linux-x86-64.so.2 # Glibc Dynamic Linker
 │   │   ├── libc.so.6           # Glibc Core
 │   │   ├── libcrypto.so.3      # OpenSSL
@@ -66,10 +72,17 @@ The engine parses **Arch Linux PKGBUILD** scripts as its primary intelligence re
 ### 2.2 Declarative Bake Orchestration
 The engine generates complex **Docker Bake (HCL)** manifests. This allows for native parallelization of library builds and atomic assembly of the final images.
 
-### 2.3 Multi-Stage Assembly Logic
+### 2.3 Isolated Build-Prefix Strategy
+To ensure build-time stability and prevent symbol leakage, the engine enforces a strict isolation policy:
+- **Build Prefix**: All dependencies (zlib, openssl, etc.) are installed into `/opt/distroless` during the builder stage.
+- **Environment Pinning**: `CPPFLAGS`, `LDFLAGS`, and `PKG_CONFIG_PATH` are strictly pointed to `/opt/distroless`.
+- **System Tool Safety**: This prevents custom libraries from overwriting system tools in the builder (e.g., preventing `curl` from breaking due to ABI conflicts with our custom OpenSSL).
+
+### 2.4 Multi-Stage Assembly Logic
 To maintain a hardened, shell-less environment:
-- **`runtime-setup` Stage**: A tool-rich environment (Arch Linux) used to download, compile, or extract runtime binaries.
-- **`runtime` Stage**: The final production image, created by copying artifacts from `runtime-setup` into a clean distroless root.
+- **`foundations/` Location**: All Dockerfiles are modularized and stored in the `/foundations` directory.
+- **`runtime-setup` Stage**: A tool-rich environment (Fedora 40) used to download, compile, or extract runtime binaries into a `/runtime-root`.
+- **`runtime` Stage**: The final production image, created by copying artifacts from `/runtime-root` into a clean distroless root.
 
 ---
 
