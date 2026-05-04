@@ -3,6 +3,7 @@
 # --- STAGE 2: BASE (The Glibc Foundation) ---
 # Inherits from the static foundation
 FROM ghcr.io/mbuccarello/static:latest as base
+USER root
 
 # Copy Busybox for essential filesystem tasks during assembly
 COPY --from=builder /usr/bin/busybox /usr/bin/busybox

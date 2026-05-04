@@ -3,6 +3,7 @@
 # --- STAGE 3: CC (ABI-Stabilized Base) ---
 # Inherits from the base foundation
 FROM ghcr.io/mbuccarello/base:latest as cc
+USER root
 
 # Inject common C-runtime libraries from the builder
 COPY --from=builder /usr/lib64/libgcc_s.so.1 /usr/lib/
