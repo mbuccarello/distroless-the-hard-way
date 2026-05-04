@@ -187,7 +187,8 @@ class HCLGenerator:
         return hcl
 
     def generate_cc_dockerfile(self, graph):
-        df = "# syntax=docker/dockerfile:1.4\n"
+        # No syntax header for secondary Dockerfile used by Bake
+        df = ""
         
         # Template for library builders
         for pkg, meta in graph.items():
