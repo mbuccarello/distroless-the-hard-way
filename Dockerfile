@@ -1,12 +1,9 @@
 # syntax=docker/dockerfile:1.4
 
-# --- STAGE 0: ARCH BUILDER (The Source Compiler) ---
-FROM archlinux:latest as builder
-# Install base tools and initialize keyring
-RUN pacman-key --init && \
-    pacman-key --populate archlinux && \
-    pacman -Syu --noconfirm && \
-    pacman -S --noconfirm base-devel git cmake curl busybox
+# --- STAGE 0: BUILDER (The Source Compiler) ---
+FROM fedora:40 as builder
+# Install base tools
+RUN dnf install -y @development-tools cmake curl git busybox-utils
 
 # Create standard Distroless RootFS
 RUN mkdir -p /rootfs/etc/ssl/certs /rootfs/etc/pki/tls/certs /rootfs/usr/lib /rootfs/usr/share/zoneinfo /rootfs/tmp /rootfs/home/nonroot /rootfs/var/lib/apt/lists /rootfs/etc/ld.so.conf.d

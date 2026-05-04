@@ -251,8 +251,9 @@ class HCLGenerator:
 
         # Final CC image
         df += "\nFROM base as cc\nUSER root\n"
-        df += "COPY --from=builder /usr/lib/libgcc_s.so.1 /usr/lib/\n"
-        df += "COPY --from=builder /usr/lib/libstdc++.so.6 /usr/lib/\n"
+        # Fedora uses lib64
+        df += "COPY --from=builder /usr/lib64/libgcc_s.so.1 /usr/lib/ || COPY --from=builder /usr/lib/libgcc_s.so.1 /usr/lib/\n"
+        df += "COPY --from=builder /usr/lib64/libstdc++.so.6 /usr/lib/ || COPY --from=builder /usr/lib/libstdc++.so.6 /usr/lib/\n"
         for pkg in graph.keys():
             df += f"COPY --from={pkg} /artifacts/usr /usr\n"
         
