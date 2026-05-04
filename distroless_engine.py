@@ -299,12 +299,10 @@ def main():
         
         with open("docker-bake.hcl", "w") as f:
             f.write(hcl)
-        print(f"✅ Generated docker-bake.hcl")
 
         df_cc = generator.generate_cc_dockerfile(resolver.graph)
         with open("Dockerfile.cc", "w") as f:
             f.write(df_cc)
-        print(f"✅ Generated Dockerfile.cc")
 
 if __name__ == "__main__":
     main()

@@ -37,5 +37,12 @@ dependencies:
 runtime:
   name: python
   version: "3.13"
-  type: binary_injection
-  binary_url: "https://github.com/indygreg/python-build-standalone/releases/download/20241016/cpython-3.13.0+20241016-x86_64-unknown-linux-gnu-install_only.tar.gz"
+  type: source_build
+  source_url: "https://www.python.org/ftp/python/3.13.0/Python-3.13.0.tar.xz"
+  build_flags:
+    - "--enable-optimizations"
+    - "--with-lto"
+    - "--enable-shared"
+    - "--with-system-ffi"
+    - "--with-system-expat"
+    - "--with-ensurepip=install"
