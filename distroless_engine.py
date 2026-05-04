@@ -261,6 +261,8 @@ def main():
         print(f"✅ Generated docker-bake.hcl")
 
         df_cc = generator.generate_cc_dockerfile(resolver.graph)
+        print(f"DEBUG: stack type is {stack_config.get('type')}")
+        print(f"DEBUG: Generated Dockerfile.cc:\n{df_cc}")
         with open("Dockerfile.cc", "w") as f:
             f.write(df_cc)
         print(f"✅ Generated Dockerfile.cc")
