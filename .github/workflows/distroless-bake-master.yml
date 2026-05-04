@@ -80,43 +80,50 @@ jobs:
           DIGEST=$(jq -r '.runtime["containerimage.digest"]' metadata.json)
           echo "digest=$DIGEST" >> $GITHUB_OUTPUT
 
-      - name: Execute E2E Smoke Test
-        run: |
-          # Use --load if not pushing, or pull if pushed
-          IMAGE_NAME="ghcr.io/${{ github.repository_owner }}/${{ inputs.stack }}-distroless:latest"
-          
-          # If we didn't push, we need to load it into the local daemon for testing
-          if [ "${{ inputs.push }}" = "false" ]; then
-            docker buildx bake -f docker-bake.hcl --set "*.output=type=docker" runtime
-          else
-            docker pull "$IMAGE_NAME"
-          fi
-
-          case "${{ inputs.stack }}" in
-            python) TEST_CMD="python3 /app/test.py" ;;
-            nodejs) TEST_CMD="node /app/test.js" ;;
-            java) TEST_CMD="java /app/test.java" ;;
-            php) TEST_CMD="php /app/test.php" ;;
-            perl) TEST_CMD="perl /app/test.pl" ;;
-            dotnet) TEST_CMD="dotnet --info" ;;
-            *) TEST_CMD="true" ;;
-          esac
-          
-          echo "🚀 Running E2E Test for ${{ inputs.stack }}..."
-          docker run --rm -v $(pwd)/app:/app "$IMAGE_NAME" $TEST_CMD
-
-      - name: Sign Images
+      - name: Extract Digest
+        id: digest
         if: ${{ inputs.push }}
         run: |
+          DIGEST=$(jq -r '.runtime["containerimage.digest"]' metadata.json)
+          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
+
+    outputs:
+      digest: ${{ steps.digest.outputs.digest }}
+
+  e2e-test:
+    needs: build
+    uses: ./.github/workflows/distroless-e2e.yml
+    with:
+      stack: ${{ inputs.stack }}
+      image_tag: latest
+    secrets: inherit
+
+  sign:
+    needs: [build, e2e-test]
+    runs-on: ubuntu-latest
+    if: ${{ inputs.push }}
+    steps:
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.7.0
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Sign Images
+        run: |
           IMAGE_NAME="ghcr.io/${{ github.repository_owner }}/${{ inputs.stack }}-distroless"
-          cosign sign --yes "${IMAGE_NAME}@${{ steps.digest.outputs.digest }}"
+          cosign sign --yes "${IMAGE_NAME}@${{ needs.build.outputs.digest }}"
 
       - name: Generate SLSA Build Provenance (Level 3)
         if: ${{ inputs.push }}
         uses: actions/attest-build-provenance@v2
         with:
           subject-name: ghcr.io/${{ github.repository_owner }}/${{ inputs.stack }}-distroless
-          subject-digest: ${{ steps.digest.outputs.digest }}
+          subject-digest: ${{ needs.build.outputs.digest }}
           push-to-registry: true
 
       - name: Upload Architecture DAG and Diagrams

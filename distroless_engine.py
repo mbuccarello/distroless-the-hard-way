@@ -214,7 +214,7 @@ class HCLGenerator:
         df += "FROM builder as runtime-setup\nUSER root\n"
         df += "ARG RUNTIME_URL\nRUN mkdir -p /runtime-root/usr\n"
         
-        # Add dependencies to runtime-setup for diagnostics and consistency
+        # Add dependencies to runtime-setup for consistency
         for pkg in graph.keys():
             df += f"COPY --from={pkg} /artifacts/usr /usr\n"
 
@@ -226,10 +226,6 @@ class HCLGenerator:
         elif self.has_stack_target:
             # Copy from the stack-specific build stage
             df += f"COPY --from={self.stack['name']} /artifacts/usr /runtime-root/usr\n"
-
-        # Diagnostic: check linkage in setup stage
-        df += "RUN if [ -f /runtime-root/usr/bin/python3 ]; then ldd /runtime-root/usr/bin/python3; fi || true\n"
-        df += "RUN ls -l /usr/lib/libz* || true\n"
 
         df += "\nFROM base as cc\nUSER root\n"
         df += "COPY --from=builder /usr/lib/libgcc_s.so.1 /usr/lib/\n"

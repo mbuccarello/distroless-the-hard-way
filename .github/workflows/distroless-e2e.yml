@@ -1,0 +1,62 @@
+name: Distroless E2E Tests
+on:
+  workflow_dispatch:
+    inputs:
+      stack:
+        description: 'Stack to test'
+        required: true
+        type: choice
+        options:
+          - python
+          - nodejs
+          - java
+          - dotnet
+          - php
+          - perl
+      image_tag:
+        description: 'Image tag to test (default: latest)'
+        required: false
+        default: 'latest'
+  workflow_call:
+    inputs:
+      stack:
+        required: true
+        type: string
+      image_tag:
+        required: false
+        type: string
+        default: 'latest'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Execute Smoke Test
+        run: |
+          IMAGE_NAME="ghcr.io/${{ github.repository_owner }}/${{ inputs.stack }}-distroless:${{ inputs.image_tag }}"
+          
+          echo "📥 Pulling image: $IMAGE_NAME"
+          docker pull "$IMAGE_NAME"
+
+          case "${{ inputs.stack }}" in
+            python) TEST_CMD="python3 /app/test.py" ;;
+            nodejs) TEST_CMD="node /app/test.js" ;;
+            java) TEST_CMD="java /app/test.java" ;;
+            php) TEST_CMD="php /app/test.php" ;;
+            perl) TEST_CMD="perl /app/test.pl" ;;
+            dotnet) TEST_CMD="dotnet --info" ;;
+            *) TEST_CMD="true" ;;
+          esac
+          
+          echo "🚀 Running E2E Test for ${{ inputs.stack }}..."
+          docker run --rm -v $(pwd)/app:/app "$IMAGE_NAME" $TEST_CMD
