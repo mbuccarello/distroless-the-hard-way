@@ -3,7 +3,7 @@
 # --- STAGE 0: BUILDER (The Source Compiler) ---
 FROM fedora:40 as builder
 # Install base tools
-RUN dnf install -y @development-tools cmake curl git busybox-utils
+RUN dnf install -y @development-tools cmake curl git busybox perl python3
 
 # Create standard Distroless RootFS
 RUN mkdir -p /rootfs/etc/ssl/certs /rootfs/etc/pki/tls/certs /rootfs/usr/lib /rootfs/usr/share/zoneinfo /rootfs/tmp /rootfs/home/nonroot /rootfs/var/lib/apt/lists /rootfs/etc/ld.so.conf.d
