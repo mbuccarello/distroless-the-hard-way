@@ -218,6 +218,9 @@ class HCLGenerator:
         for pkg in graph.keys():
             df += f"COPY --from={pkg} /artifacts/usr /usr\n"
 
+        # Update linker cache in setup stage
+        df += "RUN ldconfig\n"
+
         if self.stack.get("type") == "binary_injection":
             df += "RUN if [ -n \"$RUNTIME_URL\" ]; then \\\n"
             df += "    curl -L \"$RUNTIME_URL\" -o /tmp/runtime.tar.gz && \\\n"
@@ -226,6 +229,10 @@ class HCLGenerator:
         elif self.has_stack_target:
             # Copy from the stack-specific build stage
             df += f"COPY --from={self.stack['name']} /artifacts/usr /runtime-root/usr\n"
+
+        # Automated Linkage Validation
+        df += "RUN if [ -f /runtime-root/usr/bin/python3 ]; then ldd /runtime-root/usr/bin/python3; fi\n"
+        df += "RUN if [ -f /runtime-root/usr/bin/node ]; then ldd /runtime-root/usr/bin/node; fi\n"
 
         df += "\nFROM base as cc\nUSER root\n"
         df += "COPY --from=builder /usr/lib/libgcc_s.so.1 /usr/lib/\n"

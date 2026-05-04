@@ -5,8 +5,13 @@ FROM archlinux:latest as builder
 RUN pacman -Syu --noconfirm base-devel git busybox
 
 # Create standard Distroless RootFS
-RUN mkdir -p /rootfs/etc/ssl/certs /rootfs/etc/pki/tls/certs /rootfs/usr/lib /rootfs/usr/share/zoneinfo /rootfs/tmp /rootfs/home/nonroot /rootfs/var/lib/apt/lists
+RUN mkdir -p /rootfs/etc/ssl/certs /rootfs/etc/pki/tls/certs /rootfs/usr/lib /rootfs/usr/share/zoneinfo /rootfs/tmp /rootfs/home/nonroot /rootfs/var/lib/apt/lists /rootfs/etc/ld.so.conf.d
 RUN chmod 1777 /rootfs/tmp
+
+# Dynamic Linker Configuration
+RUN echo "/usr/lib" > /rootfs/etc/ld.so.conf && \
+    echo "/lib" >> /rootfs/etc/ld.so.conf && \
+    echo "include /etc/ld.so.conf.d/*.conf" >> /rootfs/etc/ld.so.conf
 
 # Setup Users
 RUN <<EOF
