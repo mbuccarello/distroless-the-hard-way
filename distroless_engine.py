@@ -242,6 +242,7 @@ class HCLGenerator:
             df += f"COPY --from={self.stack['name']} /artifacts/usr /runtime-root/usr\n"
 
         # Automated Linkage Validation (using ld-linux directly to avoid shell corruption)
+        df += "RUN find /runtime-root/usr/lib -maxdepth 2\n"
         df += "RUN if [ -f /runtime-root/usr/bin/python3 ]; then LD_LIBRARY_PATH=/runtime-root/usr/lib /lib64/ld-linux-x86-64.so.2 --list /runtime-root/usr/bin/python3; fi\n"
         df += "RUN if [ -f /runtime-root/usr/bin/node ]; then LD_LIBRARY_PATH=/runtime-root/usr/lib /lib64/ld-linux-x86-64.so.2 --list /runtime-root/usr/bin/node; fi\n"
 
