@@ -78,5 +78,5 @@ jobs:
         run: |
           docker pull ${REGISTRY}/${{ github.event.inputs.stack }}-distroless:latest
           if [ "${{ github.event.inputs.stack }}" == "python" ]; then
-            docker run --rm ${REGISTRY}/${{ github.event.inputs.stack }}-distroless:latest --version
+            docker run --rm ${REGISTRY}/${{ github.event.inputs.stack }}-distroless:latest python --version
           fi
