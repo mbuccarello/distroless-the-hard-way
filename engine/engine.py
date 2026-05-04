@@ -22,7 +22,12 @@ class MetadataManager:
             "expat": "https://github.com/libexpat/libexpat/releases/download/R_2_6_4/expat-2.6.4.tar.xz",
             "bzip2": "https://sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz",
             "xz": "https://github.com/tukaani-project/xz/releases/download/v5.6.3/xz-5.6.3.tar.xz",
-            "gdbm": "https://ftp.gnu.org/pub/gnu/gdbm/gdbm-1.24.tar.gz"
+            "gdbm": "https://ftp.gnu.org/pub/gnu/gdbm/gdbm-1.24.tar.gz",
+            "icu": "https://github.com/unicode-org/icu/releases/download/release-75-1/icu4c-75_1-src.tgz",
+            "brotli": "https://github.com/google/brotli/archive/refs/tags/v1.1.0.tar.gz",
+            "c-ares": "https://github.com/c-ares/c-ares/releases/download/v1.34.2/c-ares-1.34.2.tar.gz",
+            "nghttp2": "https://github.com/nghttp2/nghttp2/releases/download/v1.64.0/nghttp2-1.64.0.tar.gz",
+            "krb5": "https://web.mit.edu/kerberos/dist/krb5/1.21/krb5-1.21.3.tar.gz"
         }
 
     def fetch_arch_pkgbuild(self, pkgname):
@@ -116,7 +121,18 @@ class HCLGenerator:
                 if pkg == "ncurses": lib_config = "--with-shared --enable-widec --enable-pc-files --with-termlib"
                 if pkg == "readline": lib_config = "--with-curses"
                 if pkg == "libxcrypt": lib_config = "--disable-werror"
+                if pkg == "icu": lib_config = "--enable-static --enable-shared"
+                if pkg == "brotli": lib_config = "" # CMake usually, but let's see
+                if pkg == "c-ares": lib_config = ""
+                if pkg == "nghttp2": lib_config = "--enable-lib-only"
+                if pkg == "krb5": lib_config = "--with-crypto-impl=openssl"
                 if lib_config: hcl += f'    LIB_CONFIG = "{lib_config}"\n'
+                
+                lib_subdir = ""
+                if pkg == "icu": lib_subdir = "source"
+                if pkg == "krb5": lib_subdir = "src"
+                if lib_subdir: hcl += f'    LIB_SUBDIR = "{lib_subdir}"\n'
+                
                 hcl += '  }\n'
                 hcl += '  contexts = {\n    builder = "target:builder"\n'
                 for dep in meta['depends']:
@@ -164,8 +180,16 @@ class HCLGenerator:
             if pkg == "ncurses": lib_config = "--with-shared --enable-widec --enable-pc-files --with-termlib"
             if pkg == "readline": lib_config = "--with-curses"
             if pkg == "libxcrypt": lib_config = "--disable-werror"
+            if pkg == "icu": lib_config = "--enable-static --enable-shared"
+            if pkg == "nghttp2": lib_config = "--enable-lib-only"
+            if pkg == "krb5": lib_config = "--with-crypto-impl=openssl"
             if lib_config: hcl += f'    LIB_CONFIG = "{lib_config}"\n'
-            
+
+            lib_subdir = ""
+            if pkg == "icu": lib_subdir = "source"
+            if pkg == "krb5": lib_subdir = "src"
+            if lib_subdir: hcl += f'    LIB_SUBDIR = "{lib_subdir}"\n'
+
             hcl += '  }\n'
             hcl += '  contexts = {\n    builder = "target:foundations"\n'
             for dep in meta['depends']:
@@ -206,11 +230,11 @@ class HCLGenerator:
         df = ""
         for pkg, meta in graph.items():
             df += f"\nFROM builder AS {pkg}\n"
-            df += f"ARG LIB_NAME={pkg}\nARG LIB_URL\nARG LIB_CONFIG\n"
+            df += f"ARG LIB_NAME={pkg}\nARG LIB_URL\nARG LIB_CONFIG\nARG LIB_SUBDIR=.\n"
             for dep in meta['depends']:
                 if dep in graph: df += f"COPY --from={dep} /artifacts/usr /opt/distroless\n"
             df += "WORKDIR /build\nRUN set -ex && if [ -n \"$LIB_URL\" ] && [ \"$LIB_URL\" != \"SKIP\" ]; then \\\n"
-            df += "    curl -L \"$LIB_URL\" -o source.tar.gz && mkdir src && tar -xf source.tar.gz -C src --strip-components=1 && cd src && \\\n"
+            df += "    curl -L \"$LIB_URL\" -o source.tar.gz && mkdir src && tar -xf source.tar.gz -C src --strip-components=1 && cd src/$LIB_SUBDIR && \\\n"
             df += "    export CPPFLAGS=\"-I/opt/distroless/include\" && \\\n"
             df += "    export LDFLAGS=\"-L/opt/distroless/lib -L/opt/distroless/lib64 -Wl,-rpath,/usr/lib\" && \\\n"
             df += "    export PKG_CONFIG_PATH=\"/opt/distroless/lib/pkgconfig:/opt/distroless/lib64/pkgconfig\" && \\\n"
@@ -218,9 +242,17 @@ class HCLGenerator:
             df += "    if [ \"$LIB_NAME\" = \"bzip2\" ]; then make -j$(nproc) PREFIX=/usr && make DESTDIR=/artifacts PREFIX=/usr install; else make -j$(nproc) && make DESTDIR=/artifacts install; fi; \\\n"
             df += "    fi && mkdir -p /artifacts/usr\n"
 
+        # Runtime Setup Stage: Extracting language binaries
         df += "\nFROM builder AS runtime-setup\nUSER root\nRUN mkdir -p /runtime-root/usr\n"
-        df += "ARG RUNTIME_URL\nRUN set -ex && mkdir -p /tmp/py && curl -L \"$RUNTIME_URL\" -o /tmp/runtime.tar.gz && \\\n"
-        df += "    tar -xf /tmp/runtime.tar.gz -C /tmp/py && PY_DIR=$(find /tmp/py -name bin -type d | head -n 1 | xargs dirname) && cp -rv $PY_DIR/* /runtime-root/usr/\n"
+        df += "ARG RUNTIME_URL\nRUN set -ex && mkdir -p /tmp/extract && curl -L \"$RUNTIME_URL\" -o /tmp/runtime.tar.gz && \\\n"
+        df += "    tar -xf /tmp/runtime.tar.gz -C /tmp/extract && \\\n"
+        df += "    BIN_DIR=$(find /tmp/extract -name bin -type d | head -n 1) && \\\n"
+        df += "    if [ -n \"$BIN_DIR\" ]; then \\\n"
+        df += "      SRC_DIR=$(dirname \"$BIN_DIR\"); \\\n"
+        df += "      cp -rv \"$SRC_DIR\"/* /runtime-root/usr/; \\\n"
+        df += "    else \\\n"
+        df += "      cp -rv /tmp/extract/* /runtime-root/usr/; \\\n"
+        df += "    fi\n"
         
         df += "\nFROM cc AS runtime\nUSER root\nARG RUNTIME_NAME\nARG RUNTIME_VER\nLABEL distroless.stack=\"${RUNTIME_NAME}\"\n"
         df += "COPY --from=runtime-setup /runtime-root/usr/ /usr/\nUSER 65532:65532\n"
