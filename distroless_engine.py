@@ -230,6 +230,8 @@ class HCLGenerator:
             df += f"COPY --from={pkg} /artifacts/usr /usr\n"
             df += f"COPY --from={pkg} /artifacts/usr/share/doc /usr/share/doc\n"
         
+        df += "RUN ls -l /usr/lib/libz* || true\n"
+        
         df += "\nFROM cc as runtime\nUSER root\nARG RUNTIME_NAME\nARG RUNTIME_VER\nLABEL distroless.stack=\"${RUNTIME_NAME}\"\n"
         df += "COPY --from=runtime-setup /runtime-root/usr /usr\n"
         df += "USER 65532:65532\n"

@@ -50,6 +50,7 @@ runtime:
     - "--enable-optimizations"
     - "--with-lto"
     - "--enable-shared"
+    - "LDFLAGS=-Wl,-rpath,/usr/lib"
     - "--with-system-ffi"
     - "--with-system-expat"
     - "--without-ensurepip"
