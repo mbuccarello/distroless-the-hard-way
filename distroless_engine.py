@@ -192,13 +192,14 @@ class HCLGenerator:
         for pkg, meta in graph.items():
             df += f"\nFROM builder as {pkg}-builder\n"
             df += f"ARG LIB_NAME={pkg}\nARG LIB_URL\nARG LIB_CONFIG\n"
-            # Copy dependencies to /usr (ABI safe because we're in an isolated builder stage)
+            
+            # Copy dependencies to /usr (using context names from HCL)
             for dep in meta['depends']:
                 if dep in graph:
-                    df += f"COPY --from={dep}-builder /artifacts/usr /usr\n"
+                    df += f"COPY --from={dep} /artifacts/usr /usr\n"
             
             df += "WORKDIR /build\n"
-            df += "RUN if [ \"$LIB_URL\" != \"SKIP\" ]; then \\\n"
+            df += "RUN if [ -n \"$LIB_URL\" ] && [ \"$LIB_URL\" != \"SKIP\" ]; then \\\n"
             df += "    curl -L \"$LIB_URL\" -o source.tar.gz && \\\n"
             df += "    mkdir src && tar -xf source.tar.gz -C src --strip-components=1 && \\\n"
             df += "    cd src && \\\n"
@@ -214,28 +215,30 @@ class HCLGenerator:
             df += f"\nFROM builder as stack-builder\n"
             df += "ARG STACK_NAME\nARG STACK_URL\nARG STACK_CONFIG\n"
             for pkg in graph.keys():
-                df += f"COPY --from={pkg}-builder /artifacts/usr /usr\n"
+                df += f"COPY --from={pkg} /artifacts/usr /usr\n"
             
             df += "WORKDIR /build\n"
-            df += "RUN curl -L \"$STACK_URL\" -o source.tar.xz && \\\n"
+            df += "RUN if [ -n \"$STACK_URL\" ] && [ \"$STACK_URL\" != \"SKIP\" ]; then \\\n"
+            df += "    curl -L \"$STACK_URL\" -o source.tar.xz && \\\n"
             df += "    mkdir src && tar -xf source.tar.xz -C src --strip-components=1 && \\\n"
             df += "    cd src && \\\n"
             df += "    ./configure --prefix=/usr $STACK_CONFIG && \\\n"
             df += "    make -j$(nproc) && \\\n"
-            df += "    make DESTDIR=/artifacts install\n"
+            df += "    make DESTDIR=/artifacts install; \\\n"
+            df += "    fi\n"
 
         # Intermediate setup stage (for validation)
         df += "\nFROM builder as runtime-setup\nUSER root\n"
         df += "RUN mkdir -p /runtime-root/usr\n"
         for pkg in graph.keys():
-            df += f"COPY --from={pkg}-builder /artifacts/usr /runtime-root/usr\n"
+            df += f"COPY --from={pkg} /artifacts/usr /runtime-root/usr\n"
         
         if self.stack.get("type") == "binary_injection":
             df += "ARG RUNTIME_URL\n"
             df += "RUN curl -L \"$RUNTIME_URL\" -o /tmp/runtime.tar.gz && \\\n"
             df += "    tar -xf /tmp/runtime.tar.gz -C /runtime-root/usr --strip-components=1\n"
         elif self.has_stack_target:
-            df += f"COPY --from=stack-builder /artifacts/usr /runtime-root/usr\n"
+            df += f"COPY --from={self.stack['name']} /artifacts/usr /runtime-root/usr\n"
 
         # Automated Linkage Validation
         df += "RUN find /runtime-root/usr/lib -maxdepth 2 || true\n"
@@ -247,7 +250,7 @@ class HCLGenerator:
         df += "COPY --from=builder /usr/lib/libgcc_s.so.1 /usr/lib/\n"
         df += "COPY --from=builder /usr/lib/libstdc++.so.6 /usr/lib/\n"
         for pkg in graph.keys():
-            df += f"COPY --from={pkg}-builder /artifacts/usr /usr\n"
+            df += f"COPY --from={pkg} /artifacts/usr /usr\n"
         
         df += "\nFROM cc as runtime\nUSER root\nARG RUNTIME_NAME\nARG RUNTIME_VER\nLABEL distroless.stack=\"${RUNTIME_NAME}\"\n"
         df += "COPY --from=runtime-setup /runtime-root/usr /usr\n"

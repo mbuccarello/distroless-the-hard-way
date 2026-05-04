@@ -2,7 +2,11 @@
 
 # --- STAGE 0: ARCH BUILDER (The Source Compiler) ---
 FROM archlinux:latest as builder
-RUN pacman -Syu --noconfirm base-devel git busybox
+# Install base tools and initialize keyring
+RUN pacman -Syu --noconfirm && \
+    pacman-key --init && \
+    pacman-key --populate archlinux && \
+    pacman -S --noconfirm base-devel git cmake curl busybox
 
 # Create standard Distroless RootFS
 RUN mkdir -p /rootfs/etc/ssl/certs /rootfs/etc/pki/tls/certs /rootfs/usr/lib /rootfs/usr/share/zoneinfo /rootfs/tmp /rootfs/home/nonroot /rootfs/var/lib/apt/lists /rootfs/etc/ld.so.conf.d
