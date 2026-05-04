@@ -52,7 +52,7 @@ jobs:
         run: python3 engine/engine.py --mode runtime --stack stacks/${{ github.event.inputs.stack }}.yaml
 
       - name: Build and Assemble Runtime
-        uses: docker/bake-action@v4
+        uses: docker/bake-action@v5
         with:
           files: foundations/${{ github.event.inputs.stack }}.hcl
           push: ${{ github.event.inputs.push }}

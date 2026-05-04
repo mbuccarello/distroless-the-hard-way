@@ -50,7 +50,7 @@ jobs:
         run: python3 engine/engine.py --mode foundation
 
       - name: Build and Push CC
-        uses: docker/bake-action@v4
+        uses: docker/bake-action@v5
         with:
           files: foundations/foundations.hcl
           targets: cc
