@@ -1,10 +1,6 @@
 name: python
 version: "3.14"
-type: source_build
-base_hierarchy:
-  - static
-  - base
-  - cc
+description: "Sovereign Python 3.14 Distroless Image (Arch Linux based)"
 
 dependencies:
   - name: zlib
@@ -37,20 +33,16 @@ dependencies:
   - name: sqlite
     version: "3.47.0"
     type: source
-  - name: gdbm
-    version: "1.24"
-    type: source
 
 runtime:
   name: python
-  version: "3.14.0"
+  version: "3.14"
+  type: source_build
   source_url: "https://www.python.org/ftp/python/3.14.0/Python-3.14.0a2.tar.xz"
-  sha256: "0c7df4a365ac4b90b01627aba81df7d4" # Placeholder SHA
   build_flags:
     - "--enable-optimizations"
     - "--with-lto"
     - "--enable-shared"
-    - "LDFLAGS=-Wl,-rpath,/usr/lib"
     - "--with-system-ffi"
     - "--with-system-expat"
-    - "--without-ensurepip"
+    - "--with-ensurepip=install"
