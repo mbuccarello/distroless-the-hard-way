@@ -206,8 +206,10 @@ class HCLGenerator:
             # Robust extraction: find where python is and move it to /runtime-root/usr
             df += "RUN mkdir -p /tmp/py && curl -L \"$RUNTIME_URL\" -o /tmp/runtime.tar.gz && \\\n"
             df += "    tar -xf /tmp/runtime.tar.gz -C /tmp/py && \\\n"
+            df += "    echo \"Content of /tmp/py:\" && ls -R /tmp/py && \\\n"
             # Find the bin directory (it might be inside a python/ directory)
             df += "    PY_DIR=$(find /tmp/py -name bin -type d | head -n 1 | xargs dirname) && \\\n"
+            df += "    echo \"Identified PY_DIR: $PY_DIR\" && \\\n"
             df += "    cp -rv $PY_DIR/* /runtime-root/usr/\n"
 
         # Automated Linkage Validation & Debug
