@@ -140,10 +140,24 @@ class HCLGenerator:
             hcl += '  target = "lib-builder"\n'
             hcl += '  context = "."\n'
             hcl += f'  platforms = ["{self.platform}"]\n'
+            # Smart Overrides for core libraries
+            lib_config = ""
+            make_extra = ""
+            if pkg == "zlib":
+                lib_config = "--shared"
+            elif pkg == "openssl":
+                lib_config = "shared zlib"
+            elif pkg == "readline":
+                lib_config = "--with-curses"
+            elif pkg == "ncurses":
+                lib_config = "--with-shared --without-debug --enable-widec --enable-pc-files --with-pkg-config-libdir=/usr/lib/pkgconfig"
+            
             hcl += f'  args = {{\n'
             hcl += f'    LIB_NAME = "{pkg}"\n'
             if data["url"]: hcl += f'    LIB_URL = "{data["url"]}"\n'
             if data["sha"] and data["sha"] != "SKIP": hcl += f'    LIB_SHA = "{data["sha"]}"\n'
+            if lib_config: hcl += f'    LIB_CONFIG = "{lib_config}"\n'
+            if make_extra: hcl += f'    MAKE_EXTRA = "{make_extra}"\n'
             hcl += '  }\n'
             hcl += '  contexts = {\n'
             hcl += '    builder = "target:builder"\n'
@@ -227,9 +241,9 @@ class HCLGenerator:
             # Copy from the stack-specific build stage
             df += f"COPY --from={self.stack['name']} /artifacts/usr /runtime-root/usr\n"
 
-        # Automated Linkage Validation (using isolated environment)
-        df += "RUN if [ -f /runtime-root/usr/bin/python3 ]; then LD_LIBRARY_PATH=/runtime-root/usr/lib ldd /runtime-root/usr/bin/python3; fi\n"
-        df += "RUN if [ -f /runtime-root/usr/bin/node ]; then LD_LIBRARY_PATH=/runtime-root/usr/lib ldd /runtime-root/usr/bin/node; fi\n"
+        # Automated Linkage Validation (using ld-linux directly to avoid shell corruption)
+        df += "RUN if [ -f /runtime-root/usr/bin/python3 ]; then LD_LIBRARY_PATH=/runtime-root/usr/lib /lib64/ld-linux-x86-64.so.2 --list /runtime-root/usr/bin/python3; fi\n"
+        df += "RUN if [ -f /runtime-root/usr/bin/node ]; then LD_LIBRARY_PATH=/runtime-root/usr/lib /lib64/ld-linux-x86-64.so.2 --list /runtime-root/usr/bin/node; fi\n"
 
         df += "\nFROM base as cc\nUSER root\n"
         df += "COPY --from=builder /usr/lib/libgcc_s.so.1 /usr/lib/\n"
