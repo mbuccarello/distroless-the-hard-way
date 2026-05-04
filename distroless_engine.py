@@ -188,7 +188,6 @@ class HCLGenerator:
         return hcl
 
     def generate_cc_dockerfile(self, graph):
-        # No syntax header for secondary Dockerfile used by Bake
         df = ""
         
         # Template for library builders
@@ -196,26 +195,29 @@ class HCLGenerator:
             df += f"\nFROM builder as {pkg}-builder\n"
             df += f"ARG LIB_NAME={pkg}\nARG LIB_URL\nARG LIB_CONFIG\n"
             
-            # Copy dependencies to /usr (using context names from HCL)
+            # Use /opt/distroless as the build-time prefix to avoid breaking system tools in /usr
             for dep in meta['depends']:
                 if dep in graph:
-                    df += f"COPY --from={dep} /artifacts/usr /usr\n"
+                    df += f"COPY --from={dep} /artifacts/usr /opt/distroless\n"
             
             df += "WORKDIR /build\n"
             df += "RUN if [ -n \"$LIB_URL\" ] && [ \"$LIB_URL\" != \"SKIP\" ]; then \\\n"
             df += "    curl -L \"$LIB_URL\" -o source.tar.gz && \\\n"
             df += "    mkdir src && tar -xf source.tar.gz -C src --strip-components=1 && \\\n"
             df += "    cd src && \\\n"
+            # Point to our built dependencies
+            df += "    export CPPFLAGS=\"-I/opt/distroless/include\" && \\\n"
+            df += "    export LDFLAGS=\"-L/opt/distroless/lib -L/opt/distroless/lib64 -Wl,-rpath,/usr/lib\" && \\\n"
+            df += "    export PKG_CONFIG_PATH=\"/opt/distroless/lib/pkgconfig:/opt/distroless/lib64/pkgconfig\" && \\\n"
+            
             # Smart build command
             df += "    if [ -f ./configure ]; then ./configure --prefix=/usr $LIB_CONFIG; \\\n"
-            # openssl uses Configure (capital C)
             df += "    elif [ -f ./Configure ]; then ./Configure --prefix=/usr $LIB_CONFIG; \\\n"
             df += "    fi && \\\n"
             # Bzip2 needs special install
             df += "    if [ \"$LIB_NAME\" = \"bzip2\" ]; then make -j$(nproc) PREFIX=/usr && make DESTDIR=/artifacts PREFIX=/usr install; \\\n"
             df += "    else make -j$(nproc) && make DESTDIR=/artifacts install; fi; \\\n"
             df += "    fi\n"
-            # Ensure artifacts/usr exists even if build skipped
             df += "RUN mkdir -p /artifacts/usr\n"
 
         # Stack builder stage
@@ -223,19 +225,22 @@ class HCLGenerator:
             df += f"\nFROM builder as stack-builder\n"
             df += "ARG STACK_NAME\nARG STACK_URL\nARG STACK_CONFIG\n"
             for pkg in graph.keys():
-                df += f"COPY --from={pkg} /artifacts/usr /usr\n"
+                df += f"COPY --from={pkg} /artifacts/usr /opt/distroless\n"
             
             df += "WORKDIR /build\n"
             df += "RUN if [ -n \"$STACK_URL\" ] && [ \"$STACK_URL\" != \"SKIP\" ]; then \\\n"
             df += "    curl -L \"$STACK_URL\" -o source.tar.xz && \\\n"
             df += "    mkdir src && tar -xf source.tar.xz -C src --strip-components=1 && \\\n"
             df += "    cd src && \\\n"
+            df += "    export CPPFLAGS=\"-I/opt/distroless/include\" && \\\n"
+            df += "    export LDFLAGS=\"-L/opt/distroless/lib -L/opt/distroless/lib64 -Wl,-rpath,/usr/lib\" && \\\n"
+            df += "    export PKG_CONFIG_PATH=\"/opt/distroless/lib/pkgconfig:/opt/distroless/lib64/pkgconfig\" && \\\n"
             df += "    ./configure --prefix=/usr $STACK_CONFIG && \\\n"
             df += "    make -j$(nproc) && \\\n"
             df += "    make DESTDIR=/artifacts install; \\\n"
             df += "    fi\n"
 
-        # Intermediate setup stage (for validation)
+        # Intermediate setup stage
         df += "\nFROM builder as runtime-setup\nUSER root\n"
         df += "RUN mkdir -p /runtime-root/usr\n"
         for pkg in graph.keys():
@@ -243,7 +248,6 @@ class HCLGenerator:
         
         if self.runtime.get("type") == "binary_injection":
             df += "ARG RUNTIME_URL\n"
-            # Robust extraction: find where python is and move it to /runtime-root/usr
             df += "RUN mkdir -p /tmp/py && curl -L \"$RUNTIME_URL\" -o /tmp/runtime.tar.gz && \\\n"
             df += "    tar -xf /tmp/runtime.tar.gz -C /tmp/py && \\\n"
             df += "    PY_DIR=$(find /tmp/py -name bin -type d | head -n 1 | xargs dirname) && \\\n"
@@ -251,22 +255,14 @@ class HCLGenerator:
         elif self.has_stack_target:
             df += f"COPY --from=stack-builder /artifacts/usr /runtime-root/usr\n"
 
-        # Automated Linkage Validation & Debug
-        df += "RUN ls -F /runtime-root/usr/bin/ || true\n"
-        # Harden finding python3
-        df += "RUN if [ -f /runtime-root/usr/bin/python3 ]; then P3=/runtime-root/usr/bin/python3; \\\n"
-        df += "    fi && if [ -n \"$P3\" ]; then LD_LIBRARY_PATH=/runtime-root/usr/lib /lib64/ld-linux-x86-64.so.2 --list \"$P3\"; fi\n"
-
         # Final CC image
         df += "\nFROM base as cc\nUSER root\n"
-        # Fedora uses lib64 for libgcc/libstdc++
         df += "COPY --from=builder /usr/lib64/libgcc_s.so.1 /usr/lib/\n"
         df += "COPY --from=builder /usr/lib64/libstdc++.so.6 /usr/lib/\n"
         for pkg in graph.keys():
             df += f"COPY --from={pkg} /artifacts/usr /usr\n"
         
         df += "\nFROM cc as runtime\nUSER root\nARG RUNTIME_NAME\nARG RUNTIME_VER\nLABEL distroless.stack=\"${RUNTIME_NAME}\"\n"
-        # Ensure we copy correctly based on extraction result
         df += "COPY --from=runtime-setup /runtime-root/usr/ /usr/\n"
         df += "USER 65532:65532\n"
         
