@@ -99,6 +99,10 @@ class HCLGenerator:
     def generate(self, graph):
         hcl = 'variable "REGISTRY" {\n  default = "ghcr.io/mbuccarello"\n}\n\n'
         
+        hcl += 'group "default" {\n'
+        hcl += '  targets = ["runtime", "runtime-debug"]\n'
+        hcl += '}\n\n'
+
         # Base builder target
         hcl += 'target "builder" {\n  dockerfile = "Dockerfile"\n  target = "builder"\n  context = "."\n'
         hcl += f'  platforms = ["{self.platform}"]\n}}\n\n'
