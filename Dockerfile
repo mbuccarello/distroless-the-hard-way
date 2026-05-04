@@ -15,6 +15,9 @@ COPY --from=builder /rootfs /
 
 # --- STAGE 2: BASE (The Glibc Foundation) ---
 FROM static as base
+# Copy Busybox for essential filesystem tasks
+COPY --from=builder /usr/bin/busybox /usr/bin/busybox
+
 # Copy Glibc and essential dynamic linker files from Fedora builder (lib64)
 COPY --from=builder /usr/lib64/ld-linux-x86-64.so.2 /usr/lib/
 COPY --from=builder /usr/lib64/libc.so.6 /usr/lib/
