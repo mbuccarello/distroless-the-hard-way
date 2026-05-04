@@ -118,7 +118,11 @@ class HCLGenerator:
                 if pkg == "libxcrypt": lib_config = "--disable-werror"
                 if lib_config: hcl += f'    LIB_CONFIG = "{lib_config}"\n'
                 hcl += '  }\n'
-                hcl += '  contexts = { builder = "target:builder" }\n'
+                hcl += '  contexts = {\n    builder = "target:builder"\n'
+                for dep in meta['depends']:
+                    if dep in graph:
+                        hcl += f'    {dep} = "target:{dep}"\n'
+                hcl += '  }\n'
                 hcl += '}\n\n'
 
         # Common CC (Base for all runtimes)

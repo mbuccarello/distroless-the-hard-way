@@ -39,7 +39,9 @@ target "zlib" {
     LIB_URL = "https://github.com/madler/zlib/archive/refs/tags/v1.3.1.tar.gz"
     LIB_CONFIG = "--shared"
   }
-  contexts = { builder = "target:builder" }
+  contexts = {
+    builder = "target:builder"
+  }
 }
 
 target "openssl" {
@@ -52,7 +54,10 @@ target "openssl" {
     LIB_URL = "https://github.com/openssl/openssl/releases/download/openssl-3.4.0/openssl-3.4.0.tar.gz"
     LIB_CONFIG = "shared zlib"
   }
-  contexts = { builder = "target:builder" }
+  contexts = {
+    builder = "target:builder"
+    zlib = "target:zlib"
+  }
 }
 
 target "libxcrypt" {
@@ -65,7 +70,9 @@ target "libxcrypt" {
     LIB_URL = "https://github.com/besser82/libxcrypt/releases/download/v4.4.36/libxcrypt-4.4.36.tar.xz"
     LIB_CONFIG = "--disable-werror"
   }
-  contexts = { builder = "target:builder" }
+  contexts = {
+    builder = "target:builder"
+  }
 }
 
 target "cc" {

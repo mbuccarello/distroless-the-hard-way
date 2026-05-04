@@ -49,8 +49,7 @@ ARG RUNTIME_URL
 RUN set -ex && mkdir -p /tmp/py && curl -L "$RUNTIME_URL" -o /tmp/runtime.tar.gz && \
     tar -xf /tmp/runtime.tar.gz -C /tmp/py && PY_DIR=$(find /tmp/py -name bin -type d | head -n 1 | xargs dirname) && cp -rv $PY_DIR/* /runtime-root/usr/
 
-# --- STAGE 5: RUNTIME (Final Assembly) ---
-FROM ghcr.io/mbuccarello/cc:latest as runtime
+FROM cc AS runtime
 USER root
 ARG RUNTIME_NAME
 ARG RUNTIME_VER
