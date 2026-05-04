@@ -262,7 +262,9 @@ class HCLGenerator:
         df += "COPY --from=runtime-setup /runtime-root/usr /usr\n"
         df += "USER 65532:65532\n"
         
-        df += "\nFROM runtime as runtime-debug\nUSER root\nCOPY --from=builder /usr/bin/busybox /usr/bin/busybox\nRUN [\"/usr/bin/busybox\", \"--install\", \"-s\", \"/usr/bin\"]\nUSER 65532:65532\n"
+        df += "\nFROM runtime as runtime-debug\nUSER root\n"
+        df += "COPY --from=builder /usr/bin/busybox /usr/bin/busybox\n"
+        df += "RUN [\"/usr/bin/busybox\", \"--install\", \"-s\", \"/usr/bin\"]\nUSER 65532:65532\n"
         
         return df
 

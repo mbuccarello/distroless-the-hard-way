@@ -4,6 +4,7 @@
 FROM fedora:40 as builder
 # Install base tools
 RUN dnf install -y @development-tools cmake curl git busybox perl python3
+RUN if [ -f /usr/sbin/busybox ]; then ln -s /usr/sbin/busybox /usr/bin/busybox; fi
 
 # Create standard Distroless RootFS
 RUN mkdir -p /rootfs/etc/ssl/certs /rootfs/etc/pki/tls/certs /rootfs/usr/lib /rootfs/usr/share/zoneinfo /rootfs/tmp /rootfs/home/nonroot /rootfs/var/lib/apt/lists /rootfs/etc/ld.so.conf.d
