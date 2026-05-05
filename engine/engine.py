@@ -207,7 +207,7 @@ class HCLGenerator:
 
         # CC target (Specialized for this runtime)
         hcl += f'target "cc-{name}" {{\n'
-        hcl += '  dockerfile = "foundations/cc.Dockerfile"\n  target = "cc"\n  context = "."\n'
+        hcl += f'  dockerfile = "foundations/cc-{name}.Dockerfile"\n  target = "cc"\n  context = "."\n'
         hcl += '  contexts = {\n'
         hcl += '    builder = "target:foundations"\n'
         hcl += '    base = "docker-image://${REGISTRY}/base:latest"\n'
@@ -234,6 +234,15 @@ class HCLGenerator:
         hcl += f'  tags = ["${{REGISTRY}}/{name}-distroless:debug"]\n}}\n'
         
         return hcl
+
+    def generate_cc_dockerfile(self, graph):
+        df = "# syntax=docker/dockerfile:1.4\nFROM base AS cc\nUSER root\n"
+        df += "COPY --from=builder /usr/lib64/libgcc_s.so.1 /usr/lib/\n"
+        df += "COPY --from=builder /usr/lib64/libstdc++.so.6 /usr/lib/\n"
+        for pkg in graph.keys():
+            df += f"COPY --from={pkg} /artifacts/usr /usr\n"
+        df += "LABEL distroless.layer=\"cc\"\nUSER 65532:65532\n"
+        return df
 
     def generate_runtime_dockerfile(self, graph, stack_config=None):
         df = ""
@@ -277,7 +286,9 @@ class HCLGenerator:
             df += "    export CPPFLAGS=\"-I/opt/distroless/include\" && \\\n"
             df += "    export LDFLAGS=\"-L/opt/distroless/lib -L/opt/distroless/lib64 -Wl,-rpath,/usr/lib\" && \\\n"
             df += "    export PKG_CONFIG_PATH=\"/opt/distroless/lib/pkgconfig:/opt/distroless/lib64/pkgconfig\" && \\\n"
-            df += f"    ./configure --prefix=/usr {build_flags} && \\\n"
+            df += f"    if [ -f ./configure ]; then ./configure --prefix=/usr {build_flags}; "
+            df += f"elif [ -f ./Configure ]; then ./Configure {build_flags}; "
+            df += f"elif [ -f ./CMakeLists.txt ]; then cmake -DCMAKE_INSTALL_PREFIX=/usr {build_flags} .; fi && \\\n"
             df += "    make -j$(nproc) && make DESTDIR=/runtime-root install\n"
             
         df += "\nFROM cc AS runtime\nUSER root\nARG RUNTIME_NAME\nARG RUNTIME_VER\nLABEL distroless.stack=\"${RUNTIME_NAME}\"\n"
@@ -315,6 +326,10 @@ def main():
             df = generator.generate_runtime_dockerfile(resolver.graph)
             with open("foundations/runtime.Dockerfile", "w") as f: f.write(df)
             
+            # Generate the foundation CC Dockerfile (base core libs)
+            cc_df = generator.generate_cc_dockerfile(resolver.graph)
+            with open("foundations/cc.Dockerfile", "w") as f: f.write(cc_df)
+            
         print("✅ Generated foundations/foundations.hcl and foundations/runtime.Dockerfile")
     
     elif args.mode == "runtime":
@@ -341,7 +356,12 @@ def main():
             
             df = generator.generate_runtime_dockerfile(resolver.graph, stack_config)
             with open("foundations/runtime.Dockerfile", "w") as f: f.write(df)
-            print(f"✅ Generated foundations/{stack_config['name']}.hcl and foundations/runtime.Dockerfile")
+            
+            # Generate stack-specific CC Dockerfile
+            cc_df = generator.generate_cc_dockerfile(resolver.graph)
+            with open(f"foundations/cc-{stack_config['name']}.Dockerfile", "w") as f: f.write(cc_df)
+            
+            print(f"✅ Generated foundations/{stack_config['name']}.hcl, foundations/cc-{stack_config['name']}.Dockerfile and foundations/runtime.Dockerfile")
 
 if __name__ == "__main__":
     main()
