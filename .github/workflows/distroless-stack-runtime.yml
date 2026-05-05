@@ -49,7 +49,12 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Initialize Distroless Engine
-        run: python3 engine/engine.py --mode runtime --stack stacks/${{ github.event.inputs.stack }}.yaml
+        run: |
+          python3 engine/engine.py --mode runtime --stack stacks/${{ github.event.inputs.stack }}.yaml
+          echo "--- foundations/${{ github.event.inputs.stack }}.hcl ---"
+          cat foundations/${{ github.event.inputs.stack }}.hcl
+          echo "--- foundations/runtime.Dockerfile ---"
+          cat foundations/runtime.Dockerfile
 
       - name: Build and Assemble Runtime
         uses: docker/bake-action@v5
