@@ -289,7 +289,7 @@ class HCLGenerator:
             df += "    export PKG_CONFIG_PATH=\"/opt/distroless/lib/pkgconfig:/opt/distroless/lib64/pkgconfig\" && \\\n"
             df += "    if [ -f ./configure ]; then ./configure --prefix=/usr $LIB_CONFIG; elif [ -f ./Configure ]; then ./Configure --prefix=/usr $LIB_CONFIG; "
             df += "elif [ -f ./CMakeLists.txt ]; then cmake -DCMAKE_INSTALL_PREFIX=/usr $LIB_CONFIG .; fi && \\\n"
-            df += "    if [ \"$LIB_NAME\" = \"bzip2\" ]; then make -j$(nproc) PREFIX=/usr && make DESTDIR=/artifacts PREFIX=/usr install; else make -j$(nproc) && make DESTDIR=/artifacts install; fi; \\\n"
+            df += "    if [ \"$LIB_NAME\" = \"icu\" ]; then make -j2 && make DESTDIR=/artifacts install; elif [ \"$LIB_NAME\" = \"bzip2\" ]; then make -j$(nproc) PREFIX=/usr && make DESTDIR=/artifacts PREFIX=/usr install; else make -j$(nproc) && make DESTDIR=/artifacts install; fi; \\\n"
             df += "    fi && mkdir -p /artifacts/usr\n"
 
         if not stack_config:
@@ -302,15 +302,17 @@ class HCLGenerator:
         if stack_type == "binary_injection":
             df += f"ARG RUNTIME_URL\nRUN set -ex && mkdir -p /tmp/extract && curl -L \"$RUNTIME_URL\" -o /tmp/runtime.tar.gz && \\\n"
             df += "    tar -xf /tmp/runtime.tar.gz -C /tmp/extract && \\\n"
-            df += "    BIN_DIR=$(find /tmp/extract -name bin -type d | head -n 1) && \\\n"
-            df += "    if [ -n \"$BIN_DIR\" ]; then \\\n"
-            df += "      SRC_DIR=$(dirname \"$BIN_DIR\"); \\\n"
-            df += "      cp -rv \"$SRC_DIR\"/* /runtime-root/usr/; \\\n"
+            df += "    if [ \"$RUNTIME_NAME\" = \"dotnet\" ]; then \\\n"
+            df += "      mkdir -p /runtime-root/usr/lib/dotnet && cp -rv /tmp/extract/* /runtime-root/usr/lib/dotnet/ && \\\n"
+            df += "      mkdir -p /runtime-root/usr/bin && ln -s /usr/lib/dotnet/dotnet /runtime-root/usr/bin/dotnet; \\\n"
             df += "    else \\\n"
-            df += "      cp -rv /tmp/extract/* /runtime-root/usr/; \\\n"
-            df += "    fi && \\\n"
-            df += "    if [ -f /runtime-root/usr/dotnet ]; then \\\n"
-            df += "      mkdir -p /runtime-root/usr/bin && ln -s /usr/dotnet /runtime-root/usr/bin/dotnet; \\\n"
+            df += "      BIN_DIR=$(find /tmp/extract -name bin -type d | head -n 1) && \\\n"
+            df += "      if [ -n \"$BIN_DIR\" ]; then \\\n"
+            df += "        SRC_DIR=$(dirname \"$BIN_DIR\"); \\\n"
+            df += "        cp -rv \"$SRC_DIR\"/* /runtime-root/usr/; \\\n"
+            df += "      else \\\n"
+            df += "        cp -rv /tmp/extract/* /runtime-root/usr/; \\\n"
+            df += "      fi; \\\n"
             df += "    fi\n"
         else:
             # Source build for runtime
