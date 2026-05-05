@@ -283,14 +283,21 @@ class HCLGenerator:
             for dep in meta['depends']:
                 if dep in graph: df += f"COPY --from={dep} /artifacts/usr /opt/distroless\n"
             df += "WORKDIR /build\nRUN set -ex && if [ -n \"$LIB_URL\" ] && [ \"$LIB_URL\" != \"SKIP\" ]; then \\\n"
-            df += "    curl -L \"$LIB_URL\" -o source.tar.gz && mkdir src && tar -xf source.tar.gz -C src --strip-components=1 && cd src/$LIB_SUBDIR && \\\n"
-            df += "    export CPPFLAGS=\"-I/opt/distroless/include\" && \\\n"
-            df += "    if [ \"$LIB_NAME\" = \"icu\" ]; then export CC=clang; export CXX=clang++; export CXXFLAGS=\"$CXXFLAGS -fno-var-tracking-assignments -g0\"; fi && \\\n"
-            df += "    export LDFLAGS=\"-L/opt/distroless/lib -L/opt/distroless/lib64 -Wl,-rpath,/usr/lib\" && \\\n"
-            df += "    export PKG_CONFIG_PATH=\"/opt/distroless/lib/pkgconfig:/opt/distroless/lib64/pkgconfig\" && \\\n"
-            df += "    if [ -f ./configure ]; then ./configure --prefix=/usr $LIB_CONFIG; elif [ -f ./Configure ]; then ./Configure --prefix=/usr $LIB_CONFIG; "
-            df += "elif [ -f ./CMakeLists.txt ]; then cmake -DCMAKE_INSTALL_PREFIX=/usr $LIB_CONFIG .; fi && \\\n"
-            df += "    if [ \"$LIB_NAME\" = \"icu\" ]; then make -j1 && make DESTDIR=/artifacts install; elif [ \"$LIB_NAME\" = \"bzip2\" ]; then make -j$(nproc) PREFIX=/usr && make DESTDIR=/artifacts PREFIX=/usr install; else make -j$(nproc) && make DESTDIR=/artifacts install; fi; \\\n"
+            if pkg == "icu":
+                df += "    dnf install -y libicu-devel && \\\n"
+                df += "    mkdir -p /artifacts/usr/lib64 /artifacts/usr/include && \\\n"
+                df += "    cp -rv /usr/lib64/libicu* /artifacts/usr/lib64/ && \\\n"
+                df += "    cp -rv /usr/include/unicode /artifacts/usr/include/ && \\\n"
+                df += "    echo \"ICU installed via dnf\"; \\\n"
+            else:
+                df += "    curl -L \"$LIB_URL\" -o source.tar.gz && mkdir src && tar -xf source.tar.gz -C src --strip-components=1 && cd src/$LIB_SUBDIR && \\\n"
+                df += "    export CPPFLAGS=\"-I/opt/distroless/include\" && \\\n"
+                df += "    if [ \"$LIB_NAME\" = \"icu\" ]; then export CC=clang; export CXX=clang++; export CXXFLAGS=\"$CXXFLAGS -fno-var-tracking-assignments -g0\"; fi && \\\n"
+                df += "    export LDFLAGS=\"-L/opt/distroless/lib -L/opt/distroless/lib64 -Wl,-rpath,/usr/lib\" && \\\n"
+                df += "    export PKG_CONFIG_PATH=\"/opt/distroless/lib/pkgconfig:/opt/distroless/lib64/pkgconfig\" && \\\n"
+                df += "    if [ -f ./configure ]; then ./configure --prefix=/usr $LIB_CONFIG; elif [ -f ./Configure ]; then ./Configure --prefix=/usr $LIB_CONFIG; "
+                df += "elif [ -f ./CMakeLists.txt ]; then cmake -DCMAKE_INSTALL_PREFIX=/usr $LIB_CONFIG .; fi && \\\n"
+                df += "    if [ \"$LIB_NAME\" = \"icu\" ]; then make -j1 && make DESTDIR=/artifacts install; elif [ \"$LIB_NAME\" = \"bzip2\" ]; then make -j$(nproc) PREFIX=/usr && make DESTDIR=/artifacts PREFIX=/usr install; else make -j$(nproc) && make DESTDIR=/artifacts install; fi; \\\n"
             df += "    fi && mkdir -p /artifacts/usr\n"
 
         if not stack_config:
