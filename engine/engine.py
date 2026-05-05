@@ -312,8 +312,8 @@ class HCLGenerator:
             df += f"ARG RUNTIME_NAME={runtime_name}\nARG RUNTIME_URL\nRUN set -ex && mkdir -p /tmp/extract && curl -L \"$RUNTIME_URL\" -o /tmp/runtime.tar.gz && \\\n"
             df += "    tar -xf /tmp/runtime.tar.gz -C /tmp/extract && \\\n"
             df += "    if [ \"$RUNTIME_NAME\" = \"dotnet\" ]; then \\\n"
-            df += "      mkdir -p /runtime-root/usr/lib64/dotnet && cp -rv /tmp/extract/* /runtime-root/usr/lib64/dotnet/ && \\\n"
-            df += "      mkdir -p /runtime-root/usr/bin && ln -s ../lib64/dotnet/dotnet /runtime-root/usr/bin/dotnet; \\\n"
+            df += "      mkdir -p /runtime-root/usr/share/dotnet && cp -rv /tmp/extract/* /runtime-root/usr/share/dotnet/ && \\\n"
+            df += "      mkdir -p /runtime-root/usr/bin && ln -sf /usr/share/dotnet/dotnet /runtime-root/usr/bin/dotnet; \\\n"
             df += "    else \\\n"
             df += "      BIN_DIR=$(find /tmp/extract -name bin -type d | head -n 1) && \\\n"
             df += "      if [ -n \"$BIN_DIR\" ]; then \\\n"
@@ -334,12 +334,12 @@ class HCLGenerator:
             df += f"    if [ -f ./configure ]; then ./configure --prefix=/usr {build_flags}; "
             df += f"elif [ -f ./Configure ]; then ./Configure {build_flags}; "
             df += f"elif [ -f ./CMakeLists.txt ]; then cmake -DCMAKE_INSTALL_PREFIX=/usr {build_flags} .; fi && \\\n"
-            df += "    make -j$(nproc) && make DESTDIR=/runtime-root install\n"
+            df += "    make -j2 && make DESTDIR=/runtime-root install\n"
             
         df += "\nFROM cc AS runtime\nUSER root\nARG RUNTIME_NAME\nARG RUNTIME_VER\nLABEL distroless.stack=\"${RUNTIME_NAME}\"\n"
         if stack_config and stack_config["name"] == "dotnet":
-            df += "ENV DOTNET_ROOT=/usr/lib64/dotnet\n"
-            df += "ENV PATH=\"${PATH}:/usr/lib64/dotnet\"\n"
+            df += "ENV DOTNET_ROOT=/usr/share/dotnet\n"
+            df += "ENV PATH=\"${PATH}:/usr/share/dotnet\"\n"
         df += "COPY --from=runtime-setup /runtime-root/usr/ /usr/\n"
         # For source builds, we might need some extra copies if the layout is different
         if stack_type == "source_build":
