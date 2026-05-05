@@ -12,7 +12,10 @@ COPY --from=builder /usr/bin/busybox /usr/bin/busybox
 RUN ["/usr/bin/busybox", "mkdir", "-p", "/usr/lib", "/usr/lib64", "/usr/bin", "/usr/sbin", "/bin", "/etc/ld.so.conf.d"]
 RUN ["/usr/bin/busybox", "ln", "-s", "/usr/lib", "/lib"]
 RUN ["/usr/bin/busybox", "ln", "-s", "/usr/lib64", "/lib64"]
+RUN ["/usr/bin/busybox", "--install", "-s", "/usr/bin"]
 RUN ["/usr/bin/busybox", "ln", "-s", "/usr/bin/busybox", "/bin/sh"]
+
+ENV PATH=/usr/bin:/usr/sbin:/bin:/sbin
 
 # Inject essential glibc shared objects from the builder
 COPY --from=builder /usr/lib64/libc.so.6 /usr/lib64/
