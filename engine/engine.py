@@ -148,7 +148,7 @@ class HCLGenerator:
                 if pkg == "ncurses": lib_config = "--with-shared --enable-widec --enable-pc-files --with-termlib"
                 if pkg == "readline": lib_config = "--with-curses"
                 if pkg == "libxcrypt": lib_config = "--disable-werror"
-                if pkg == "icu": lib_config = "--enable-static --enable-shared"
+                if pkg == "icu": lib_config = "--enable-static --enable-shared --disable-tests --disable-samples --disable-extras --disable-icuio --disable-layoutex --disable-tools"
                 if pkg == "brotli": lib_config = "" # CMake usually, but let's see
                 if pkg == "c-ares": lib_config = ""
                 if pkg == "nghttp2": lib_config = "--enable-lib-only"
@@ -208,7 +208,7 @@ class HCLGenerator:
             if pkg == "ncurses": lib_config = "--with-shared --enable-widec --enable-pc-files --with-termlib"
             if pkg == "readline": lib_config = "--with-curses"
             if pkg == "libxcrypt": lib_config = "--disable-werror"
-            if pkg == "icu": lib_config = "--enable-static --enable-shared"
+            if pkg == "icu": lib_config = "--enable-static --enable-shared --disable-tests --disable-samples --disable-extras --disable-icuio --disable-layoutex --disable-tools"
             if pkg == "nghttp2": lib_config = "--enable-lib-only"
             if pkg == "krb5": lib_config = "--with-crypto-impl=openssl --with-system-verto=no --disable-rpath"
             if pkg == "libxml2": lib_config = "--without-python --without-icu"
@@ -300,7 +300,8 @@ class HCLGenerator:
         for pkg in graph.keys():
             df += f"COPY --from={pkg} /artifacts/usr /opt/distroless\n"
         if stack_type == "binary_injection":
-            df += f"ARG RUNTIME_URL\nRUN set -ex && mkdir -p /tmp/extract && curl -L \"$RUNTIME_URL\" -o /tmp/runtime.tar.gz && \\\n"
+            runtime_name = stack_config["name"] if stack_config else ""
+            df += f"ARG RUNTIME_NAME={runtime_name}\nARG RUNTIME_URL\nRUN set -ex && mkdir -p /tmp/extract && curl -L \"$RUNTIME_URL\" -o /tmp/runtime.tar.gz && \\\n"
             df += "    tar -xf /tmp/runtime.tar.gz -C /tmp/extract && \\\n"
             df += "    if [ \"$RUNTIME_NAME\" = \"dotnet\" ]; then \\\n"
             df += "      mkdir -p /runtime-root/usr/lib/dotnet && cp -rv /tmp/extract/* /runtime-root/usr/lib/dotnet/ && \\\n"
