@@ -1,6 +1,6 @@
 name: php
 version: "8.3"
-type: source_build
+type: binary_injection
 base_hierarchy:
   - static
   - base
@@ -28,18 +28,12 @@ dependencies:
   - name: libxcrypt
     version: "4.4.36"
     type: source
+  - name: pcre2
+    version: "10.44"
+    type: source
 
 runtime:
   name: php
   version: "8.3.13"
-  source_url: "https://www.php.net/distributions/php-8.3.13.tar.xz"
+  binary_url: "DNF"
   sha256: "SKIP"
-  build_flags:
-    - "--enable-fpm"
-    - "--with-openssl"
-    - "--with-zlib"
-    - "--with-curl"
-    - "--enable-mbstring"
-    - "--with-mysqli"
-    - "--with-pdo-mysql"
-    - "--with-external-pcre"
