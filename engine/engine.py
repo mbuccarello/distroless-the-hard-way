@@ -160,7 +160,7 @@ class HCLGenerator:
         hcl = self._header()
         name = stack_config["name"]
         runtime = stack_config.get("runtime", {})
-        stack_type = stack_config.get("type", "source_build")
+        stack_type = runtime.get("type", "source_build")
         has_source = stack_type == "source_build"
         
         hcl += 'group "default" {\n  targets = ["runtime", "runtime-debug"]\n}\n\n'
@@ -246,8 +246,8 @@ class HCLGenerator:
 
     def generate_runtime_dockerfile(self, graph, stack_config=None):
         df = ""
-        stack_type = stack_config.get("type", "source_build") if stack_config else "source_build"
         runtime = stack_config.get("runtime", {}) if stack_config else {}
+        stack_type = runtime.get("type", "source_build")
         for pkg, meta in graph.items():
             df += f"\nFROM builder AS {pkg}\n"
             df += f"ARG LIB_NAME={pkg}\nARG LIB_URL\nARG LIB_CONFIG\nARG LIB_SUBDIR=.\n"
