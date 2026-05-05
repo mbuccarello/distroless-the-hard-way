@@ -310,7 +310,7 @@ class HCLGenerator:
             df += "      cp -rv /tmp/extract/* /runtime-root/usr/; \\\n"
             df += "    fi && \\\n"
             df += "    if [ -f /runtime-root/usr/dotnet ]; then \\\n"
-            df += "      mkdir -p /runtime-root/usr/bin && mv /runtime-root/usr/dotnet /runtime-root/usr/bin/; \\\n"
+            df += "      mkdir -p /runtime-root/usr/bin && ln -s /usr/dotnet /runtime-root/usr/bin/dotnet; \\\n"
             df += "    fi\n"
         else:
             # Source build for runtime
