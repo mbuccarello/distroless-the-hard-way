@@ -9,7 +9,7 @@ USER root
 COPY --from=builder /usr/bin/busybox /usr/bin/busybox
 
 # Setup essential FHS structure using JSON form
-RUN ["/usr/bin/busybox", "mkdir", "-p", "/usr/lib", "/usr/lib64", "/usr/bin", "/bin", "/etc/ld.so.conf.d"]
+RUN ["/usr/bin/busybox", "mkdir", "-p", "/usr/lib", "/usr/lib64", "/usr/bin", "/usr/sbin", "/bin", "/etc/ld.so.conf.d"]
 RUN ["/usr/bin/busybox", "ln", "-s", "/usr/lib", "/lib"]
 RUN ["/usr/bin/busybox", "ln", "-s", "/usr/lib64", "/lib64"]
 RUN ["/usr/bin/busybox", "ln", "-s", "/usr/bin/busybox", "/bin/sh"]
@@ -23,6 +23,7 @@ COPY --from=builder /usr/lib64/libdl.so.2 /usr/lib64/
 COPY --from=builder /usr/lib64/libresolv.so.2 /usr/lib64/
 COPY --from=builder /usr/lib64/libutil.so.1 /usr/lib64/
 COPY --from=builder /usr/lib64/ld-linux-x86-64.so.2 /usr/lib64/
+COPY --from=builder /usr/sbin/ldconfig /usr/sbin/ldconfig
 
 # Configure the dynamic linker
 RUN echo "/usr/lib" > /etc/ld.so.conf && \
