@@ -27,7 +27,11 @@ class MetadataManager:
             "brotli": "https://github.com/google/brotli/archive/refs/tags/v1.1.0.tar.gz",
             "c-ares": "https://github.com/c-ares/c-ares/releases/download/v1.34.2/c-ares-1.34.2.tar.gz",
             "nghttp2": "https://github.com/nghttp2/nghttp2/releases/download/v1.64.0/nghttp2-1.64.0.tar.gz",
-            "krb5": "https://web.mit.edu/kerberos/dist/krb5/1.21/krb5-1.21.3.tar.gz"
+            "krb5": "https://web.mit.edu/kerberos/dist/krb5/1.21/krb5-1.21.3.tar.gz",
+            "libxml2": "https://download.gnome.org/sources/libxml2/2.12/libxml2-2.12.9.tar.xz",
+            "oniguruma": "https://github.com/kkos/oniguruma/releases/download/v6.9.9/onig-6.9.9.tar.gz",
+            "curl": "https://github.com/curl/curl/releases/download/curl-8_11_0/curl-8.11.0.tar.gz",
+            "pcre2": "https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.44/pcre2-10.44.tar.gz"
         }
 
     def fetch_arch_pkgbuild(self, pkgname):
@@ -183,7 +187,11 @@ class HCLGenerator:
             if pkg == "libxcrypt": lib_config = "--disable-werror"
             if pkg == "icu": lib_config = "--enable-static --enable-shared"
             if pkg == "nghttp2": lib_config = "--enable-lib-only"
-            if pkg == "krb5": lib_config = "--with-crypto-impl=openssl"
+            if pkg == "krb5": lib_config = "--with-crypto-impl=openssl --with-system-verto=no --disable-rpath"
+            if pkg == "libxml2": lib_config = "--without-python --without-icu"
+            if pkg == "curl": lib_config = "--with-openssl --with-zlib --with-nghttp2 --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt"
+            if pkg == "pcre2": lib_config = "--enable-jit --enable-unicode"
+            if pkg == "oniguruma": lib_config = "--enable-shared"
             if lib_config: hcl += f'    LIB_CONFIG = "{lib_config}"\n'
 
             lib_subdir = ""
