@@ -248,7 +248,10 @@ class HCLGenerator:
             hcl += f'    RUNTIME_URL = "{runtime["binary_url"]}"\n'
         hcl += '  }\n'
         hcl += '  contexts = {\n'
-        hcl += f'    cc = "target:cc-{name}"\n'
+        if stack_type == "source_build":
+            hcl += f'    cc = "target:cc-{name}"\n'
+        else:
+            hcl += '    cc = "docker-image://${REGISTRY}/cc:latest"\n'
         hcl += '    builder = "target:foundations"\n'
         if stack_type == "source_build":
             for pkg in graph.keys():
