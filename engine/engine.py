@@ -285,6 +285,7 @@ class HCLGenerator:
             df += "WORKDIR /build\nRUN set -ex && if [ -n \"$LIB_URL\" ] && [ \"$LIB_URL\" != \"SKIP\" ]; then \\\n"
             df += "    curl -L \"$LIB_URL\" -o source.tar.gz && mkdir src && tar -xf source.tar.gz -C src --strip-components=1 && cd src/$LIB_SUBDIR && \\\n"
             df += "    export CPPFLAGS=\"-I/opt/distroless/include\" && \\\n"
+            df += "    if [ \"$LIB_NAME\" = \"icu\" ]; then export CXXFLAGS=\"$CXXFLAGS -fno-var-tracking-assignments\"; fi && \\\n"
             df += "    export LDFLAGS=\"-L/opt/distroless/lib -L/opt/distroless/lib64 -Wl,-rpath,/usr/lib\" && \\\n"
             df += "    export PKG_CONFIG_PATH=\"/opt/distroless/lib/pkgconfig:/opt/distroless/lib64/pkgconfig\" && \\\n"
             df += "    if [ -f ./configure ]; then ./configure --prefix=/usr $LIB_CONFIG; elif [ -f ./Configure ]; then ./Configure --prefix=/usr $LIB_CONFIG; "
@@ -329,6 +330,9 @@ class HCLGenerator:
             df += "    make -j$(nproc) && make DESTDIR=/runtime-root install\n"
             
         df += "\nFROM cc AS runtime\nUSER root\nARG RUNTIME_NAME\nARG RUNTIME_VER\nLABEL distroless.stack=\"${RUNTIME_NAME}\"\n"
+        if stack_config and stack_config["name"] == "dotnet":
+            df += "ENV DOTNET_ROOT=/usr/lib/dotnet\n"
+            df += "ENV PATH=\"${PATH}:/usr/lib/dotnet\"\n"
         df += "COPY --from=runtime-setup /runtime-root/usr/ /usr/\n"
         # For source builds, we might need some extra copies if the layout is different
         if stack_type == "source_build":
