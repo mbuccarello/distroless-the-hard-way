@@ -285,7 +285,7 @@ class HCLGenerator:
             df += "WORKDIR /build\nRUN set -ex && if [ -n \"$LIB_URL\" ] && [ \"$LIB_URL\" != \"SKIP\" ]; then \\\n"
             df += "    curl -L \"$LIB_URL\" -o source.tar.gz && mkdir src && tar -xf source.tar.gz -C src --strip-components=1 && cd src/$LIB_SUBDIR && \\\n"
             df += "    export CPPFLAGS=\"-I/opt/distroless/include\" && \\\n"
-            df += "    if [ \"$LIB_NAME\" = \"icu\" ]; then export CXXFLAGS=\"$CXXFLAGS -fno-var-tracking-assignments\"; fi && \\\n"
+            df += "    if [ \"$LIB_NAME\" = \"icu\" ]; then export CXXFLAGS=\"$CXXFLAGS -fno-var-tracking-assignments -g0\"; fi && \\\n"
             df += "    export LDFLAGS=\"-L/opt/distroless/lib -L/opt/distroless/lib64 -Wl,-rpath,/usr/lib\" && \\\n"
             df += "    export PKG_CONFIG_PATH=\"/opt/distroless/lib/pkgconfig:/opt/distroless/lib64/pkgconfig\" && \\\n"
             df += "    if [ -f ./configure ]; then ./configure --prefix=/usr $LIB_CONFIG; elif [ -f ./Configure ]; then ./Configure --prefix=/usr $LIB_CONFIG; "
@@ -305,8 +305,8 @@ class HCLGenerator:
             df += f"ARG RUNTIME_NAME={runtime_name}\nARG RUNTIME_URL\nRUN set -ex && mkdir -p /tmp/extract && curl -L \"$RUNTIME_URL\" -o /tmp/runtime.tar.gz && \\\n"
             df += "    tar -xf /tmp/runtime.tar.gz -C /tmp/extract && \\\n"
             df += "    if [ \"$RUNTIME_NAME\" = \"dotnet\" ]; then \\\n"
-            df += "      mkdir -p /runtime-root/usr/lib/dotnet && cp -rv /tmp/extract/* /runtime-root/usr/lib/dotnet/ && \\\n"
-            df += "      mkdir -p /runtime-root/usr/bin && ln -s ../lib/dotnet/dotnet /runtime-root/usr/bin/dotnet; \\\n"
+            df += "      mkdir -p /runtime-root/usr/lib64/dotnet && cp -rv /tmp/extract/* /runtime-root/usr/lib64/dotnet/ && \\\n"
+            df += "      mkdir -p /runtime-root/usr/bin && ln -s ../lib64/dotnet/dotnet /runtime-root/usr/bin/dotnet; \\\n"
             df += "    else \\\n"
             df += "      BIN_DIR=$(find /tmp/extract -name bin -type d | head -n 1) && \\\n"
             df += "      if [ -n \"$BIN_DIR\" ]; then \\\n"
@@ -331,8 +331,8 @@ class HCLGenerator:
             
         df += "\nFROM cc AS runtime\nUSER root\nARG RUNTIME_NAME\nARG RUNTIME_VER\nLABEL distroless.stack=\"${RUNTIME_NAME}\"\n"
         if stack_config and stack_config["name"] == "dotnet":
-            df += "ENV DOTNET_ROOT=/usr/lib/dotnet\n"
-            df += "ENV PATH=\"${PATH}:/usr/lib/dotnet\"\n"
+            df += "ENV DOTNET_ROOT=/usr/lib64/dotnet\n"
+            df += "ENV PATH=\"${PATH}:/usr/lib64/dotnet\"\n"
         df += "COPY --from=runtime-setup /runtime-root/usr/ /usr/\n"
         # For source builds, we might need some extra copies if the layout is different
         if stack_type == "source_build":
