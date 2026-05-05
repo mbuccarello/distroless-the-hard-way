@@ -227,6 +227,9 @@ class HCLGenerator:
         hcl += '  contexts = {\n'
         hcl += f'    cc = "target:cc-{name}"\n'
         hcl += '    builder = "target:foundations"\n'
+        if stack_type == "source_build":
+            for pkg in graph.keys():
+                hcl += f'    {pkg} = "target:{pkg}"\n'
         hcl += '  }\n'
         hcl += f'  tags = ["${{REGISTRY}}/{name}-distroless:latest"]\n}}\n\n'
 
@@ -270,7 +273,9 @@ class HCLGenerator:
             return df
 
         # Runtime Setup Stage: Extracting or Building language binaries
-        df += "\nFROM builder AS runtime-setup\nUSER root\nRUN mkdir -p /runtime-root/usr /runtime-root/etc /runtime-root/var\n"
+        df += "\nFROM builder AS runtime-setup\nUSER root\nRUN mkdir -p /runtime-root/usr /runtime-root/etc /runtime-root/var /opt/distroless\n"
+        for pkg in graph.keys():
+            df += f"COPY --from={pkg} /artifacts/usr /opt/distroless\n"
         if stack_type == "binary_injection":
             df += f"ARG RUNTIME_URL\nRUN set -ex && mkdir -p /tmp/extract && curl -L \"$RUNTIME_URL\" -o /tmp/runtime.tar.gz && \\\n"
             df += "    tar -xf /tmp/runtime.tar.gz -C /tmp/extract && \\\n"
@@ -280,6 +285,9 @@ class HCLGenerator:
             df += "      cp -rv \"$SRC_DIR\"/* /runtime-root/usr/; \\\n"
             df += "    else \\\n"
             df += "      cp -rv /tmp/extract/* /runtime-root/usr/; \\\n"
+            df += "    fi && \\\n"
+            df += "    if [ -f /runtime-root/usr/dotnet ]; then \\\n"
+            df += "      mkdir -p /runtime-root/usr/bin && mv /runtime-root/usr/dotnet /runtime-root/usr/bin/; \\\n"
             df += "    fi\n"
         else:
             # Source build for runtime
@@ -298,8 +306,8 @@ class HCLGenerator:
         df += "COPY --from=runtime-setup /runtime-root/usr/ /usr/\n"
         # For source builds, we might need some extra copies if the layout is different
         if stack_type == "source_build":
-             df += "COPY --from=runtime-setup /runtime-root/etc/ /etc/ || true\n"
-             df += "COPY --from=runtime-setup /runtime-root/var/ /var/ || true\n"
+            df += "COPY --from=runtime-setup /runtime-root/etc/ /etc/\n"
+            df += "COPY --from=runtime-setup /runtime-root/var/ /var/\n"
         df += "USER 65532:65532\n"
         
         df += "\nFROM runtime AS runtime-debug\nUSER root\nCOPY --from=builder /usr/bin/busybox /usr/bin/busybox\n"
