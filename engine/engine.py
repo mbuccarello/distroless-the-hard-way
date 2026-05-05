@@ -237,8 +237,11 @@ class HCLGenerator:
 
     def generate_cc_dockerfile(self, graph):
         df = "# syntax=docker/dockerfile:1.4\nFROM base AS cc\nUSER root\n"
-        df += "COPY --from=builder /usr/lib64/libgcc_s.so.1 /usr/lib/\n"
-        df += "COPY --from=builder /usr/lib64/libstdc++.so.6 /usr/lib/\n"
+        df += "RUN mkdir -p /usr/lib64\n"
+        df += "COPY --from=builder /usr/lib64/libgcc_s.so.1 /usr/lib64/\n"
+        df += "COPY --from=builder /usr/lib64/libstdc++.so.6 /usr/lib64/\n"
+        df += "RUN ln -sf /usr/lib64/libgcc_s.so.1 /usr/lib/libgcc_s.so.1 && \\\n"
+        df += "    ln -sf /usr/lib64/libstdc++.so.6 /usr/lib/libstdc++.so.6\n"
         for pkg in graph.keys():
             df += f"COPY --from={pkg} /artifacts/usr /usr\n"
         df += "LABEL distroless.layer=\"cc\"\nUSER 65532:65532\n"
@@ -267,7 +270,7 @@ class HCLGenerator:
             return df
 
         # Runtime Setup Stage: Extracting or Building language binaries
-        df += "\nFROM builder AS runtime-setup\nUSER root\nRUN mkdir -p /runtime-root/usr\n"
+        df += "\nFROM builder AS runtime-setup\nUSER root\nRUN mkdir -p /runtime-root/usr /runtime-root/etc /runtime-root/var\n"
         if stack_type == "binary_injection":
             df += f"ARG RUNTIME_URL\nRUN set -ex && mkdir -p /tmp/extract && curl -L \"$RUNTIME_URL\" -o /tmp/runtime.tar.gz && \\\n"
             df += "    tar -xf /tmp/runtime.tar.gz -C /tmp/extract && \\\n"

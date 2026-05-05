@@ -27,7 +27,8 @@ COPY --from=builder /usr/lib64/ld-linux-x86-64.so.2 /usr/lib64/
 # Configure the dynamic linker
 RUN echo "/usr/lib" > /etc/ld.so.conf && \
     echo "/usr/lib64" >> /etc/ld.so.conf && \
-    echo "include /etc/ld.so.conf.d/*.conf" >> /etc/ld.so.conf
+    echo "include /etc/ld.so.conf.d/*.conf" >> /etc/ld.so.conf && \
+    ldconfig
 
 LABEL distroless.layer="base"
 USER 65532:65532
