@@ -334,7 +334,8 @@ class HCLGenerator:
             df += f"    if [ -f ./configure ]; then ./configure --prefix=/usr {build_flags}; "
             df += f"elif [ -f ./Configure ]; then ./Configure {build_flags}; "
             df += f"elif [ -f ./CMakeLists.txt ]; then cmake -DCMAKE_INSTALL_PREFIX=/usr {build_flags} .; fi && \\\n"
-            df += "    make -j2 && make DESTDIR=/runtime-root install\n"
+            df += "    export CXXFLAGS=\"$CXXFLAGS -fno-var-tracking-assignments -g0\" && \\\n"
+            df += "    make -j1 && make DESTDIR=/runtime-root install\n"
             
         df += "\nFROM cc AS runtime\nUSER root\nARG RUNTIME_NAME\nARG RUNTIME_VER\nLABEL distroless.stack=\"${RUNTIME_NAME}\"\n"
         if stack_config and stack_config["name"] == "dotnet":
