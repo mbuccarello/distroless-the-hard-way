@@ -55,13 +55,12 @@ jobs:
           cat foundations/runtime.Dockerfile
 
       - name: Build and Assemble Runtime
-        uses: docker/bake-action@v5
-        with:
-          files: foundations/${{ github.event.inputs.stack }}.hcl
-          push: ${{ github.event.inputs.push }}
-          set: |
-            *.cache-from=type=gha
-            *.cache-to=type=gha
+        run: |
+          docker buildx bake -f foundations/${{ github.event.inputs.stack }}.hcl \
+            --set *.cache-from=type=gha \
+            --set *.cache-to=type=gha \
+            --push=${{ github.event.inputs.push }} \
+            runtime
 
       - name: Extract Digest
         if: github.event.inputs.push == 'true'
