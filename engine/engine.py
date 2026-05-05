@@ -83,6 +83,29 @@ class DAGResolver:
             for dep in meta['depends']:
                 if dep in self.manager.hardcoded_sources:
                     stack.append(dep)
+        self.graph = self.topological_sort()
+
+    def topological_sort(self):
+        sorted_nodes = []
+        visited = set()
+        temp_visited = set()
+
+        def visit(node):
+            if node in temp_visited:
+                return # Ignore cycles for now or handle specifically
+            if node in visited:
+                return
+            temp_visited.add(node)
+            for dep in self.graph.get(node, {}).get('depends', []):
+                if dep in self.graph:
+                    visit(dep)
+            temp_visited.remove(node)
+            visited.add(node)
+            sorted_nodes.append(node)
+
+        for node in self.graph:
+            visit(node)
+        return {node: self.graph[node] for node in sorted_nodes}
 
 class HCLGenerator:
     def __init__(self, registry="ghcr.io/mbuccarello", platform="linux/amd64"):
