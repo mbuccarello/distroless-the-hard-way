@@ -235,8 +235,10 @@ class HCLGenerator:
         
         return hcl
 
-    def generate_runtime_dockerfile(self, graph):
+    def generate_runtime_dockerfile(self, graph, stack_config=None):
         df = ""
+        stack_type = stack_config.get("type", "source_build") if stack_config else "source_build"
+        runtime = stack_config.get("runtime", {}) if stack_config else {}
         for pkg, meta in graph.items():
             df += f"\nFROM builder AS {pkg}\n"
             df += f"ARG LIB_NAME={pkg}\nARG LIB_URL\nARG LIB_CONFIG\nARG LIB_SUBDIR=.\n"
@@ -252,20 +254,39 @@ class HCLGenerator:
             df += "    if [ \"$LIB_NAME\" = \"bzip2\" ]; then make -j$(nproc) PREFIX=/usr && make DESTDIR=/artifacts PREFIX=/usr install; else make -j$(nproc) && make DESTDIR=/artifacts install; fi; \\\n"
             df += "    fi && mkdir -p /artifacts/usr\n"
 
-        # Runtime Setup Stage: Extracting language binaries
+        if not stack_config:
+            return df
+
+        # Runtime Setup Stage: Extracting or Building language binaries
         df += "\nFROM builder AS runtime-setup\nUSER root\nRUN mkdir -p /runtime-root/usr\n"
-        df += "ARG RUNTIME_URL\nRUN set -ex && mkdir -p /tmp/extract && curl -L \"$RUNTIME_URL\" -o /tmp/runtime.tar.gz && \\\n"
-        df += "    tar -xf /tmp/runtime.tar.gz -C /tmp/extract && \\\n"
-        df += "    BIN_DIR=$(find /tmp/extract -name bin -type d | head -n 1) && \\\n"
-        df += "    if [ -n \"$BIN_DIR\" ]; then \\\n"
-        df += "      SRC_DIR=$(dirname \"$BIN_DIR\"); \\\n"
-        df += "      cp -rv \"$SRC_DIR\"/* /runtime-root/usr/; \\\n"
-        df += "    else \\\n"
-        df += "      cp -rv /tmp/extract/* /runtime-root/usr/; \\\n"
-        df += "    fi\n"
-        
+        if stack_type == "binary_injection":
+            df += f"ARG RUNTIME_URL\nRUN set -ex && mkdir -p /tmp/extract && curl -L \"$RUNTIME_URL\" -o /tmp/runtime.tar.gz && \\\n"
+            df += "    tar -xf /tmp/runtime.tar.gz -C /tmp/extract && \\\n"
+            df += "    BIN_DIR=$(find /tmp/extract -name bin -type d | head -n 1) && \\\n"
+            df += "    if [ -n \"$BIN_DIR\" ]; then \\\n"
+            df += "      SRC_DIR=$(dirname \"$BIN_DIR\"); \\\n"
+            df += "      cp -rv \"$SRC_DIR\"/* /runtime-root/usr/; \\\n"
+            df += "    else \\\n"
+            df += "      cp -rv /tmp/extract/* /runtime-root/usr/; \\\n"
+            df += "    fi\n"
+        else:
+            # Source build for runtime
+            source_url = runtime.get("source_url", "")
+            build_flags = " ".join(runtime.get("build_flags", []))
+            df += f"RUN set -ex && curl -L \"{source_url}\" -o source.tar.gz && mkdir src && tar -xf source.tar.gz -C src --strip-components=1 && cd src && \\\n"
+            df += "    export CPPFLAGS=\"-I/opt/distroless/include\" && \\\n"
+            df += "    export LDFLAGS=\"-L/opt/distroless/lib -L/opt/distroless/lib64 -Wl,-rpath,/usr/lib\" && \\\n"
+            df += "    export PKG_CONFIG_PATH=\"/opt/distroless/lib/pkgconfig:/opt/distroless/lib64/pkgconfig\" && \\\n"
+            df += f"    ./configure --prefix=/usr {build_flags} && \\\n"
+            df += "    make -j$(nproc) && make DESTDIR=/runtime-root install\n"
+            
         df += "\nFROM cc AS runtime\nUSER root\nARG RUNTIME_NAME\nARG RUNTIME_VER\nLABEL distroless.stack=\"${RUNTIME_NAME}\"\n"
-        df += "COPY --from=runtime-setup /runtime-root/usr/ /usr/\nUSER 65532:65532\n"
+        df += "COPY --from=runtime-setup /runtime-root/usr/ /usr/\n"
+        # For source builds, we might need some extra copies if the layout is different
+        if stack_type == "source_build":
+             df += "COPY --from=runtime-setup /runtime-root/etc/ /etc/ || true\n"
+             df += "COPY --from=runtime-setup /runtime-root/var/ /var/ || true\n"
+        df += "USER 65532:65532\n"
         
         df += "\nFROM runtime AS runtime-debug\nUSER root\nCOPY --from=builder /usr/bin/busybox /usr/bin/busybox\n"
         df += "RUN [\"/usr/bin/busybox\", \"--install\", \"-s\", \"/usr/bin\"]\nUSER 65532:65532\n"
@@ -318,7 +339,7 @@ def main():
             hcl = generator.generate_runtime_hcl(stack_config, resolver.graph)
             with open(f"foundations/{stack_config['name']}.hcl", "w") as f: f.write(hcl)
             
-            df = generator.generate_runtime_dockerfile(resolver.graph)
+            df = generator.generate_runtime_dockerfile(resolver.graph, stack_config)
             with open("foundations/runtime.Dockerfile", "w") as f: f.write(df)
             print(f"✅ Generated foundations/{stack_config['name']}.hcl and foundations/runtime.Dockerfile")
 
