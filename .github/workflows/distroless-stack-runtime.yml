@@ -93,6 +93,10 @@ jobs:
             dotnet)
               docker run --rm ${REGISTRY}/${{ github.event.inputs.stack }}-distroless:latest dotnet --list-runtimes
               ;;
+            php)
+              docker run --rm ${REGISTRY}/${{ github.event.inputs.stack }}-distroless:latest php -v
+              docker run --rm ${REGISTRY}/${{ github.event.inputs.stack }}-distroless:latest php -m
+              ;;
             *)
               echo "No smoke test defined for ${{ github.event.inputs.stack }}"
               ;;
