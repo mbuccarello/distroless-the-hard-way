@@ -43,12 +43,18 @@ class MetadataManager:
         except Exception:
             return None
 
-    def parse_pkgbuild(self, content):
-        metadata = {"depends": []}
+        metadata = {"depends": [], "sources": []}
         depends_match = re.search(r'depends=\((.*?)\)', content, re.DOTALL)
         if depends_match:
             deps_str = depends_match.group(1).replace('"', '').replace("'", "")
             metadata["depends"] = [d.split('>')[0].split('<')[0].split('=')[0].strip() for d in deps_str.split() if d.strip()]
+        
+        # Extract sources
+        sources_match = re.search(r'source=\((.*?)\)', content, re.DOTALL)
+        if sources_match:
+            src_str = sources_match.group(1).replace('"', '').replace("'", "")
+            metadata["sources"] = [s.strip() for s in src_str.split() if s.strip()]
+            
         return metadata
 
     def get_metadata(self, pkgname):
@@ -64,10 +70,21 @@ class MetadataManager:
                 content = f.read()
             info = self.parse_pkgbuild(content)
             res["depends"] = info["depends"]
-            # Extract version from PKGBUILD
+            
+            # Extract version
             version_match = re.search(r'pkgver=([^\s]+)', content)
             if version_match:
                 res["version"] = version_match.group(1).replace('"', '').replace("'", "")
+                
+            # Discovery: if URL is SKIP, try to find it in sources
+            if res["url"] == "SKIP" or not res["url"]:
+                for s in info["sources"]:
+                    if s.startswith("http") and any(s.endswith(ext) for ext in [".tar.gz", ".tar.xz", ".tar.bz2", ".tar.zst"]):
+                        # Cleanup Arch variables like $pkgver
+                        s = s.replace("$pkgver", res["version"]).replace("${pkgver}", res["version"])
+                        s = s.replace("$pkgname", pkgname).replace("${pkgname}", pkgname)
+                        res["url"] = s
+                        break
         return res
 
 class DAGResolver:
