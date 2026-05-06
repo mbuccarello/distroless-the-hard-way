@@ -37,3 +37,19 @@ runtime:
   version: "8.3.13"
   source_url: "https://www.php.net/distributions/php-8.3.13.tar.gz"
   sha256: "SKIP"
+  build_flags:
+    - --with-openssl=/opt/distroless
+    - --with-zlib=/opt/distroless
+    - --with-curl=/opt/distroless
+    - --with-libxml=/opt/distroless
+    - --with-sqlite3=/opt/distroless
+    - --with-pdo-sqlite=/opt/distroless
+    - --with-onig=/opt/distroless
+    - --with-pcre-dir=/opt/distroless
+    - --enable-fpm
+    - --enable-mbstring
+    - --enable-bcmath
+    - --enable-xml
+    - --enable-pcntl
+    - --with-config-file-path=/etc/php
+    - --with-config-file-scan-dir=/etc/php/conf.d
