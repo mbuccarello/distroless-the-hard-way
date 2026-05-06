@@ -43,6 +43,7 @@ class MetadataManager:
         except Exception:
             return None
 
+    def parse_pkgbuild(self, content):
         metadata = {"depends": [], "sources": []}
         depends_match = re.search(r'depends=\((.*?)\)', content, re.DOTALL)
         if depends_match:
