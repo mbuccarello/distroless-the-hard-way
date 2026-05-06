@@ -55,6 +55,7 @@ class MetadataManager:
         res = {
             "url": self.hardcoded_sources.get(pkgname, "SKIP"),
             "sha": "SKIP",
+            "version": "latest",
             "depends": []
         }
         pkgbuild_path = self.fetch_arch_pkgbuild(pkgname)
@@ -63,6 +64,10 @@ class MetadataManager:
                 content = f.read()
             info = self.parse_pkgbuild(content)
             res["depends"] = info["depends"]
+            # Extract version from PKGBUILD
+            version_match = re.search(r'pkgver=([^\s]+)', content)
+            if version_match:
+                res["version"] = version_match.group(1).replace('"', '').replace("'", "")
         return res
 
 class DAGResolver:
@@ -113,7 +118,21 @@ class HCLGenerator:
         self.platform = platform
 
     def _header(self):
-        return f'variable "REGISTRY" {{\n  default = "{self.registry}"\n}}\n\n'
+        hcl = f'variable "REGISTRY" {{\n  default = "{self.registry}"\n}}\n\n'
+        hcl += f'variable "ATOMS_REGISTRY" {{\n  default = "{self.registry}/atoms"\n}}\n\n'
+        return hcl
+
+    def check_atom_exists(self, pkg, version):
+        """Check if an atom already exists in the registry."""
+        import subprocess
+        full_image = f"{self.registry}/atoms/{pkg}:{version}"
+        try:
+            # Use docker manifest inspect for a lightweight check
+            subprocess.run(["docker", "manifest", "inspect", full_image], 
+                           check=True, capture_output=True)
+            return True
+        except subprocess.CalledProcessError:
+            return False
 
     def generate_foundation_hcl(self, graph=None):
         hcl = self._header()
@@ -194,11 +213,17 @@ class HCLGenerator:
         # Library targets for THIS runtime
         if stack_type == "source_build":
             for pkg, meta in graph.items():
+                version = meta.get("version", "latest")
+                atom_exists = self.check_atom_exists(pkg, version)
+                
+                # We still generate the target so it's visible in the HCL, 
+                # but we'll use it only if it doesn't exist remotely
                 hcl += f'target "{pkg}" {{\n'
                 hcl += '  dockerfile = "foundations/runtime.Dockerfile"\n'
                 hcl += f'  target = "{pkg}"\n'
                 hcl += '  context = "."\n'
                 hcl += f'  platforms = ["{self.platform}"]\n'
+                hcl += f'  tags = ["${{ATOMS_REGISTRY}}/{pkg}:{version}"]\n'
                 hcl += '  args = {\n'
                 hcl += f'    LIB_NAME = "{pkg}"\n'
                 hcl += f'    LIB_URL = "{meta["url"]}"\n'
@@ -226,7 +251,13 @@ class HCLGenerator:
                 hcl += '  }\n'
                 hcl += '  contexts = {\n    builder = "target:foundations"\n'
                 for dep in meta['depends']:
-                    if dep in graph: hcl += f'    {dep} = "target:{dep}"\n'
+                    if dep in graph:
+                        dep_meta = graph[dep]
+                        dep_version = dep_meta.get("version", "latest")
+                        if self.check_atom_exists(dep, dep_version):
+                            hcl += f'    {dep} = "docker-image://${{ATOMS_REGISTRY}}/{dep}:{dep_version}"\n'
+                        else:
+                            hcl += f'    {dep} = "target:{dep}"\n'
                 hcl += '  }\n}\n\n'
 
             # CC target (Specialized for this runtime)
@@ -235,8 +266,12 @@ class HCLGenerator:
             hcl += '  contexts = {\n'
             hcl += '    builder = "target:foundations"\n'
             hcl += '    base = "docker-image://${REGISTRY}/base:latest"\n'
-            for pkg in graph.keys():
-                hcl += f'    {pkg} = "target:{pkg}"\n'
+            for pkg, meta in graph.items():
+                version = meta.get("version", "latest")
+                if self.check_atom_exists(pkg, version):
+                    hcl += f'    {pkg} = "docker-image://${{ATOMS_REGISTRY}}/{pkg}:{version}"\n'
+                else:
+                    hcl += f'    {pkg} = "target:{pkg}"\n'
             hcl += '  }\n}\n\n'
 
         # Final Runtime
