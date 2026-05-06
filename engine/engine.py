@@ -301,7 +301,7 @@ class HCLGenerator:
                 df += "    export PKG_CONFIG_PATH=\"/opt/distroless/lib/pkgconfig:/opt/distroless/lib64/pkgconfig\" && \\\n"
                 df += "    if [ -f ./configure ]; then ./configure --prefix=/usr $LIB_CONFIG; elif [ -f ./Configure ]; then ./Configure --prefix=/usr $LIB_CONFIG; "
                 df += "elif [ -f ./CMakeLists.txt ]; then cmake -DCMAKE_INSTALL_PREFIX=/usr $LIB_CONFIG .; fi && \\\n"
-                df += "    if [ \"$LIB_NAME\" = \"icu\" ]; then make -j1 && make DESTDIR=/artifacts install; elif [ \"$LIB_NAME\" = \"bzip2\" ]; then make -j$(nproc) PREFIX=/usr && make DESTDIR=/artifacts PREFIX=/usr install; else make -j$(nproc) && make DESTDIR=/artifacts install; fi; \\\n"
+                df += "    if [ \"$LIB_NAME\" = \"icu\" ]; then make -j1 && make DESTDIR=/artifacts install; elif [ \"$LIB_NAME\" = \"bzip2\" ]; then make -j2 PREFIX=/usr && make DESTDIR=/artifacts PREFIX=/usr install; else make -j2 && make DESTDIR=/artifacts install; fi; \\\n"
             df += "    fi && mkdir -p /artifacts/usr\n"
 
         if not stack_config:
