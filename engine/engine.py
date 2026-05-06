@@ -352,6 +352,8 @@ class HCLGenerator:
                 df += "    if [ \"$LIB_NAME\" = \"icu\" ]; then export CC=clang; export CXX=clang++; export CXXFLAGS=\"$CXXFLAGS -fno-var-tracking-assignments -g0\"; fi && \\\n"
                 df += "    export LDFLAGS=\"-L/opt/distroless/lib -L/opt/distroless/lib64 -Wl,-rpath,/usr/lib\" && \\\n"
                 df += "    export PKG_CONFIG_PATH=\"/opt/distroless/lib/pkgconfig:/opt/distroless/lib64/pkgconfig\" && \\\n"
+                df += "    echo '--- DEBUG: Contents of /opt/distroless ---' && ls -R /opt/distroless && \\\n"
+                df += "    echo '--- DEBUG: Available pkg-config packages ---' && pkg-config --list-all && \\\n"
                 df += "    if [ -f ./configure ]; then ./configure --prefix=/usr $LIB_CONFIG; elif [ -f ./Configure ]; then ./Configure --prefix=/usr $LIB_CONFIG; "
                 df += "elif [ -f ./CMakeLists.txt ]; then cmake -DCMAKE_INSTALL_PREFIX=/usr $LIB_CONFIG .; fi && \\\n"
                 df += "    if [ \"$LIB_NAME\" = \"icu\" ]; then make -j1 && make DESTDIR=/artifacts install; elif [ \"$LIB_NAME\" = \"bzip2\" ]; then make -j2 PREFIX=/usr && make DESTDIR=/artifacts PREFIX=/usr install; else make -j2 && make DESTDIR=/artifacts install; fi; \\\n"
