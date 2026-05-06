@@ -27,8 +27,11 @@ When generating or modifying the Distroless Engine or Bake definitions, you must
 3. **Keyless Signing:** All final images and intermediate targets must be signed using Sigstore/Cosign OIDC Keyless mechanisms.
 4. **SLSA Level 3:** Non-falsifiable build attestations for every layer.
 
-## 4. Documentation Standards
-- **Formal Engineering Tone:** Documentation must be written as objective technical specifications. Phrases such as "We discovered" or "I found" are strictly prohibited. 
-- **Architectural Documentation Enforcement:** Each architectural shift (documented in `docs/architectural_changes.md`) must be propagated to the reference architecture in `docs/` and the project `README.md`.
+## 4. Technical Communication & Documentation Standards
+- **Professional Engineering Tone:** Documentation must be written as objective technical specifications. Avoid first-person narratives ("We discovered", "I found").
+- **Strict Anti-AI Style:** 
+    - **No Emojis:** The use of emojis in technical documentation (README, AGENT.md, docs/) is strictly prohibited.
+    - **No Meta-Transitions:** Avoid explaining internal process changes (e.g., "We have transitioned to..."). Documentation must describe the **current state** of the architecture directly.
+    - **No Filler Content:** Documentation must be concise and focus on implementation details. Avoid repetitive summaries or marketing-style buzzwords.
+- **Architectural Traceability:** Every change to the core logic must be reflected in the project `README.md` and relevant technical docs, ensuring the "source of truth" is always updated to the latest state.
 - **Graphical Diagrams (Mermaid):** Technical flows must be visualized using Mermaid syntax and rendered to static assets.
-- **No Filler Content:** Documentation must focus on the "why" and "how" of the architecture. Avoid AI-generated filler.

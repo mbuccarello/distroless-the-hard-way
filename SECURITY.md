@@ -6,8 +6,8 @@ We actively provide security updates for the following versions of Distroless-Th
 
 | Version | Supported          |
 | ------- | ------------------ |
-| V2.x    | :white_check_mark: |
-| V1.x    | :x:                |
+| V2.x    | Yes                |
+| V1.x    | No                 |
 
 ## Reporting a Vulnerability
 
