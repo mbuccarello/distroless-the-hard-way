@@ -64,6 +64,8 @@ jobs:
           set: |
             *.cache-from=type=gha
             *.cache-to=type=gha,mode=max
+          provenance: false
+          sbom: false
 
       - name: Extract Digest
         if: github.event.inputs.push == 'true'
