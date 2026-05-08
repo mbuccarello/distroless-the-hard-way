@@ -57,5 +57,6 @@ jobs:
           targets: cc
           push: true
           set: |
+            *.parallel=2
             *.cache-from=type=gha
             *.cache-to=type=gha,mode=max
