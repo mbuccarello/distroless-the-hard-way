@@ -51,12 +51,11 @@ jobs:
         run: python3 engine/engine.py --mode foundation
 
       - name: Build and Push CC
-        uses: docker/bake-action@v5
-        with:
-          files: foundations/foundations.hcl
-          targets: cc
-          push: true
-          set: |
-            *.parallel=2
-            *.cache-from=type=gha
-            *.cache-to=type=gha,mode=max
+        run: |
+          docker buildx bake \
+            -f foundations/foundations.hcl \
+            --set "*.cache-from=type=gha" \
+            --set "*.cache-to=type=gha,mode=max" \
+            --push \
+            --parallel 2 \
+            cc

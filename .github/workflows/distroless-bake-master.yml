@@ -33,7 +33,7 @@ jobs:
       attestations: write
     outputs:
       image: ${{ env.REGISTRY }}/${{ inputs.stack }}-distroless
-      digest: ${{ steps.bake.outputs.digest }}
+      digest: ${{ steps.build.outputs.digest }}
     
     steps:
       - name: Checkout Repository
@@ -67,21 +67,16 @@ jobs:
           echo "STACK_NAME=${{ inputs.stack }}" >> $GITHUB_ENV
 
       - name: Build and Assemble Runtime
-        id: bake
-        uses: docker/bake-action@v5
-        with:
-          files: foundations/${{ inputs.stack }}.hcl
-          targets: runtime
-          push: ${{ inputs.push }}
-          set: |
-            *.parallel=2
-            *.cache-from=type=gha
-            *.cache-to=type=gha,mode=max
-
-      - name: Extract Digest
-        if: inputs.push
-        id: digest
+        id: build
         run: |
+          docker buildx bake \
+            -f foundations/${{ inputs.stack }}.hcl \
+            --set "*.cache-from=type=gha" \
+            --set "*.cache-to=type=gha,mode=max" \
+            --push \
+            --parallel 2 \
+            runtime
+          
           IMAGE_NAME=${REGISTRY}/${{ inputs.stack }}-distroless:latest
           DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' $IMAGE_NAME | cut -d'@' -f2)
           echo "digest=$DIGEST" >> $GITHUB_OUTPUT
