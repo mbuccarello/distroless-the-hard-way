@@ -76,11 +76,11 @@ jobs:
             -f foundations/${{ inputs.stack }}.hcl \
             --set "*.cache-from=type=gha" \
             --set "*.cache-to=type=gha,mode=max" \
+            --metadata-file metadata.json \
             --push \
             runtime
           
-          IMAGE_NAME=${REGISTRY}/${{ inputs.stack }}-distroless:latest
-          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' $IMAGE_NAME | cut -d'@' -f2)
+          DIGEST=$(jq -r '.runtime["containerimage.digest"]' metadata.json)
           echo "digest=$DIGEST" >> $GITHUB_OUTPUT
           echo "IMAGE_DIGEST=$DIGEST" >> $GITHUB_ENV
 

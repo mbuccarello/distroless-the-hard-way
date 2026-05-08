@@ -3,7 +3,8 @@
 FROM fedora:40 as builder
 
 # Install base tools
-RUN dnf install -y @development-tools cmake curl git busybox perl python3 xz tar bison flex gettext texinfo clang pkgconf-pkg-config
+# Install base tools with retries
+RUN for i in {1..5}; do dnf install -y @development-tools cmake curl git busybox perl python3 xz tar bison flex gettext texinfo clang pkgconf-pkg-config && break || sleep 5; done && dnf clean all
 
 # Ensure Busybox is in path
 RUN if [ -f /usr/sbin/busybox ]; then ln -s /usr/sbin/busybox /usr/bin/busybox; fi
