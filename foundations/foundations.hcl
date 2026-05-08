@@ -2,6 +2,10 @@ variable "REGISTRY" {
   default = "ghcr.io/mbuccarello"
 }
 
+variable "ATOMS_REGISTRY" {
+  default = "ghcr.io/mbuccarello/atoms"
+}
+
 group "default" {
   targets = ["static", "base", "cc"]
 }
@@ -31,7 +35,7 @@ target "base" {
 
 target "zlib" {
   dockerfile = "foundations/runtime.Dockerfile"
-  target = "zlib-builder"
+  target = "zlib"
   context = "."
   platforms = ["linux/amd64"]
   args = {
@@ -44,9 +48,23 @@ target "zlib" {
   }
 }
 
+target "brotli" {
+  dockerfile = "foundations/runtime.Dockerfile"
+  target = "brotli"
+  context = "."
+  platforms = ["linux/amd64"]
+  args = {
+    LIB_NAME = "brotli"
+    LIB_URL = "https://github.com/google/brotli/archive/refs/tags/v1.1.0.tar.gz"
+  }
+  contexts = {
+    builder = "target:builder"
+  }
+}
+
 target "openssl" {
   dockerfile = "foundations/runtime.Dockerfile"
-  target = "openssl-builder"
+  target = "openssl"
   context = "."
   platforms = ["linux/amd64"]
   args = {
@@ -56,13 +74,14 @@ target "openssl" {
   }
   contexts = {
     builder = "target:builder"
+    brotli = "target:brotli"
     zlib = "target:zlib"
   }
 }
 
 target "libxcrypt" {
   dockerfile = "foundations/runtime.Dockerfile"
-  target = "libxcrypt-builder"
+  target = "libxcrypt"
   context = "."
   platforms = ["linux/amd64"]
   args = {
@@ -83,6 +102,7 @@ target "cc" {
     builder = "target:builder"
     base = "target:base"
     zlib = "target:zlib"
+    brotli = "target:brotli"
     openssl = "target:openssl"
     libxcrypt = "target:libxcrypt"
   }

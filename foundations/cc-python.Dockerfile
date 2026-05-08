@@ -10,5 +10,12 @@ COPY --from=zlib /artifacts/usr /usr
 COPY --from=brotli /artifacts/usr /usr
 COPY --from=openssl /artifacts/usr /usr
 COPY --from=libxcrypt /artifacts/usr /usr
+COPY --from=libffi /artifacts/usr /usr
+COPY --from=expat /artifacts/usr /usr
+COPY --from=bzip2 /artifacts/usr /usr
+COPY --from=xz /artifacts/usr /usr
+COPY --from=ncurses /artifacts/usr /usr
+COPY --from=readline /artifacts/usr /usr
+COPY --from=sqlite /artifacts/usr /usr
 LABEL distroless.layer="cc"
 USER 65532:65532

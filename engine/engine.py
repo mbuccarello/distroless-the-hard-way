@@ -8,9 +8,12 @@ import re
 
 ARCH_GITLAB_BASE = "https://gitlab.archlinux.org/archlinux/packaging/packages/{}/-/raw/main/PKGBUILD"
 
+from discovery import DiscoveryEngine
+
 class MetadataManager:
     def __init__(self, cache_dir):
         self.cache_dir = cache_dir
+        self.discovery = DiscoveryEngine(cache_dir)
         self.hardcoded_sources = {
             "zlib": "https://github.com/madler/zlib/archive/refs/tags/v1.3.1.tar.gz",
             "openssl": "https://github.com/openssl/openssl/releases/download/openssl-3.4.0/openssl-3.4.0.tar.gz",
@@ -34,30 +37,6 @@ class MetadataManager:
             "pcre2": "https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.44/pcre2-10.44.tar.gz"
         }
 
-    def fetch_arch_pkgbuild(self, pkgname):
-        url = ARCH_GITLAB_BASE.format(pkgname)
-        dest = os.path.join(self.cache_dir, f"{pkgname}_PKGBUILD")
-        try:
-            urllib.request.urlretrieve(url, dest)
-            return dest
-        except Exception:
-            return None
-
-    def parse_pkgbuild(self, content):
-        metadata = {"depends": [], "sources": []}
-        depends_match = re.search(r'depends=\((.*?)\)', content, re.DOTALL)
-        if depends_match:
-            deps_str = depends_match.group(1).replace('"', '').replace("'", "")
-            metadata["depends"] = [d.split('>')[0].split('<')[0].split('=')[0].strip() for d in deps_str.split() if d.strip()]
-        
-        # Extract sources
-        sources_match = re.search(r'source=\((.*?)\)', content, re.DOTALL)
-        if sources_match:
-            src_str = sources_match.group(1).replace('"', '').replace("'", "")
-            metadata["sources"] = [s.strip() for s in src_str.split() if s.strip()]
-            
-        return metadata
-
     def get_metadata(self, pkgname):
         res = {
             "url": self.hardcoded_sources.get(pkgname, "SKIP"),
@@ -65,27 +44,14 @@ class MetadataManager:
             "version": "latest",
             "depends": []
         }
-        pkgbuild_path = self.fetch_arch_pkgbuild(pkgname)
-        if pkgbuild_path:
-            with open(pkgbuild_path, 'r') as f:
-                content = f.read()
-            info = self.parse_pkgbuild(content)
-            res["depends"] = info["depends"]
-            
-            # Extract version
-            version_match = re.search(r'pkgver=([^\s]+)', content)
-            if version_match:
-                res["version"] = version_match.group(1).replace('"', '').replace("'", "")
-                
-            # Discovery: if URL is SKIP, try to find it in sources
-            if res["url"] == "SKIP" or not res["url"]:
-                for s in info["sources"]:
-                    if s.startswith("http") and any(s.endswith(ext) for ext in [".tar.gz", ".tar.xz", ".tar.bz2", ".tar.zst"]):
-                        # Cleanup Arch variables like $pkgver
-                        s = s.replace("$pkgver", res["version"]).replace("${pkgver}", res["version"])
-                        s = s.replace("$pkgname", pkgname).replace("${pkgname}", pkgname)
-                        res["url"] = s
-                        break
+        
+        meta = self.discovery.fetch_arch_metadata(pkgname)
+        if meta:
+            res["version"] = meta["version"]
+            res["depends"] = meta["depends"]
+            if res["url"] == "SKIP" and meta["sources"]:
+                res["url"] = meta["sources"][0]
+        
         return res
 
 class DAGResolver:
@@ -143,13 +109,21 @@ class HCLGenerator:
     def check_atom_exists(self, pkg, version):
         """Check if an atom already exists in the registry."""
         import subprocess
+        
+        # Bypass check if FORCE_BUILD is set
+        if os.environ.get("FORCE_BUILD") == "true":
+            print(f"  [CACHE] Force build enabled, skipping registry check for {pkg}:{version}")
+            return False
+
         full_image = f"{self.registry}/atoms/{pkg}:{version}"
         try:
             # Use docker manifest inspect for a lightweight check
             subprocess.run(["docker", "manifest", "inspect", full_image], 
                            check=True, capture_output=True)
+            print(f"  [CACHE] Found pre-compiled atom: {full_image}")
             return True
         except subprocess.CalledProcessError:
+            print(f"  [CACHE] Atom not found in registry: {pkg}:{version} (will build from source)")
             return False
 
     def generate_foundation_hcl(self, graph=None):
@@ -256,7 +230,7 @@ class HCLGenerator:
                 if pkg == "nghttp2": lib_config = "--enable-lib-only"
                 if pkg == "krb5": lib_config = "--with-crypto-impl=openssl --with-system-verto=no --disable-rpath"
                 if pkg == "libxml2": lib_config = "--without-python --without-icu"
-                if pkg == "curl": lib_config = "--with-openssl --with-zlib --with-nghttp2 --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt"
+                if pkg == "curl": lib_config = "--with-openssl=/opt/distroless --with-zlib=/opt/distroless --with-nghttp2=/opt/distroless --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt"
                 if pkg == "pcre2": lib_config = "--enable-jit --enable-unicode"
                 if pkg == "oniguruma": lib_config = "--enable-shared"
                 if lib_config: hcl += f'    LIB_CONFIG = "{lib_config}"\n'
@@ -401,7 +375,10 @@ class HCLGenerator:
             df += "    export CPPFLAGS=\"-I/opt/distroless/include\" && \\\n"
             df += "    export LDFLAGS=\"-L/opt/distroless/lib -L/opt/distroless/lib64 -Wl,-rpath,/usr/lib\" && \\\n"
             df += "    export PKG_CONFIG_PATH=\"/opt/distroless/lib/pkgconfig:/opt/distroless/lib64/pkgconfig\" && \\\n"
-            df += f"    if [ -f ./configure ]; then ./configure --prefix=/usr {build_flags}; "
+            # Special handling for Perl's Configure which is not autoconf
+            df += f"    if [ -f ./Configure ] && grep -q \"Perl\" ./Configure; then \\\n"
+            df += f"        ./Configure {build_flags} -Dlocincpth=\"/opt/distroless/include\" -Dloclibpth=\"/opt/distroless/lib /opt/distroless/lib64\"; \\\n"
+            df += f"    elif [ -f ./configure ]; then ./configure --prefix=/usr {build_flags}; "
             df += f"elif [ -f ./Configure ]; then ./Configure {build_flags}; "
             df += f"elif [ -f ./CMakeLists.txt ]; then cmake -DCMAKE_INSTALL_PREFIX=/usr {build_flags} .; fi && \\\n"
             df += "    export CXXFLAGS=\"$CXXFLAGS -fno-var-tracking-assignments -g0 -O1\" && \\\n"
@@ -427,7 +404,11 @@ def main():
     parser = argparse.ArgumentParser(description="Distroless Build Engine")
     parser.add_argument("--mode", choices=["foundation", "runtime"], required=True)
     parser.add_argument("--stack", help="Path to stack YAML config (required for runtime mode)")
+    parser.add_argument("--force-build", action="store_true", help="Skip registry check and build everything from source")
     args = parser.parse_args()
+
+    if args.force_build:
+        os.environ["FORCE_BUILD"] = "true"
 
     generator = HCLGenerator()
     

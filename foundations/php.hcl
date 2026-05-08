@@ -193,7 +193,7 @@ target "curl" {
   args = {
     LIB_NAME = "curl"
     LIB_URL = "https://github.com/curl/curl/releases/download/curl-8_11_0/curl-8.11.0.tar.gz"
-    LIB_CONFIG = "--with-openssl --with-zlib --with-nghttp2 --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt"
+    LIB_CONFIG = "--with-openssl=/opt/distroless --with-zlib=/opt/distroless --with-nghttp2=/opt/distroless --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt"
   }
   contexts = {
     builder = "target:foundations"

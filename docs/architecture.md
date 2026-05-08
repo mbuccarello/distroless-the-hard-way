@@ -1,6 +1,6 @@
-# Sovereign Distroless Architecture: Technical Specification
+# Distroless Architecture: Technical Specification
 
-This document defines the high-assurance architecture of the **Distroless The Hard Way** project. It combines the technical hierarchy, the dependency orchestration engine, and the sovereign supply chain principles into a single unified reference.
+This document defines the high-assurance architecture of the **Distroless The Hard Way** project. It combines the technical hierarchy, the dependency orchestration engine, and the core supply chain principles into a single unified reference.
 
 ---
 
@@ -20,7 +20,7 @@ The architecture enforces a strictly linear cascading hierarchy modeled after Go
 To prevent ABI drift, all libraries are unified into `/usr/lib`. Standardized symlinks (`/lib -> /usr/lib`, `/lib64 -> /usr/lib`) ensure universal kernel compliance across all execution environments.
 
 ### 📂 Canonical Filesystem Layout (`cc` layer)
-Every sovereign image adheres to the following layout before the language runtime is injected:
+Every image adheres to the following layout before the language runtime is injected:
 
 ```text
 /
@@ -121,7 +121,7 @@ docker buildx bake -f foundations/python.hcl python
 
 ### 4.1 Zero-Trust Principles
 - **Zero OS Extraction**: No reliance on host OS package managers.
-- **Rpath Pinning**: Binaries are compiled with `-Wl,-rpath,/usr/lib` to ensure they only load sovereign libraries.
+- **Rpath Pinning**: Binaries are compiled with `-Wl,-rpath,/usr/lib` to ensure they only load high-assurance libraries.
 - **Shell-Free Production**: Standard images contain zero executables (`no sh`, `no ls`).
 
 ### 4.2 Compliance & Attestation
@@ -141,4 +141,4 @@ The project migrated from fragmented YAML-based workflows to the unified Python-
 2. **Maintenance Toil**: Updating a library version required manual edits across dozens of files.
 3. **Build Velocity**: Transitioned from sequential steps to native Docker Buildx graph execution.
 
-*This document serves as the authoritative technical reference for the Sovereign Distroless project.*
+*This document serves as the authoritative technical reference for the Distroless The Hard Way project.*

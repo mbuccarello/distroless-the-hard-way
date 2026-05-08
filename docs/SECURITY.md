@@ -1,4 +1,4 @@
-# Sovereign Distroless Security: High-Assurance Supply Chain
+# Distroless Security: High-Assurance Supply Chain
 
 This document defines the security architecture, compliance standards, and integrity verification processes of the **Distroless The Hard Way** project.
 
@@ -27,7 +27,7 @@ The project generates **SLSA Level 3** build provenance for every artifact. This
 ## 2. Integrity Verification (Gating)
 
 ### 2.1 Capability Analysis (Malcontent)
-The integrity of compiled binaries is verified using **Chainguard Malcontent** to detect unexpected capabilities, syscalls, or malicious indicators. This ensures that the "Sovereign" build strategy has not been bypassed by unexpected build-time behaviors.
+The integrity of compiled binaries is verified using **Chainguard Malcontent** to detect unexpected capabilities, syscalls, or malicious indicators. This ensures that the build strategy has not been bypassed by unexpected build-time behaviors.
 
 ### 2.2 Static Analysis (Semgrep & Scorecard)
 - **Semgrep**: Used to scan Dockerfiles and Python engine code for security misconfigurations.

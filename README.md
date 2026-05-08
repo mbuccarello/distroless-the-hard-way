@@ -3,7 +3,7 @@
 [![Distroless Full Fleet Build](https://github.com/mbuccarello/distroless-the-hard-way/actions/workflows/distroless-fleet-build.yml/badge.svg)](https://github.com/mbuccarello/distroless-the-hard-way/actions/workflows/distroless-fleet-build.yml)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/mbuccarello/distroless-the-hard-way/badge)](https://securityscorecards.dev/viewer/?uri=github.com/mbuccarello/distroless-the-hard-way)
 
-Distroless The Hard Way is a technical framework for constructing minimal, secure OCI container images compiled entirely from source code. The project implements a sovereign supply chain that eliminates reliance on external binary distributions.
+Distroless The Hard Way is a technical framework for constructing minimal, secure OCI container images compiled entirely from source code. The project implements a source-driven supply chain that eliminates reliance on external binary distributions.
 
 ---
 
@@ -13,13 +13,13 @@ The project utilizes a modular architecture where language runtimes (PHP, Python
 
 ### Core Principles
 
-1.  **Source Sovereignty**: All binaries and libraries are compiled from upstream source code to ensure total control over the software supply chain.
-2.  **Persistent Atoms**: Dependencies are managed as versioned OCI images stored in GHCR, replacing transient build layers with reusable artifacts.
+1.  **Source Control**: All binaries and libraries are compiled from upstream source code to ensure total control over the software supply chain.
+2.  **Persistent Atoms**: Dependencies are managed as versioned OCI images in GHCR for high-assurance assembly, replacing transient build layers with reusable artifacts.
 3.  **Registry-First Orchestration**: The build engine prioritizes pulling pre-compiled Atoms from the registry, accelerating assembly while maintaining granular provenance.
 4.  **Dynamic Metadata Discovery**: A specialized discovery engine extracts dependency graphs and configuration parameters directly from Arch Linux metadata.
 
 ### Build Orchestration
-The Distroless Engine (engine/engine.py) manages the assembly process by:
+The Build Engine (engine/engine.py) manages the assembly process by:
 *   Executing in targeted modes: --mode foundation for core layers and --mode runtime for language-specific stacks.
 *   Analyzing Arch Linux PKGBUILDs to automate dependency resolution and extract optimized compilation flags.
 *   Generating Docker Bake (HCL) manifests (foundations/*.hcl) to ensure ABI consistency across all layers.
@@ -31,16 +31,16 @@ The Distroless Engine (engine/engine.py) manages the assembly process by:
 
 | Runtime | Base Layer | Sourcing | Status |
 | :--- | :--- | :--- | :--- |
-| **Python** | `cc` | Source-Built (3.14) | Active |
-| **Node.js** | `cc` | Binary Injection (LTS) | Active |
-| **Java** | `cc` | Binary Injection (21 LTS) | Active |
-| **.NET** | `cc` | Binary Injection (8 LTS) | Active |
-| **Go** | `static` | Static Compilation | Active |
-| **PHP / Perl**| `cc` | Source-Built | Active |
+| **Python** | `cc` | Source-Built (3.14) | ✅ Active |
+| **Node.js** | `cc` | Binary Injection (LTS) | ✅ Active |
+| **Java** | `cc` | Binary Injection (21 LTS) | ✅ Active |
+| **.NET** | `cc` | Binary Injection (8 LTS) | ✅ Active |
+| **Go** | `static` | Static Compilation | ✅ Active |
+| **PHP / Perl**| `cc` | Source-Built | ✅ Active |
 
 ---
 
-## Sovereign Principles & Security
+## Security Principles & Hardening
 
 - **Zero OS Extraction**: No reliance on host OS package managers (`apt`, `apk`). We compile from upstream source tarballs.
 - **Unified FHS**: All libraries are unified into `/usr/lib` to prevent ABI drift and path complexity.
