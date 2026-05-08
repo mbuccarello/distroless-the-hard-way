@@ -50,6 +50,9 @@ jobs:
       - name: Generate Foundation HCL
         run: python3 engine/engine.py --mode foundation
 
+      - name: Check Buildx Version
+        run: docker buildx version
+
       - name: Build and Push CC
         run: |
           docker buildx bake \
@@ -57,5 +60,5 @@ jobs:
             --set "*.cache-from=type=gha" \
             --set "*.cache-to=type=gha,mode=max" \
             --push \
-            --parallel 2 \
+            -j 2 \
             cc

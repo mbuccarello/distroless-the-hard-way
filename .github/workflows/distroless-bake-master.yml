@@ -66,6 +66,9 @@ jobs:
           python3 engine/engine.py --mode runtime --stack stacks/${{ inputs.stack }}.yaml
           echo "STACK_NAME=${{ inputs.stack }}" >> $GITHUB_ENV
 
+      - name: Check Buildx Version
+        run: docker buildx version
+
       - name: Build and Assemble Runtime
         id: build
         run: |
@@ -74,7 +77,7 @@ jobs:
             --set "*.cache-from=type=gha" \
             --set "*.cache-to=type=gha,mode=max" \
             --push \
-            --parallel 2 \
+            -j 2 \
             runtime
           
           IMAGE_NAME=${REGISTRY}/${{ inputs.stack }}-distroless:latest
