@@ -58,6 +58,6 @@ jobs:
           docker buildx bake \
             -f foundations/foundations.hcl \
             --set "*.cache-from=type=gha" \
-            --set "*.cache-to=type=gha,mode=max" \
             --push \
+            -j 1 \
             cc
