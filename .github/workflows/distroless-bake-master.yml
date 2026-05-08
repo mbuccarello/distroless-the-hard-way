@@ -77,7 +77,6 @@ jobs:
             --set "*.cache-from=type=gha" \
             --set "*.cache-to=type=gha,mode=max" \
             --push \
-            -j 2 \
             runtime
           
           IMAGE_NAME=${REGISTRY}/${{ inputs.stack }}-distroless:latest
