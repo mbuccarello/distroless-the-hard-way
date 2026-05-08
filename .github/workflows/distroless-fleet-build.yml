@@ -12,7 +12,7 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - id: set-matrix
         run: |
           # Robust matrix generation - exclude foundations as they are built within runtimes
