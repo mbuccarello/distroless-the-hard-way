@@ -16,7 +16,7 @@ jobs:
     outputs:
       stacks: ${{ steps.set-matrix.outputs.stacks }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - id: set-matrix
         run: |
           STACKS=$(ls stacks/*.yaml | xargs -n1 basename -s .yaml | jq -R -s -c 'split("\n")[:-1]')
@@ -34,7 +34,7 @@ jobs:
     
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Java (for compilation)
         if: matrix.stack == 'java'
