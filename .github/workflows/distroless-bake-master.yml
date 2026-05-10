@@ -78,7 +78,6 @@ jobs:
             -f foundations/${{ inputs.stack }}.hcl \
             --set "*.cache-from=type=gha" \
             --set "*.cache-to=type=gha,mode=max" \
-            --set "REGISTRY=${{ env.REGISTRY }}" \
             --metadata-file metadata.json \
             --push \
             runtime
