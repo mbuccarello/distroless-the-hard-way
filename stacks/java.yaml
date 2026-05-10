@@ -1,6 +1,6 @@
 name: java
 version: "21.0.11"
-type: source_build
+type: binary_injection
 base_hierarchy:
   - static
   - base
@@ -31,8 +31,7 @@ dependencies:
 runtime:
   name: openjdk
   version: "21.0.11"
-  source_url: "https://github.com/openjdk/jdk21u/archive/refs/tags/jdk-21.0.11-ga.tar.gz"
-  sha256: "SKIP"
+  binary_url: "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.6%2B7/OpenJDK21U-jdk_x64_linux_hotspot_21.0.6_7.tar.gz"
   build_flags:
     - "--with-zlib=system"
     - "--with-freetype=system"

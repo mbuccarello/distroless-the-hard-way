@@ -1,6 +1,6 @@
 name: php
 version: "8.3"
-type: source_build
+type: binary_injection
 base_hierarchy:
   - static
   - base
@@ -35,8 +35,7 @@ dependencies:
 runtime:
   name: php
   version: "8.3.13"
-  source_url: "https://www.php.net/distributions/php-8.3.13.tar.gz"
-  sha256: "SKIP"
+  binary_url: "DNF"
   build_flags:
     - --with-openssl=/opt/distroless
     - --with-zlib=/opt/distroless
