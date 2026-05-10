@@ -59,5 +59,4 @@ jobs:
             -f foundations/foundations.hcl \
             --set "*.cache-from=type=gha" \
             --push \
-            -j 1 \
             cc
