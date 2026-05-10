@@ -79,7 +79,7 @@ target "libxcrypt" {
   args = {
     LIB_NAME = "libxcrypt"
     LIB_URL = "https://github.com/besser82/libxcrypt/releases/download/v4.4.36/libxcrypt-4.4.36.tar.xz"
-    LIB_CONFIG = "--disable-werror"
+    LIB_CONFIG = "--disable-werror --enable-hashes=all --enable-obsolete-api=no"
   }
   contexts = {
     builder = "target:foundations"
@@ -123,6 +123,7 @@ target "runtime" {
   args = {
     RUNTIME_NAME = "perl"
     RUNTIME_VER = "5.38"
+    RUNTIME_URL = "https://github.com/skaji/perl-static/releases/download/5.38.2-1/perl-5.38.2-linux-x86_64.tar.gz"
   }
   contexts = {
     cc = "target:cc-perl"

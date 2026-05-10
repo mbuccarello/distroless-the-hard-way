@@ -212,7 +212,7 @@ target "libxcrypt" {
   args = {
     LIB_NAME = "libxcrypt"
     LIB_URL = "https://github.com/besser82/libxcrypt/releases/download/v4.4.36/libxcrypt-4.4.36.tar.xz"
-    LIB_CONFIG = "--disable-werror"
+    LIB_CONFIG = "--disable-werror --enable-hashes=all --enable-obsolete-api=no"
   }
   contexts = {
     builder = "target:foundations"
@@ -284,6 +284,7 @@ target "runtime" {
   args = {
     RUNTIME_NAME = "php"
     RUNTIME_VER = "8.3"
+    RUNTIME_URL = "DNF"
   }
   contexts = {
     cc = "target:cc-php"

@@ -233,7 +233,7 @@ target "libxcrypt" {
   args = {
     LIB_NAME = "libxcrypt"
     LIB_URL = "https://github.com/besser82/libxcrypt/releases/download/v4.4.36/libxcrypt-4.4.36.tar.xz"
-    LIB_CONFIG = "--disable-werror"
+    LIB_CONFIG = "--disable-werror --enable-hashes=all --enable-obsolete-api=no"
   }
   contexts = {
     builder = "target:foundations"
@@ -270,7 +270,8 @@ target "runtime" {
   context = "."
   args = {
     RUNTIME_NAME = "java"
-    RUNTIME_VER = "21.0.11"
+    RUNTIME_VER = "21.0.6"
+    RUNTIME_URL = "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.6%2B7/OpenJDK21U-jdk_x64_linux_hotspot_21.0.6_7.tar.gz"
   }
   contexts = {
     cc = "target:cc-java"
