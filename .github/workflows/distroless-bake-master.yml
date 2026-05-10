@@ -92,7 +92,7 @@ jobs:
         with:
           image: ${{ env.REGISTRY }}/${{ inputs.stack }}-distroless:latest
           artifact-name: sbom-${{ inputs.stack }}.json
-          output-format: cyclonedx-json
+          format: cyclonedx-json
 
       - name: Scan Image (Grype)
         if: inputs.push
