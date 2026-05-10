@@ -32,7 +32,7 @@ jobs:
       id-token: write
       attestations: write
     outputs:
-      image: ${{ env.REGISTRY }}/${{ inputs.stack }}-distroless
+      image: ${{ steps.info.outputs.image }}
       digest: ${{ steps.build.outputs.digest }}
     
     steps:
@@ -62,9 +62,11 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Initialize Build Engine
+        id: info
         run: |
           python3 engine/engine.py --mode runtime --stack stacks/${{ inputs.stack }}.yaml
           echo "STACK_NAME=${{ inputs.stack }}" >> $GITHUB_ENV
+          echo "image=${{ env.REGISTRY }}/${{ inputs.stack }}-distroless" >> $GITHUB_OUTPUT
 
       - name: Check Buildx Version
         run: docker buildx version
@@ -76,6 +78,7 @@ jobs:
             -f foundations/${{ inputs.stack }}.hcl \
             --set "*.cache-from=type=gha" \
             --set "*.cache-to=type=gha,mode=max" \
+            --set "REGISTRY=${{ env.REGISTRY }}" \
             --metadata-file metadata.json \
             --push \
             runtime
@@ -107,12 +110,12 @@ jobs:
       - name: Sign Image (Keyless)
         if: inputs.push
         run: |
-          cosign sign --yes ${REGISTRY}/${{ inputs.stack }}-distroless@${{ steps.digest.outputs.digest }}
+          cosign sign --yes ${REGISTRY}/${{ inputs.stack }}-distroless@${{ steps.build.outputs.digest }}
 
       - name: Generate SLSA Provenance
         if: inputs.push
         uses: actions/attest-build-provenance@v1
         with:
           subject-name: ${{ env.REGISTRY }}/${{ inputs.stack }}-distroless
-          subject-digest: ${{ steps.digest.outputs.digest }}
+          subject-digest: ${{ steps.build.outputs.digest }}
           push-to-registry: true

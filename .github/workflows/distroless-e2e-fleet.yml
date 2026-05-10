@@ -1,0 +1,71 @@
+name: "Distroless E2E Fleet Verification"
+
+on:
+  workflow_run:
+    workflows: ["Distroless Full Fleet Build"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  generate-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      stacks: ${{ steps.set-matrix.outputs.stacks }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: set-matrix
+        run: |
+          STACKS=$(ls stacks/*.yaml | xargs -n1 basename -s .yaml | jq -R -s -c 'split("\n")[:-1]')
+          echo "stacks=$STACKS" >> $GITHUB_OUTPUT
+
+  smoke-test:
+    needs: generate-matrix
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        stack: ${{ fromJson(needs.generate-matrix.outputs.stacks) }}
+    env:
+      REGISTRY: ghcr.io/${{ github.repository_owner }}
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java (for compilation)
+        if: matrix.stack == 'java'
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Run E2E Smoke Test
+        run: |
+          IMAGE_NAME="${REGISTRY}/${{ matrix.stack }}-distroless:latest"
+          echo "Testing image: $IMAGE_NAME"
+          
+          case "${{ matrix.stack }}" in
+            python)
+              docker run --rm -v $(pwd)/app/test.py:/app/test.py $IMAGE_NAME /usr/bin/python3 /app/test.py
+              ;;
+            nodejs)
+              docker run --rm -v $(pwd)/app/test.js:/app/test.js $IMAGE_NAME /usr/bin/node /app/test.js
+              ;;
+            php)
+              docker run --rm -v $(pwd)/app/test.php:/app/test.php $IMAGE_NAME /usr/bin/php /app/test.php
+              ;;
+            perl)
+              docker run --rm -v $(pwd)/app/test.pl:/app/test.pl $IMAGE_NAME /usr/bin/perl /app/test.pl
+              ;;
+            java)
+              javac app/test.java
+              docker run --rm -v $(pwd)/app/test.class:/app/test.class $IMAGE_NAME /usr/bin/java -cp / app/test
+              ;;
+            *)
+              echo "No specific test logic for ${{ matrix.stack }}, skipping."
+              ;;
+          esac

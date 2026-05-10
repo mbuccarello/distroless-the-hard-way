@@ -17,6 +17,6 @@ jobs:
   assemble:
     uses: ./.github/workflows/distroless-bake-master.yml
     with:
-      stack: ${{ github.event.inputs.stack }}
-      push: ${{ github.event.inputs.push }}
+      stack: ${{ inputs.stack }}
+      push: ${{ inputs.push }}
     secrets: inherit

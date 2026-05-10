@@ -97,8 +97,8 @@ class DAGResolver:
         return {node: self.graph[node] for node in sorted_nodes}
 
 class HCLGenerator:
-    def __init__(self, registry="ghcr.io/mbuccarello", platform="linux/amd64"):
-        self.registry = registry
+    def __init__(self, registry=None, platform="linux/amd64"):
+        self.registry = registry or os.environ.get("REGISTRY", "ghcr.io/mbuccarello")
         self.platform = platform
 
     def _header(self):
