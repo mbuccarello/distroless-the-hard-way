@@ -27,6 +27,12 @@ target "runtime" {
   contexts = {
     cc = "docker-image://${REGISTRY}/cc:latest"
     builder = "target:foundations"
+    zlib = "target:zlib"
+    brotli = "target:brotli"
+    openssl = "target:openssl"
+    icu = "target:icu"
+    krb5 = "target:krb5"
+    libxcrypt = "target:libxcrypt"
   }
   tags = ["${REGISTRY}/dotnet-distroless:latest"]
 }

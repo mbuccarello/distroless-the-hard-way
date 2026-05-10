@@ -27,6 +27,20 @@ target "runtime" {
   contexts = {
     cc = "docker-image://${REGISTRY}/cc:latest"
     builder = "target:foundations"
+    zlib = "target:zlib"
+    brotli = "target:brotli"
+    bzip2 = "target:bzip2"
+    libpng = "target:libpng"
+    freetype2 = "target:freetype2"
+    libjpeg-turbo = "target:libjpeg-turbo"
+    lcms2 = "target:lcms2"
+    libx11 = "target:libx11"
+    libxext = "target:libxext"
+    libxrender = "target:libxrender"
+    libxtst = "target:libxtst"
+    alsa-lib = "target:alsa-lib"
+    openssl = "target:openssl"
+    libxcrypt = "target:libxcrypt"
   }
   tags = ["${REGISTRY}/java-distroless:latest"]
 }

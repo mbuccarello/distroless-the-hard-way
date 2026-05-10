@@ -27,6 +27,20 @@ target "runtime" {
   contexts = {
     cc = "docker-image://${REGISTRY}/cc:latest"
     builder = "target:foundations"
+    zlib = "target:zlib"
+    brotli = "target:brotli"
+    openssl = "target:openssl"
+    icu = "target:icu"
+    ncurses = "target:ncurses"
+    readline = "target:readline"
+    libxml2 = "target:libxml2"
+    sqlite = "target:sqlite"
+    oniguruma = "target:oniguruma"
+    krb5 = "target:krb5"
+    curl = "target:curl"
+    libxcrypt = "target:libxcrypt"
+    bzip2 = "target:bzip2"
+    pcre2 = "target:pcre2"
   }
   tags = ["${REGISTRY}/php-distroless:latest"]
 }

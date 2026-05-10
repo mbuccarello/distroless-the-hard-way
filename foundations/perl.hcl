@@ -27,6 +27,12 @@ target "runtime" {
   contexts = {
     cc = "docker-image://${REGISTRY}/cc:latest"
     builder = "target:foundations"
+    zlib = "target:zlib"
+    gdbm = "target:gdbm"
+    bzip2 = "target:bzip2"
+    brotli = "target:brotli"
+    openssl = "target:openssl"
+    libxcrypt = "target:libxcrypt"
   }
   tags = ["${REGISTRY}/perl-distroless:latest"]
 }

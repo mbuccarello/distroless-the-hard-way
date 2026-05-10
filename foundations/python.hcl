@@ -27,6 +27,17 @@ target "runtime" {
   contexts = {
     cc = "docker-image://${REGISTRY}/cc:latest"
     builder = "target:foundations"
+    zlib = "target:zlib"
+    brotli = "target:brotli"
+    openssl = "target:openssl"
+    libxcrypt = "target:libxcrypt"
+    libffi = "target:libffi"
+    expat = "target:expat"
+    bzip2 = "target:bzip2"
+    xz = "target:xz"
+    ncurses = "target:ncurses"
+    readline = "target:readline"
+    sqlite = "target:sqlite"
   }
   tags = ["${REGISTRY}/python-distroless:latest"]
 }

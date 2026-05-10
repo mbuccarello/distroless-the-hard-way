@@ -281,9 +281,8 @@ class HCLGenerator:
         else:
             hcl += '    cc = "docker-image://${REGISTRY}/cc:latest"\n'
         hcl += '    builder = "target:foundations"\n'
-        if stack_type == "source_build":
-            for pkg in graph.keys():
-                hcl += f'    {pkg} = "target:{pkg}"\n'
+        for pkg in graph.keys():
+            hcl += f'    {pkg} = "target:{pkg}"\n'
         hcl += '  }\n'
         hcl += f'  tags = ["${{REGISTRY}}/{name}-distroless:latest"]\n}}\n\n'
 
@@ -346,9 +345,12 @@ class HCLGenerator:
             df += f"ARG RUNTIME_NAME={runtime_name}\nARG RUNTIME_URL\nRUN set -ex && mkdir -p /tmp/extract && \\\n"
             df += "    if [ \"$RUNTIME_URL\" = \"DNF\" ]; then \\\n"
             df += "      dnf clean all && dnf install -y --setopt=install_weak_deps=False $RUNTIME_NAME $RUNTIME_NAME-fpm $RUNTIME_NAME-mysqlnd $RUNTIME_NAME-opcache $RUNTIME_NAME-xml $RUNTIME_NAME-mbstring $RUNTIME_NAME-gd $RUNTIME_NAME-curl || dnf install -y $RUNTIME_NAME && \\\n"
-            df += "      mkdir -p /runtime-root/usr/bin /runtime-root/usr/sbin /runtime-root/usr/lib64 /runtime-root/etc && \\\n"
+            df += "      mkdir -p /runtime-root/usr/bin /runtime-root/usr/sbin /runtime-root/usr/lib64 /runtime-root/usr/lib /runtime-root/usr/share /runtime-root/etc && \\\n"
             df += "      cp -rv /usr/bin/${RUNTIME_NAME}* /runtime-root/usr/bin/ || true && \\\n"
             df += "      cp -rv /usr/sbin/${RUNTIME_NAME}* /runtime-root/usr/sbin/ || true && \\\n"
+            df += "      cp -rv /usr/lib64/${RUNTIME_NAME}* /runtime-root/usr/lib64/ || true && \\\n"
+            df += "      cp -rv /usr/lib/${RUNTIME_NAME}* /runtime-root/usr/lib/ || true && \\\n"
+            df += "      cp -rv /usr/share/${RUNTIME_NAME}* /runtime-root/usr/share/ || true && \\\n"
             df += "      cp -rv /usr/lib64/lib${RUNTIME_NAME}* /runtime-root/usr/lib64/ || true && \\\n"
             df += "      cp -rv /etc/${RUNTIME_NAME}* /runtime-root/etc/ || true && \\\n"
             df += "      echo \"Runtime installed via dnf\"; \\\n"

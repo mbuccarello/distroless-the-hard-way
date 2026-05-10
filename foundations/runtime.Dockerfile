@@ -125,9 +125,12 @@ ARG RUNTIME_URL
 RUN set -ex && mkdir -p /tmp/extract && \
     if [ "$RUNTIME_URL" = "DNF" ]; then \
       dnf clean all && dnf install -y --setopt=install_weak_deps=False $RUNTIME_NAME $RUNTIME_NAME-fpm $RUNTIME_NAME-mysqlnd $RUNTIME_NAME-opcache $RUNTIME_NAME-xml $RUNTIME_NAME-mbstring $RUNTIME_NAME-gd $RUNTIME_NAME-curl || dnf install -y $RUNTIME_NAME && \
-      mkdir -p /runtime-root/usr/bin /runtime-root/usr/sbin /runtime-root/usr/lib64 /runtime-root/etc && \
+      mkdir -p /runtime-root/usr/bin /runtime-root/usr/sbin /runtime-root/usr/lib64 /runtime-root/usr/lib /runtime-root/usr/share /runtime-root/etc && \
       cp -rv /usr/bin/${RUNTIME_NAME}* /runtime-root/usr/bin/ || true && \
       cp -rv /usr/sbin/${RUNTIME_NAME}* /runtime-root/usr/sbin/ || true && \
+      cp -rv /usr/lib64/${RUNTIME_NAME}* /runtime-root/usr/lib64/ || true && \
+      cp -rv /usr/lib/${RUNTIME_NAME}* /runtime-root/usr/lib/ || true && \
+      cp -rv /usr/share/${RUNTIME_NAME}* /runtime-root/usr/share/ || true && \
       cp -rv /usr/lib64/lib${RUNTIME_NAME}* /runtime-root/usr/lib64/ || true && \
       cp -rv /etc/${RUNTIME_NAME}* /runtime-root/etc/ || true && \
       echo "Runtime installed via dnf"; \

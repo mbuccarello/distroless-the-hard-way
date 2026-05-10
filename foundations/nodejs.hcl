@@ -27,6 +27,13 @@ target "runtime" {
   contexts = {
     cc = "docker-image://${REGISTRY}/cc:latest"
     builder = "target:foundations"
+    zlib = "target:zlib"
+    brotli = "target:brotli"
+    openssl = "target:openssl"
+    icu = "target:icu"
+    c-ares = "target:c-ares"
+    nghttp2 = "target:nghttp2"
+    libxcrypt = "target:libxcrypt"
   }
   tags = ["${REGISTRY}/nodejs-distroless:latest"]
 }
