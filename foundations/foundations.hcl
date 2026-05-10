@@ -87,7 +87,7 @@ target "libxcrypt" {
   args = {
     LIB_NAME = "libxcrypt"
     LIB_URL = "https://github.com/besser82/libxcrypt/releases/download/v4.4.36/libxcrypt-4.4.36.tar.xz"
-    LIB_CONFIG = "--disable-werror"
+    LIB_CONFIG = "--disable-werror --enable-hashes=all --enable-obsolete-api=no"
   }
   contexts = {
     builder = "target:builder"
