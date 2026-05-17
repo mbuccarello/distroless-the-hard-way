@@ -203,55 +203,55 @@ class HCLGenerator:
         hcl += 'target "foundations" {\n  dockerfile = "foundations/builder.Dockerfile"\n  context = "."\n}\n\n'
         
         # Library targets for THIS runtime
+        for pkg, meta in graph.items():
+            version = meta.get("version", "latest")
+            atom_exists = self.check_atom_exists(pkg, version)
+            
+            # We still generate the target so it's visible in the HCL, 
+            # but we'll use it only if it doesn't exist remotely
+            hcl += f'target "{pkg}" {{\n'
+            hcl += '  dockerfile = "foundations/runtime.Dockerfile"\n'
+            hcl += f'  target = "{pkg}"\n'
+            hcl += '  context = "."\n'
+            hcl += f'  platforms = ["{self.platform}"]\n'
+            hcl += f'  tags = ["${{ATOMS_REGISTRY}}/{pkg}:{version}"]\n'
+            hcl += '  args = {\n'
+            hcl += f'    LIB_NAME = "{pkg}"\n'
+            hcl += f'    LIB_URL = "{meta["url"]}"\n'
+            
+            lib_config = ""
+            if pkg == "zlib": lib_config = "--shared"
+            if pkg == "openssl": lib_config = "shared zlib"
+            if pkg == "ncurses": lib_config = "--with-shared --enable-widec --enable-pc-files --with-termlib"
+            if pkg == "readline": lib_config = "--with-curses"
+            if pkg == "libxcrypt": lib_config = "--disable-werror --enable-hashes=all --enable-obsolete-api=no"
+            if pkg == "icu": lib_config = "--enable-static --enable-shared --disable-tests --disable-samples --disable-extras --disable-icuio --disable-layoutex --disable-tools"
+            if pkg == "nghttp2": lib_config = "--enable-lib-only"
+            if pkg == "krb5": lib_config = "--with-crypto-impl=openssl --with-system-verto=no --disable-rpath"
+            if pkg == "libxml2": lib_config = "--without-python --without-icu"
+            if pkg == "curl": lib_config = "--with-openssl=/opt/distroless --with-zlib=/opt/distroless --with-nghttp2=/opt/distroless --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt"
+            if pkg == "pcre2": lib_config = "--enable-jit --enable-unicode"
+            if pkg == "oniguruma": lib_config = "--enable-shared"
+            if lib_config: hcl += f'    LIB_CONFIG = "{lib_config}"\n'
+
+            lib_subdir = ""
+            if pkg == "icu": lib_subdir = "source"
+            if pkg == "krb5": lib_subdir = "src"
+            if lib_subdir: hcl += f'    LIB_SUBDIR = "{lib_subdir}"\n'
+
+            hcl += '  }\n'
+            hcl += '  contexts = {\n    builder = "target:foundations"\n'
+            for dep in meta['depends']:
+                if dep in graph:
+                    dep_meta = graph[dep]
+                    dep_version = dep_meta.get("version", "latest")
+                    if self.check_atom_exists(dep, dep_version):
+                        hcl += f'    {dep} = "docker-image://${{ATOMS_REGISTRY}}/{dep}:{dep_version}"\n'
+                    else:
+                        hcl += f'    {dep} = "target:{dep}"\n'
+            hcl += '  }\n}\n\n'
+
         if stack_type == "source_build":
-            for pkg, meta in graph.items():
-                version = meta.get("version", "latest")
-                atom_exists = self.check_atom_exists(pkg, version)
-                
-                # We still generate the target so it's visible in the HCL, 
-                # but we'll use it only if it doesn't exist remotely
-                hcl += f'target "{pkg}" {{\n'
-                hcl += '  dockerfile = "foundations/runtime.Dockerfile"\n'
-                hcl += f'  target = "{pkg}"\n'
-                hcl += '  context = "."\n'
-                hcl += f'  platforms = ["{self.platform}"]\n'
-                hcl += f'  tags = ["${{ATOMS_REGISTRY}}/{pkg}:{version}"]\n'
-                hcl += '  args = {\n'
-                hcl += f'    LIB_NAME = "{pkg}"\n'
-                hcl += f'    LIB_URL = "{meta["url"]}"\n'
-                
-                lib_config = ""
-                if pkg == "zlib": lib_config = "--shared"
-                if pkg == "openssl": lib_config = "shared zlib"
-                if pkg == "ncurses": lib_config = "--with-shared --enable-widec --enable-pc-files --with-termlib"
-                if pkg == "readline": lib_config = "--with-curses"
-                if pkg == "libxcrypt": lib_config = "--disable-werror --enable-hashes=all --enable-obsolete-api=no"
-                if pkg == "icu": lib_config = "--enable-static --enable-shared --disable-tests --disable-samples --disable-extras --disable-icuio --disable-layoutex --disable-tools"
-                if pkg == "nghttp2": lib_config = "--enable-lib-only"
-                if pkg == "krb5": lib_config = "--with-crypto-impl=openssl --with-system-verto=no --disable-rpath"
-                if pkg == "libxml2": lib_config = "--without-python --without-icu"
-                if pkg == "curl": lib_config = "--with-openssl=/opt/distroless --with-zlib=/opt/distroless --with-nghttp2=/opt/distroless --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt"
-                if pkg == "pcre2": lib_config = "--enable-jit --enable-unicode"
-                if pkg == "oniguruma": lib_config = "--enable-shared"
-                if lib_config: hcl += f'    LIB_CONFIG = "{lib_config}"\n'
-
-                lib_subdir = ""
-                if pkg == "icu": lib_subdir = "source"
-                if pkg == "krb5": lib_subdir = "src"
-                if lib_subdir: hcl += f'    LIB_SUBDIR = "{lib_subdir}"\n'
-
-                hcl += '  }\n'
-                hcl += '  contexts = {\n    builder = "target:foundations"\n'
-                for dep in meta['depends']:
-                    if dep in graph:
-                        dep_meta = graph[dep]
-                        dep_version = dep_meta.get("version", "latest")
-                        if self.check_atom_exists(dep, dep_version):
-                            hcl += f'    {dep} = "docker-image://${{ATOMS_REGISTRY}}/{dep}:{dep_version}"\n'
-                        else:
-                            hcl += f'    {dep} = "target:{dep}"\n'
-                hcl += '  }\n}\n\n'
-
             # CC target (Specialized for this runtime)
             hcl += f'target "cc-{name}" {{\n'
             hcl += f'  dockerfile = "foundations/cc-{name}.Dockerfile"\n  target = "cc"\n  context = "."\n'
