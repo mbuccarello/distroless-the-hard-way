@@ -234,7 +234,7 @@ class HCLGenerator:
             if pkg == "nghttp2": lib_config = "--enable-lib-only"
             if pkg == "krb5": lib_config = "--with-crypto-impl=openssl --with-system-verto=no --disable-rpath"
             if pkg == "libxml2": lib_config = "--without-python --without-icu"
-            if pkg == "curl": lib_config = "--with-openssl=/opt/distroless --with-zlib=/opt/distroless --with-nghttp2=/opt/distroless --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt"
+            if pkg == "curl": lib_config = "--with-openssl=/opt/distroless --with-zlib=/opt/distroless --with-nghttp2=/opt/distroless --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt --without-libpsl"
             if pkg == "pcre2": lib_config = "--enable-jit --enable-unicode"
             if pkg == "oniguruma": lib_config = "--enable-shared"
             if lib_config: hcl += f'    LIB_CONFIG = "{lib_config}"\n'
