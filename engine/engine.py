@@ -52,6 +52,11 @@ class MetadataManager:
             if res["url"] == "SKIP" and meta["sources"]:
                 res["url"] = meta["sources"][0]
         
+        # Hardcoded overrides for dependencies
+        if pkgname == "curl":
+            if "openssl" not in res["depends"]:
+                res["depends"].append("openssl")
+        
         return res
 
 class DAGResolver:
