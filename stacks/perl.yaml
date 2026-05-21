@@ -1,6 +1,6 @@
 name: perl
 version: "5.38"
-type: binary_injection
+type: source_build
 base_hierarchy:
   - static
   - base
@@ -23,7 +23,7 @@ dependencies:
 runtime:
   name: perl
   version: "5.38.2"
-  binary_url: "DNF"
+  source_url: "https://www.cpan.org/src/5.0/perl-5.38.2.tar.gz"
   build_flags:
     - "-des"
     - "-Dprefix=/usr"

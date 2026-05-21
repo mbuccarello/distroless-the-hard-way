@@ -110,6 +110,22 @@ target "openssl" {
   }
 }
 
+target "cc-perl" {
+  dockerfile = "foundations/cc-perl.Dockerfile"
+  target = "cc"
+  context = "."
+  contexts = {
+    builder = "target:foundations"
+    base = "docker-image://${REGISTRY}/base:latest"
+    zlib = "target:zlib"
+    gdbm = "target:gdbm"
+    bzip2 = "target:bzip2"
+    libxcrypt = "target:libxcrypt"
+    brotli = "target:brotli"
+    openssl = "target:openssl"
+  }
+}
+
 target "runtime" {
   dockerfile = "foundations/runtime.Dockerfile"
   target = "runtime"
@@ -117,10 +133,9 @@ target "runtime" {
   args = {
     RUNTIME_NAME = "perl"
     RUNTIME_VER = "5.38"
-    RUNTIME_URL = "DNF"
   }
   contexts = {
-    cc = "docker-image://${REGISTRY}/cc:latest"
+    cc = "target:cc-perl"
     builder = "target:foundations"
     zlib = "target:zlib"
     gdbm = "target:gdbm"

@@ -254,6 +254,30 @@ target "pcre2" {
   }
 }
 
+target "cc-php" {
+  dockerfile = "foundations/cc-php.Dockerfile"
+  target = "cc"
+  context = "."
+  contexts = {
+    builder = "target:foundations"
+    base = "docker-image://${REGISTRY}/base:latest"
+    zlib = "target:zlib"
+    brotli = "target:brotli"
+    openssl = "target:openssl"
+    icu = "target:icu"
+    ncurses = "target:ncurses"
+    readline = "target:readline"
+    libxml2 = "target:libxml2"
+    sqlite = "target:sqlite"
+    oniguruma = "target:oniguruma"
+    krb5 = "target:krb5"
+    curl = "target:curl"
+    libxcrypt = "target:libxcrypt"
+    bzip2 = "target:bzip2"
+    pcre2 = "target:pcre2"
+  }
+}
+
 target "runtime" {
   dockerfile = "foundations/runtime.Dockerfile"
   target = "runtime"
@@ -261,10 +285,9 @@ target "runtime" {
   args = {
     RUNTIME_NAME = "php"
     RUNTIME_VER = "8.3"
-    RUNTIME_URL = "DNF"
   }
   contexts = {
-    cc = "docker-image://${REGISTRY}/cc:latest"
+    cc = "target:cc-php"
     builder = "target:foundations"
     zlib = "target:zlib"
     brotli = "target:brotli"
