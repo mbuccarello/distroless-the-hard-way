@@ -13,5 +13,6 @@ COPY --from=icu /artifacts/usr /usr
 COPY --from=c-ares /artifacts/usr /usr
 COPY --from=nghttp2 /artifacts/usr /usr
 COPY --from=libxcrypt /artifacts/usr /usr
+RUN ldconfig
 LABEL distroless.layer="cc"
 USER 65532:65532

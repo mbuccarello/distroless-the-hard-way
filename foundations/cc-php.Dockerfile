@@ -20,5 +20,6 @@ COPY --from=curl /artifacts/usr /usr
 COPY --from=libxcrypt /artifacts/usr /usr
 COPY --from=bzip2 /artifacts/usr /usr
 COPY --from=pcre2 /artifacts/usr /usr
+RUN ldconfig
 LABEL distroless.layer="cc"
 USER 65532:65532

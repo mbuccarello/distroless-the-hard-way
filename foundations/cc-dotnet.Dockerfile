@@ -12,5 +12,6 @@ COPY --from=openssl /artifacts/usr /usr
 COPY --from=icu /artifacts/usr /usr
 COPY --from=krb5 /artifacts/usr /usr
 COPY --from=libxcrypt /artifacts/usr /usr
+RUN ldconfig
 LABEL distroless.layer="cc"
 USER 65532:65532

@@ -305,6 +305,7 @@ class HCLGenerator:
         df += "    ln -sf /usr/lib64/libstdc++.so.6 /usr/lib/libstdc++.so.6\n"
         for pkg in graph.keys():
             df += f"COPY --from={pkg} /artifacts/usr /usr\n"
+        df += "RUN ldconfig\n"
         df += "LABEL distroless.layer=\"cc\"\nUSER 65532:65532\n"
         return df
 
@@ -405,6 +406,7 @@ class HCLGenerator:
         if stack_type == "source_build":
             df += "COPY --from=runtime-setup /runtime-root/etc/ /etc/\n"
             df += "COPY --from=runtime-setup /runtime-root/var/ /var/\n"
+        df += "RUN ldconfig\n"
         df += "USER 65532:65532\n"
         
         df += "\nFROM runtime AS runtime-debug\nUSER root\nCOPY --from=builder /usr/bin/busybox /usr/bin/busybox\n"

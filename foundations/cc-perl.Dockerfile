@@ -12,5 +12,6 @@ COPY --from=bzip2 /artifacts/usr /usr
 COPY --from=libxcrypt /artifacts/usr /usr
 COPY --from=brotli /artifacts/usr /usr
 COPY --from=openssl /artifacts/usr /usr
+RUN ldconfig
 LABEL distroless.layer="cc"
 USER 65532:65532

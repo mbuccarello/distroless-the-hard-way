@@ -17,5 +17,6 @@ COPY --from=xz /artifacts/usr /usr
 COPY --from=ncurses /artifacts/usr /usr
 COPY --from=readline /artifacts/usr /usr
 COPY --from=sqlite /artifacts/usr /usr
+RUN ldconfig
 LABEL distroless.layer="cc"
 USER 65532:65532

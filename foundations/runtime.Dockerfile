@@ -105,6 +105,7 @@ LABEL distroless.stack="${RUNTIME_NAME}"
 COPY --from=runtime-setup /runtime-root/usr/ /usr/
 COPY --from=runtime-setup /runtime-root/etc/ /etc/
 COPY --from=runtime-setup /runtime-root/var/ /var/
+RUN ldconfig
 USER 65532:65532
 
 FROM runtime AS runtime-debug
