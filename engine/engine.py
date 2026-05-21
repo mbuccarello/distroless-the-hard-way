@@ -345,6 +345,7 @@ class HCLGenerator:
             df += f"ARG RUNTIME_NAME={runtime_name}\nARG RUNTIME_URL\nRUN set -ex && mkdir -p /tmp/extract && \\\n"
             df += "    if [ \"$RUNTIME_URL\" = \"DNF\" ]; then \\\n"
             df += "      dnf clean all && dnf install -y --setopt=install_weak_deps=False $RUNTIME_NAME $RUNTIME_NAME-fpm $RUNTIME_NAME-mysqlnd $RUNTIME_NAME-opcache $RUNTIME_NAME-xml $RUNTIME_NAME-mbstring $RUNTIME_NAME-gd $RUNTIME_NAME-curl || dnf install -y $RUNTIME_NAME && \\\n"
+            df += "      if [ \"$RUNTIME_NAME\" = \"php\" ]; then dnf install -y php-cli; fi && \\\n"
             df += "      mkdir -p /runtime-root/usr/bin /runtime-root/usr/sbin /runtime-root/usr/lib64 /runtime-root/usr/lib /runtime-root/usr/share /runtime-root/etc && \\\n"
             df += "      cp -rv /usr/bin/${RUNTIME_NAME}* /runtime-root/usr/bin/ || true && \\\n"
             df += "      cp -rv /usr/sbin/${RUNTIME_NAME}* /runtime-root/usr/sbin/ || true && \\\n"

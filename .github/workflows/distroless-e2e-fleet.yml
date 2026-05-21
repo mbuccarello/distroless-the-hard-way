@@ -36,12 +36,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Java (for compilation)
-        if: matrix.stack == 'java'
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '21'
+
 
       - name: Run E2E Smoke Test
         run: |
@@ -62,8 +57,7 @@ jobs:
               docker run --rm -v $(pwd)/app/test.pl:/app/test.pl $IMAGE_NAME /usr/bin/perl /app/test.pl
               ;;
             java)
-              javac app/test.java
-              docker run --rm -v $(pwd)/app/test.class:/app/test.class $IMAGE_NAME /usr/bin/java -cp / app/test
+              docker run --rm -v $(pwd)/app/test.java:/app/test.java $IMAGE_NAME /usr/bin/java /app/test.java
               ;;
             *)
               echo "No specific test logic for ${{ matrix.stack }}, skipping."

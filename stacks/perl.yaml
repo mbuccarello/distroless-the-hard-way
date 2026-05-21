@@ -16,6 +16,9 @@ dependencies:
   - name: bzip2
     version: "1.0.8"
     type: source
+  - name: libxcrypt
+    version: "4.4.36"
+    type: source
 
 runtime:
   name: perl

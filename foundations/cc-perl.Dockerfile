@@ -9,8 +9,8 @@ RUN ln -sf /usr/lib64/libgcc_s.so.1 /usr/lib/libgcc_s.so.1 && \
 COPY --from=zlib /artifacts/usr /usr
 COPY --from=gdbm /artifacts/usr /usr
 COPY --from=bzip2 /artifacts/usr /usr
+COPY --from=libxcrypt /artifacts/usr /usr
 COPY --from=brotli /artifacts/usr /usr
 COPY --from=openssl /artifacts/usr /usr
-COPY --from=libxcrypt /artifacts/usr /usr
 LABEL distroless.layer="cc"
 USER 65532:65532
