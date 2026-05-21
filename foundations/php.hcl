@@ -254,6 +254,21 @@ target "pcre2" {
   }
 }
 
+target "libffi" {
+  dockerfile = "foundations/runtime.Dockerfile"
+  target = "libffi"
+  context = "."
+  platforms = ["linux/amd64"]
+  tags = ["${ATOMS_REGISTRY}/libffi:3.5.2"]
+  args = {
+    LIB_NAME = "libffi"
+    LIB_URL = "https://github.com/libffi/libffi/releases/download/v3.4.6/libffi-3.4.6.tar.gz"
+  }
+  contexts = {
+    builder = "target:foundations"
+  }
+}
+
 target "cc-php" {
   dockerfile = "foundations/cc-php.Dockerfile"
   target = "cc"
@@ -275,6 +290,7 @@ target "cc-php" {
     libxcrypt = "target:libxcrypt"
     bzip2 = "target:bzip2"
     pcre2 = "target:pcre2"
+    libffi = "target:libffi"
   }
 }
 
@@ -303,6 +319,7 @@ target "runtime" {
     libxcrypt = "target:libxcrypt"
     bzip2 = "target:bzip2"
     pcre2 = "target:pcre2"
+    libffi = "target:libffi"
   }
   tags = ["${REGISTRY}/php-distroless:latest"]
 }

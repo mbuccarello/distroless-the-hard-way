@@ -31,6 +31,9 @@ dependencies:
   - name: pcre2
     version: "10.44"
     type: source
+  - name: libffi
+    version: "3.4.6"
+    type: source
 
 runtime:
   name: php
@@ -45,6 +48,8 @@ runtime:
     - --with-pdo-sqlite=/opt/distroless
     - --with-onig=/opt/distroless
     - --with-pcre-dir=/opt/distroless
+    - --with-ffi
+    - --disable-opcache
     - --enable-fpm
     - --enable-mbstring
     - --enable-bcmath
