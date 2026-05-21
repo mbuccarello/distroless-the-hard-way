@@ -393,7 +393,9 @@ class HCLGenerator:
             df += "    export CXXFLAGS=\"$CXXFLAGS -fno-var-tracking-assignments -g0 -O1\" && \\\n"
             df += "    export CFLAGS=\"$CFLAGS -g0 -O1\" && \\\n"
             df += "    make -j1 && make DESTDIR=/runtime-root install\n"
-            
+
+        df += "\nRUN mkdir -p /runtime-root/usr && if [ -d /opt/distroless ] && [ \"$(ls -A /opt/distroless)\" ]; then cp -rv /opt/distroless/* /runtime-root/usr/; fi\n"
+
         df += "\nFROM cc AS runtime\nUSER root\nARG RUNTIME_NAME\nARG RUNTIME_VER\nLABEL distroless.stack=\"${RUNTIME_NAME}\"\n"
         if stack_config and stack_config["name"] == "dotnet":
             df += "ENV DOTNET_ROOT=/usr/share/dotnet\n"

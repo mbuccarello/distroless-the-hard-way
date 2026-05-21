@@ -64,54 +64,6 @@ target "openssl" {
   }
 }
 
-target "icu" {
-  dockerfile = "foundations/runtime.Dockerfile"
-  target = "icu"
-  context = "."
-  platforms = ["linux/amd64"]
-  tags = ["${ATOMS_REGISTRY}/icu:78.3"]
-  args = {
-    LIB_NAME = "icu"
-    LIB_URL = "https://github.com/unicode-org/icu/releases/download/release-75-1/icu4c-75_1-src.tgz"
-    LIB_CONFIG = "--enable-static --enable-shared --disable-tests --disable-samples --disable-extras --disable-icuio --disable-layoutex --disable-tools"
-    LIB_SUBDIR = "source"
-  }
-  contexts = {
-    builder = "target:foundations"
-  }
-}
-
-target "c-ares" {
-  dockerfile = "foundations/runtime.Dockerfile"
-  target = "c-ares"
-  context = "."
-  platforms = ["linux/amd64"]
-  tags = ["${ATOMS_REGISTRY}/c-ares:1.34.6"]
-  args = {
-    LIB_NAME = "c-ares"
-    LIB_URL = "https://github.com/c-ares/c-ares/releases/download/v1.34.2/c-ares-1.34.2.tar.gz"
-  }
-  contexts = {
-    builder = "target:foundations"
-  }
-}
-
-target "nghttp2" {
-  dockerfile = "foundations/runtime.Dockerfile"
-  target = "nghttp2"
-  context = "."
-  platforms = ["linux/amd64"]
-  tags = ["${ATOMS_REGISTRY}/nghttp2:latest"]
-  args = {
-    LIB_NAME = "nghttp2"
-    LIB_URL = "https://github.com/nghttp2/nghttp2/releases/download/v1.64.0/nghttp2-1.64.0.tar.gz"
-    LIB_CONFIG = "--enable-lib-only"
-  }
-  contexts = {
-    builder = "target:foundations"
-  }
-}
-
 target "libxcrypt" {
   dockerfile = "foundations/runtime.Dockerfile"
   target = "libxcrypt"
@@ -128,31 +80,41 @@ target "libxcrypt" {
   }
 }
 
+target "cc-cc" {
+  dockerfile = "foundations/cc-cc.Dockerfile"
+  target = "cc"
+  context = "."
+  contexts = {
+    builder = "target:foundations"
+    base = "docker-image://${REGISTRY}/base:latest"
+    zlib = "target:zlib"
+    brotli = "target:brotli"
+    openssl = "target:openssl"
+    libxcrypt = "target:libxcrypt"
+  }
+}
+
 target "runtime" {
   dockerfile = "foundations/runtime.Dockerfile"
   target = "runtime"
   context = "."
   args = {
-    RUNTIME_NAME = "nodejs"
-    RUNTIME_VER = "20"
-    RUNTIME_URL = "https://nodejs.org/dist/v20.18.1/node-v20.18.1-linux-x64.tar.xz"
+    RUNTIME_NAME = "cc"
+    RUNTIME_VER = "latest"
   }
   contexts = {
-    cc = "docker-image://${REGISTRY}/cc:latest"
+    cc = "target:cc-cc"
     builder = "target:foundations"
     zlib = "target:zlib"
     brotli = "target:brotli"
     openssl = "target:openssl"
-    icu = "target:icu"
-    c-ares = "target:c-ares"
-    nghttp2 = "target:nghttp2"
     libxcrypt = "target:libxcrypt"
   }
-  tags = ["${REGISTRY}/nodejs-distroless:latest"]
+  tags = ["${REGISTRY}/cc-distroless:latest"]
 }
 
 target "runtime-debug" {
   inherits = ["runtime"]
   target = "runtime-debug"
-  tags = ["${REGISTRY}/nodejs-distroless:debug"]
+  tags = ["${REGISTRY}/cc-distroless:debug"]
 }
