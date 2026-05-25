@@ -89,5 +89,6 @@ distroless-the-hard-way/
 ## Credits and Inspiration
 
 - **Kubernetes The Hard Way**: The educational blueprint for manual deconstruction.
-- **Google Distroless**: The architectural gold standard for minimal OCI images.
+- **Google Distroless**: The architectural gold standard for minimal OCI images (e.g., `static`, `base`, `cc`, language runtimes). *Distroless The Hard Way* builds upon this standard by introducing modular OCI Atoms for a customized, lightweight `cc` layer and strict FHS symlink preservation.
 - **Arch Linux**: The primary intelligence source for dependency mapping and build blueprints.
+- **iximiuz Labs**: Inspiration for container filesystem internals, namespace isolation, and robust rootfs design patterns.

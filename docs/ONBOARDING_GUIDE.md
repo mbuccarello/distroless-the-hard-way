@@ -1,112 +1,64 @@
-# Onboarding Guide: Adding New Stacks
+# Onboarding Guide: Distroless The Hard Way
 
-This guide explains how to add a new language runtime or technology stack to the modular Distroless architecture.
-
-## Workflow Overview
-
-Adding a new stack follows a 4-step process: **Discovery** -> **Definition** -> **Generation** -> **Validation**.
+Welcome to **Distroless The Hard Way**! This guide will help you get started with the project, build your first distroless images locally, and understand the core layout of the repository.
 
 ---
 
-## Step 1: Discovery
-Use the `discovery_cli.py` tool to automatically identify the necessary dependencies and build configurations from upstream sources (Arch Linux PKGBUILDs).
+## 1. Prerequisites
 
-```bash
-python3 engine/discovery_cli.py --name openjdk
-```
-
-The tool will output a proposed YAML structure. Note down the `dependencies` list.
-
-## Step 2: Definition
-Create a new file in the `stacks/` directory: `stacks/<your-stack>.yaml`.
-
-### Example Structure:
-```yaml
-name: java
-version: "21.0.2"
-type: source_build
-base_hierarchy:
-  - static
-  - base
-  - cc
-
-dependencies:
-  - name: zlib
-    version: "latest"
-  - name: freetype2
-    version: "latest"
-  # Add other discovered dependencies here
-
-runtime:
-  name: openjdk
-  version: "21.0.2"
-  source_url: "https://github.com/openjdk/jdk21u/archive/..."
-  build_flags: ["--with-zlib=system", "--with-freetype=system"]
-```
-
-## Step 3: Generation
-Run the build engine to generate the HCL orchestration and the localized Dockerfiles.
-
-```bash
-python3 engine/engine.py --mode runtime --stack stacks/<your-stack>.yaml
-```
-
-This will create:
-- `foundations/<your-stack>.hcl`: The Bake orchestration file.
-- `foundations/cc-<your-stack>.Dockerfile`: The compiler container for this specific stack.
-
-## Step 4: Validation & CI
-Before pushing, you can verify the generation locally:
-
-```bash
-# Verify HCL generation with registry bypass
-python3 engine/engine.py --mode runtime --stack stacks/<your-stack>.yaml --force-build
-```
-
-### Automatic CI Trigger
-Once you commit and push the `stacks/<your-stack>.yaml` file:
-1. The **Full Fleet Build** workflow will automatically detect the new file.
-2. It will trigger a parallel build for the new stack.
-3. If dependencies (Atoms) are missing in the registry, it will build them from source.
-4. The final image will be **signed** with Cosign and get **SLSA Level 3** provenance.
+Before you start, ensure you have the following installed on your local machine:
+- **Docker** with **Buildx** enabled (for bake builds).
+- **Python 3.10+** (for the Distroless Engine).
+- **Git** (to clone the repository).
 
 ---
 
-## Troubleshooting: Empty Discovery Output
+## 2. Repository Layout
 
-If `discovery_cli.py` returns an empty `dependencies` list or `SKIP` values, it means the package name provided does not match the upstream repository name exactly.
+When you clone the repository, you'll find the following key directories:
 
-### How to find the correct name:
-The discovery tool fetches `PKGBUILD` files from the official Arch Linux GitLab. Often, multiple packages (like `jdk21-openjdk`, `jre21-openjdk`, `jre21-openjdk-headless`) are built from a single **Base Package** (also known as Source Package). You must provide the name of this Base Package to the tool.
-
-1. Go to [Arch Linux Package Search](https://archlinux.org/packages/).
-2. Search for the runtime you want (e.g., `openjdk`).
-   
-   ![Search Results for OpenJDK](./images/arch_search_results.png)
-   *Figure 1: Multiple results for 'openjdk' search.*
-
-3. In the results list, click on the specific version you need (e.g., `jdk21-openjdk`).
-4. On the package details page, look at the **Package Details** sidebar or the header.
-5. Identify the **Base Package** field. 
-   
-   ![Package Details for JDK21](./images/arch_package_details.png)
-   *Figure 2: The 'Base Package' field highlights the correct name for discovery (java21-openjdk).*
-
-6. Use this name with the discovery tool:
-   ```bash
-   python3 engine/discovery_cli.py --name java21-openjdk
-   ```
-
-> [!TIP]
-> If you are unsure, look for the "Source Files" link on the same page; it will lead you to the GitLab repository whose name you should use.
-5. Re-run the discovery tool using that name:
-   ```bash
-   python3 engine/discovery_cli.py --name java-openjdk
-   ```
+- `/engine`: Contains `engine.py`, our custom orchestration tool that reads Arch Linux definitions and generates Docker configurations.
+- `/foundations`: Contains the base Dockerfiles (`static`, `base`, `cc`, `builder`) and the generated HCL files for the foundational layers.
+- `/stacks`: Contains YAML configuration files (e.g., `php.yaml`, `python.yaml`) for assembling specific language runtimes.
+- `/docs`: Contains technical specifications, pipeline documentation, and architecture diagrams.
 
 ---
 
-## Tips for Success
-- **Atom Reuse**: Always check if a dependency is already available as an Atom (e.g., `openssl`, `zlib`, `icu`).
-- **Build Flags**: Ensure the runtime is configured to use "system" libraries (the Atoms) instead of bundled ones.
-- **Paths**: The engine installs everything under `/opt/distroless`. Ensure your runtime points there for dependencies.
+## 3. Quick Start: Local Build
+
+To understand how the project works, let's build the **Python** distroless image stack from scratch locally.
+
+### Step 1: Generate Foundation Manifests
+First, generate the foundational configurations (which compile `glibc`, `openssl`, etc.):
+```bash
+python3 engine/engine.py --mode foundation
+```
+
+### Step 2: Build the CC Layer
+Next, use Docker Buildx Bake to build the foundations up to the `cc` layer:
+```bash
+docker buildx bake --load -f foundations/foundations.hcl cc
+```
+*Note: This might take a few minutes as it downloads and compiles C libraries from source.*
+
+### Step 3: Generate Runtime Manifests
+Now, generate the build blueprints for the specific language stack (e.g., Python):
+```bash
+python3 engine/engine.py --mode runtime --stack stacks/python.yaml
+```
+
+### Step 4: Build the Final Runtime Image
+Finally, build the Python distroless image:
+```bash
+docker buildx bake --load -f foundations/python.hcl python
+```
+
+You now have a fully operational, zero-trust, source-compiled Distroless Python image!
+
+---
+
+## 4. Where to Go Next
+
+- **[Architecture Specification](ARCHITECTURE.md)**: Deep dive into the 4-layer model and our FHS Unification strategy.
+- **[Engine Documentation](ENGINE.md)**: Learn how the `engine.py` script orchestrates dependency graphs.
+- **[Pipelines Documentation](PIPELINES.md)**: Understand our Tiered Pipeline Hierarchy in GitHub Actions.

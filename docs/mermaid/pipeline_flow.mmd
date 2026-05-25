@@ -1,34 +1,13 @@
-sequenceDiagram
-    autonumber
-    participant Dev as 👤 Blueprint Push (Main)
-    participant L1 as 🏗️ L1: System Foundations
-    participant L15 as 📦 L1.5: Runtime Foundations
-    participant L2 as ⚙️ L2: Assembly
-    participant Reg as 🏘️ GitHub Container Registry
-    participant Security as 🛡️ Security Gate
-    
-    Dev->>L1: Trigger foundations build
-    activate L1
-    L1->>L1: Compile (glibc, openssl, certs)
-    L1->>Security: SAST + SBOM + Cosign
-    Security-->>L1: Pass
-    L1->>Reg: Push System Artifacts
-    deactivate L1
-    
-    Reg->>L15: Trigger Runtime Foundations
-    activate L15
-    L15->>Reg: Pull L1 Artifacts
-    L15->>L15: Compile (libffi, ncurses, xml2)
-    L15->>Security: SAST + SBOM + Cosign
-    Security-->>L15: Pass
-    L15->>Reg: Push Library Artifacts
-    deactivate L15
-    
-    Reg->>L2: Trigger Assembly
-    activate L2
-    L2->>Reg: Pull L1 + L1.5 Artifacts
-    L2->>L2: Construct Runtimes (Python, Java, etc.)
-    L2->>Security: Sign OCI Manifest + SLSA
-    Security-->>L2: Pass
-    L2->>Reg: Push Final Images
-    deactivate L2
+graph LR
+    classDef action fill:#1f2428,stroke:#444c56,stroke-width:2px,color:#c9d1d9
+    classDef deploy fill:#238636,stroke:#2ea043,stroke-width:2px,color:#ffffff
+
+    Push((Push / PR)) --> S1
+
+    subgraph "Tiered Pipeline Hierarchy"
+        S1[distroless-foundation-static]:::action --> S2[distroless-foundation-base]:::action
+        S2 --> S3[distroless-foundation-cc]:::action
+        S3 --> S4[distroless-stack-runtime]:::action
+    end
+
+    S4 --> P[GHCR Registry]:::deploy

@@ -24,9 +24,17 @@ class DiscoveryEngine:
 
     def fetch_arch_metadata(self, pkgname):
         """Fetch and parse PKGBUILD from Arch Linux."""
+        cache_path = os.path.join(self.cache_dir, f"{pkgname}.json")
+        if os.path.exists(cache_path):
+            try:
+                with open(cache_path, "r") as f:
+                    return json.load(f)
+            except Exception:
+                pass
+
         url = ARCH_GITLAB_BASE.format(pkgname)
         try:
-            with urllib.request.urlopen(url) as response:
+            with urllib.request.urlopen(url, timeout=10) as response:
                 content = response.read().decode('utf-8')
             
             metadata = {"depends": [], "sources": [], "version": "latest", "pkgname": pkgname}
@@ -54,6 +62,12 @@ class DiscoveryEngine:
                         s = s.replace("$pkgname", pkgname).replace("${pkgname}", pkgname)
                         metadata["sources"].append(s)
             
+            try:
+                with open(cache_path, "w") as f:
+                    json.dump(metadata, f)
+            except Exception:
+                pass
+
             return metadata
         except Exception as e:
             print(f"  [DISCOVERY] Failed to fetch Arch metadata for {pkgname}: {e}")

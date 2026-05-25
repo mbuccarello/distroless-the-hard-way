@@ -2,6 +2,7 @@ import os
 import yaml
 import json
 import argparse
+import time
 import urllib.request
 import tempfile
 import re
@@ -297,15 +298,21 @@ class HCLGenerator:
         return hcl
 
     def generate_cc_dockerfile(self, graph):
-        df = "# syntax=docker/dockerfile:1.4\nFROM base AS cc\nUSER root\n"
-        df += "RUN mkdir -p /usr/lib64\n"
-        df += "COPY --from=builder /usr/lib64/libgcc_s.so.1 /usr/lib64/\n"
-        df += "COPY --from=builder /usr/lib64/libstdc++.so.6 /usr/lib64/\n"
-        df += "RUN ln -sf /usr/lib64/libgcc_s.so.1 /usr/lib/libgcc_s.so.1 && \\\n"
-        df += "    ln -sf /usr/lib64/libstdc++.so.6 /usr/lib/libstdc++.so.6\n"
+        df = "# syntax=docker/dockerfile:1.4\n"
+        df += "FROM builder AS cc-setup\n"
+        df += "RUN mkdir -p /cc-root/usr/lib64 /cc-root/usr/lib /cc-root/etc && \\\n"
+        df += "    ln -sf usr/lib /cc-root/lib && \\\n"
+        df += "    ln -sf usr/lib64 /cc-root/lib64\n"
+        df += "COPY --from=builder /usr/lib64/libgcc_s.so.1 /cc-root/usr/lib64/\n"
+        df += "COPY --from=builder /usr/lib64/libstdc++.so.6 /cc-root/usr/lib64/\n"
+        df += "RUN ln -sf /usr/lib64/libgcc_s.so.1 /cc-root/usr/lib/libgcc_s.so.1 && \\\n"
+        df += "    ln -sf /usr/lib64/libstdc++.so.6 /cc-root/usr/lib/libstdc++.so.6\n"
         for pkg in graph.keys():
-            df += f"COPY --from={pkg} /artifacts/usr /usr\n"
-        df += "RUN ldconfig\n"
+            df += f"COPY --from={pkg} /artifacts/usr /cc-root/usr\n"
+        df += "RUN ldconfig -r /cc-root\n\n"
+        df += "FROM base AS cc\nUSER root\n"
+        df += "COPY --from=cc-setup /cc-root/usr/ /usr/\n"
+        df += "COPY --from=cc-setup /cc-root/etc/ /etc/\n"
         df += "LABEL distroless.layer=\"cc\"\nUSER 65532:65532\n"
         return df
 
@@ -346,6 +353,7 @@ class HCLGenerator:
         df += "\nFROM builder AS runtime-setup\nUSER root\nRUN mkdir -p /runtime-root/usr /runtime-root/etc /runtime-root/var /opt/distroless\n"
         for pkg in graph.keys():
             df += f"COPY --from={pkg} /artifacts/usr /opt/distroless\n"
+        df += "RUN if [ -d /opt/distroless ] && [ \"$(ls -A /opt/distroless)\" ]; then cp -rv /opt/distroless/* /runtime-root/usr/; fi\n"
         if stack_type == "binary_injection":
             runtime_name = stack_config["name"] if stack_config else ""
             df += f"ARG RUNTIME_NAME={runtime_name}\nARG RUNTIME_URL\nRUN set -ex && mkdir -p /tmp/extract && \\\n"
@@ -360,19 +368,6 @@ class HCLGenerator:
             df += "      cp -rv /usr/share/${RUNTIME_NAME}* /runtime-root/usr/share/ || true && \\\n"
             df += "      cp -rv /usr/lib64/lib${RUNTIME_NAME}* /runtime-root/usr/lib64/ || true && \\\n"
             df += "      cp -rv /etc/${RUNTIME_NAME}* /runtime-root/etc/ || true && \\\n"
-            df += "      find /runtime-root/usr/bin/ /runtime-root/usr/sbin/ /runtime-root/usr/lib64/ /runtime-root/usr/lib/ -type f 2>/dev/null | while read -r file; do \\\n"
-            df += "        if [ -x \"$file\" ] || [[ \"$file\" == *.so* ]]; then \\\n"
-            df += "          ldd \"$file\" 2>/dev/null | grep \"=>\" | awk '{print $3}' | while read -r lib; do \\\n"
-            df += "            if [ -f \"$lib\" ]; then \\\n"
-            df += "              if [[ \"$lib\" == /usr/lib64/* ]] || [[ \"$lib\" == /lib64/* ]]; then \\\n"
-            df += "                mkdir -p /runtime-root/usr/lib64 && cp -L -n \"$lib\" /runtime-root/usr/lib64/ || true; \\\n"
-            df += "              elif [[ \"$lib\" == /usr/lib/* ]] || [[ \"$lib\" == /lib/* ]]; then \\\n"
-            df += "                mkdir -p /runtime-root/usr/lib && cp -L -n \"$lib\" /runtime-root/usr/lib/ || true; \\\n"
-            df += "              fi; \\\n"
-            df += "            fi; \\\n"
-            df += "          done; \\\n"
-            df += "        fi; \\\n"
-            df += "      done && \\\n"
             df += "      echo \"Runtime installed via dnf\"; \\\n"
             df += "    else \\\n"
             df += "      curl -L \"$RUNTIME_URL\" -o /tmp/runtime.tar.gz && \\\n"
@@ -394,8 +389,9 @@ class HCLGenerator:
             # Source build for runtime
             source_url = runtime.get("source_url", "")
             build_flags = " ".join(runtime.get("build_flags", []))
+            df += f"ENV CACHE_BYPASS_SETUP=\"{time.time()}\"\n"
             df += f"RUN set -ex && curl -L \"{source_url}\" -o source.tar.gz && mkdir src && tar -xf source.tar.gz -C src --strip-components=1 && cd src && \\\n"
-            df += "    export CPPFLAGS=\"-I/opt/distroless/include\" && \\\n"
+            df += "    export CPPFLAGS=\"-I/opt/distroless/include -I/opt/distroless/include/libxml2\" && \\\n"
             df += "    export LDFLAGS=\"-L/opt/distroless/lib -L/opt/distroless/lib64 -Wl,-rpath,/usr/lib\" && \\\n"
             df += "    export PKG_CONFIG_PATH=\"/opt/distroless/lib/pkgconfig:/opt/distroless/lib64/pkgconfig\" && \\\n"
             # Special handling for Perl's Configure which is not autoconf
@@ -406,11 +402,41 @@ class HCLGenerator:
             df += f"elif [ -f ./CMakeLists.txt ]; then cmake -DCMAKE_INSTALL_PREFIX=/usr {build_flags} .; fi && \\\n"
             df += "    export CXXFLAGS=\"$CXXFLAGS -fno-var-tracking-assignments -g0 -O1\" && \\\n"
             df += "    export CFLAGS=\"$CFLAGS -g0 -O1\" && \\\n"
-            df += "    make -j1 && make DESTDIR=/runtime-root install\n"
+            df += "    make -j1 && make DESTDIR=/runtime-root INSTALL_ROOT=/runtime-root install && \\\n"
+            df += "    echo '--- DIAGNOSTIC: /runtime-root contents ---' && \\\n"
+            df += "    find /runtime-root -maxdepth 4 || true\n"
 
-        df += "\nRUN mkdir -p /runtime-root/usr && if [ -d /opt/distroless ] && [ \"$(ls -A /opt/distroless)\" ]; then cp -rv /opt/distroless/* /runtime-root/usr/; fi\n"
+        # Copy core glibc system libraries from builder to ensure matching dynamic linker and libc versions
+        df += "\nRUN set -ex && mkdir -p /runtime-root/usr/lib64 && \\\n"
+        df += "    cp -L /usr/lib64/libc.so.6 /runtime-root/usr/lib64/ || true && \\\n"
+        df += "    cp -L /usr/lib64/libm.so.6 /runtime-root/usr/lib64/ || true && \\\n"
+        df += "    cp -L /usr/lib64/librt.so.1 /runtime-root/usr/lib64/ || true && \\\n"
+        df += "    cp -L /usr/lib64/libpthread.so.0 /runtime-root/usr/lib64/ || true && \\\n"
+        df += "    cp -L /usr/lib64/libdl.so.2 /runtime-root/usr/lib64/ || true && \\\n"
+        df += "    cp -L /usr/lib64/libresolv.so.2 /runtime-root/usr/lib64/ || true && \\\n"
+        df += "    cp -L /usr/lib64/libutil.so.1 /runtime-root/usr/lib64/ || true && \\\n"
+        df += "    cp -L /usr/lib64/ld-linux*.so* /runtime-root/usr/lib64/ || true\n"
 
-        df += "\nFROM cc AS runtime\nUSER root\nARG RUNTIME_NAME\nARG RUNTIME_VER\nLABEL distroless.stack=\"${RUNTIME_NAME}\"\n"
+        # Copy transitively resolved shared libraries via ldd to /runtime-root/usr/lib and /runtime-root/usr/lib64
+        df += "\nRUN set -ex && find /runtime-root/usr/bin/ /runtime-root/usr/sbin/ /runtime-root/usr/lib64/ /runtime-root/usr/lib/ -type f 2>/dev/null | while read -r file; do \\\n"
+        df += "    if [ -x \"$file\" ] || [[ \"$file\" == *.so* ]]; then \\\n"
+        df += "      ldd \"$file\" 2>/dev/null | grep \"=>\" | awk '{print $3}' | while read -r lib; do \\\n"
+        df += "        if [ -f \"$lib\" ]; then \\\n"
+        df += "          if [[ \"$lib\" == /usr/lib64/* ]] || [[ \"$lib\" == /lib64/* ]]; then \\\n"
+        df += "            mkdir -p /runtime-root/usr/lib64 && cp -L -n \"$lib\" /runtime-root/usr/lib64/ || true; \\\n"
+        df += "          elif [[ \"$lib\" == /usr/lib/* ]] || [[ \"$lib\" == /lib/* ]]; then \\\n"
+        df += "            mkdir -p /runtime-root/usr/lib && cp -L -n \"$lib\" /runtime-root/usr/lib/ || true; \\\n"
+        df += "          fi; \\\n"
+        df += "        fi; \\\n"
+        df += "      done; \\\n"
+        df += "    fi; \\\n"
+        df += "  done\n"
+
+        df += "\nRUN ldconfig -r /runtime-root\n"
+
+
+        df += f"\nFROM cc AS runtime\nUSER root\nARG RUNTIME_NAME\nARG RUNTIME_VER\nLABEL distroless.stack=\"${{RUNTIME_NAME}}\"\n"
+        df += f"ENV CACHE_BYPASS=\"{time.time()}\"\n"
         if stack_config and stack_config["name"] == "dotnet":
             df += "ENV DOTNET_ROOT=/usr/share/dotnet\n"
             df += "ENV PATH=\"${PATH}:/usr/share/dotnet\"\n"
@@ -419,7 +445,8 @@ class HCLGenerator:
         if stack_type == "source_build":
             df += "COPY --from=runtime-setup /runtime-root/etc/ /etc/\n"
             df += "COPY --from=runtime-setup /runtime-root/var/ /var/\n"
-        df += "RUN ldconfig\n"
+        else:
+            df += "COPY --from=runtime-setup /runtime-root/etc/ /etc/\n"
         df += "USER 65532:65532\n"
         
         df += "\nFROM runtime AS runtime-debug\nUSER root\nCOPY --from=builder /usr/bin/busybox /usr/bin/busybox\n"
@@ -440,22 +467,21 @@ def main():
     
     if args.mode == "foundation":
         print("🚀 Resolving core dependencies for foundation CC...")
-        with tempfile.TemporaryDirectory() as tmpdir:
-            manager = MetadataManager(tmpdir)
-            resolver = DAGResolver(manager)
-            # Core libraries for CC foundation
-            resolver.resolve(["zlib", "openssl", "libxcrypt"])
-            
-            hcl = generator.generate_foundation_hcl(resolver.graph)
-            with open("foundations/foundations.hcl", "w") as f: f.write(hcl)
-            
-            # We also need the library builders in a Dockerfile for foundation CC
-            df = generator.generate_runtime_dockerfile(resolver.graph)
-            with open("foundations/runtime.Dockerfile", "w") as f: f.write(df)
-            
-            # Generate the foundation CC Dockerfile (base core libs)
-            cc_df = generator.generate_cc_dockerfile(resolver.graph)
-            with open("foundations/cc.Dockerfile", "w") as f: f.write(cc_df)
+        manager = MetadataManager(".cache")
+        resolver = DAGResolver(manager)
+        # Core libraries for CC foundation
+        resolver.resolve(["zlib", "openssl", "libxcrypt"])
+        
+        hcl = generator.generate_foundation_hcl(resolver.graph)
+        with open("foundations/foundations.hcl", "w") as f: f.write(hcl)
+        
+        # We also need the library builders in a Dockerfile for foundation CC
+        df = generator.generate_runtime_dockerfile(resolver.graph)
+        with open("foundations/runtime.Dockerfile", "w") as f: f.write(df)
+        
+        # Generate the foundation CC Dockerfile (base core libs)
+        cc_df = generator.generate_cc_dockerfile(resolver.graph)
+        with open("foundations/cc.Dockerfile", "w") as f: f.write(cc_df)
             
         print("✅ Generated foundations/foundations.hcl and foundations/runtime.Dockerfile")
     
@@ -467,28 +493,27 @@ def main():
             stack_config = yaml.safe_load(f)
         
         print(f"🚀 Resolving dependencies for {stack_config['name']}...")
-        with tempfile.TemporaryDirectory() as tmpdir:
-            manager = MetadataManager(tmpdir)
-            resolver = DAGResolver(manager)
-            deps = stack_config.get('dependencies', [])
-            initial_deps = [d['name'] for d in deps]
-            # Always ensure core foundation libraries are present for the CC layer
-            for core_dep in ["zlib", "openssl", "libxcrypt"]:
-                if core_dep not in initial_deps:
-                    initial_deps.append(core_dep)
-            resolver.resolve(initial_deps)
+        manager = MetadataManager(".cache")
+        resolver = DAGResolver(manager)
+        deps = stack_config.get('dependencies', [])
+        initial_deps = [d['name'] for d in deps]
+        # Always ensure core foundation libraries are present for the CC layer
+        for core_dep in ["zlib", "openssl", "libxcrypt"]:
+            if core_dep not in initial_deps:
+                initial_deps.append(core_dep)
+        resolver.resolve(initial_deps)
+        
+        hcl = generator.generate_runtime_hcl(stack_config, resolver.graph)
+        with open(f"foundations/{stack_config['name']}.hcl", "w") as f: f.write(hcl)
+        
+        df = generator.generate_runtime_dockerfile(resolver.graph, stack_config)
+        with open("foundations/runtime.Dockerfile", "w") as f: f.write(df)
+        
+        # Generate stack-specific CC Dockerfile
+        cc_df = generator.generate_cc_dockerfile(resolver.graph)
+        with open(f"foundations/cc-{stack_config['name']}.Dockerfile", "w") as f: f.write(cc_df)
             
-            hcl = generator.generate_runtime_hcl(stack_config, resolver.graph)
-            with open(f"foundations/{stack_config['name']}.hcl", "w") as f: f.write(hcl)
-            
-            df = generator.generate_runtime_dockerfile(resolver.graph, stack_config)
-            with open("foundations/runtime.Dockerfile", "w") as f: f.write(df)
-            
-            # Generate stack-specific CC Dockerfile
-            cc_df = generator.generate_cc_dockerfile(resolver.graph)
-            with open(f"foundations/cc-{stack_config['name']}.Dockerfile", "w") as f: f.write(cc_df)
-            
-            print(f"✅ Generated foundations/{stack_config['name']}.hcl, foundations/cc-{stack_config['name']}.Dockerfile and foundations/runtime.Dockerfile")
+        print(f"✅ Generated foundations/{stack_config['name']}.hcl, foundations/cc-{stack_config['name']}.Dockerfile and foundations/runtime.Dockerfile")
 
 if __name__ == "__main__":
     main()
