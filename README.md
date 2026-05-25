@@ -68,21 +68,32 @@ The project utilizes a **Tiered Pipeline Hierarchy** powered by specialized Dock
 
 ```text
 distroless-the-hard-way/
+ app/                       # E2E Smoke Test Applications (Perl, PHP, Python, Java, etc.)
  engine/                    # The Modular Build Orchestrator
     engine.py              # Core logic for HCL/Dockerfile generation
- foundations/               # The OCI Hierarchy Blueprints
+    discovery.py           # Dependency lookup and Arch package metadata queries
+ foundations/               # The OCI Hierarchy Blueprints & Generated HCL/Dockerfiles
     static.Dockerfile      # L1: Rootfs Skeleton
-    base.Dockerfile        # L2: Glibc & NSS
-    cc.Dockerfile          # L3: ABI-stabilized C/C++ Layer
-    runtime.Dockerfile     # L4: Final Assembly Template
- stacks/                    # YAML-based language stack definitions
- docs/                      # Technical System Specifications
-    architecture.md        # Technical System Specification
-    security.md            # Security & Supply Chain Integrity
-    pipeline_status.md     # Current Fleet Health Report
+    base.Dockerfile        # L2: Glibc & NSS Base Layer
+    cc.Dockerfile          # L3: Common C/C++ (CC) Base Base Layer
+    cc-*.Dockerfile        # Stack-specific ABI C/C++ CC Layers (e.g., cc-php.Dockerfile)
+    runtime.Dockerfile     # L4: Final Assembly Template Stage
+    *.hcl                  # Target Docker Bake HCL configs (e.g., php.hcl)
+ patches/                   # Build-time source patches for dependency compilation
+ poc/                       # Proof-of-Concept, initial roadmap, and legacy designs
+ stacks/                    # YAML-based language stack definitions (e.g., php.yaml)
+ docs/                      # Technical System Specifications & Developer Guides
+    ARCHITECTURE.md        # Technical System Specification (4-Layer Model, FHS)
+    ONBOARDING_GUIDE.md    # Developer Quick Start & Local Compilation Guide
+    ENGINE.md              # Technical manual for engine/engine.py
+    PIPELINES.md           # CI/CD tiered pipeline flows & GHA workflows
+    TESTING.md             # E2E Smoke Testing and local/CI validation
+    OPERATIONS.md          # Operations, deployments, and SLSA provenance
+    SECURITY.md            # Security, hardening, and supply chain integrity
+    PIPELINE_STATUS.md     # Current Fleet Health & Verification Status
 ```
 
-**[Explore the full technical documentation in the `docs/` directory.](docs/ARCHITECTURE.md)**
+**[Get Started with the Developer Onboarding Guide](docs/ONBOARDING_GUIDE.md) | [Explore the Core Architecture Design](docs/ARCHITECTURE.md)**
 
 ---
 
