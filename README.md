@@ -7,6 +7,43 @@ Distroless The Hard Way is a technical framework for constructing minimal, secur
 
 ---
 
+## Quick Start
+
+Our distroless images contain no shell, package manager, or dynamic utilities. You can execute them directly, or use them as a secure foundation in multi-stage builds.
+
+### 1. Run a container directly
+Execute our source-compiled, minimal Python 3.14 distroless image:
+```bash
+docker run --rm ghcr.io/mbuccarello/python-distroless:latest -c "print('Hello from source-built distroless!')"
+```
+
+### 2. Multi-Stage Dockerfile Pattern
+Use our base layers to build highly secure, shell-free production containers:
+```dockerfile
+# Build Stage: Compile the app using an ephemeral build container
+FROM golang:1.22 AS builder
+WORKDIR /src
+COPY . .
+RUN CGO_ENABLED=0 go build -o myapp .
+
+# Runtime Stage: Deploy the binary to our source-built, minimal static layer
+FROM ghcr.io/mbuccarello/static:latest
+COPY --from=builder /src/myapp /usr/bin/myapp
+USER nonroot:nonroot
+ENTRYPOINT ["/usr/bin/myapp"]
+```
+
+### 3. Keyless Image Verification
+All OCI images produced by our fleet pipeline are signed using **Sigstore/Cosign**. You can instantly verify their integrity with zero static keys:
+```bash
+cosign verify ghcr.io/mbuccarello/python-distroless:latest \
+  --certificate-identity-regexp "https://github.com/mbuccarello/distroless-the-hard-way/.github/workflows/distroless-bake-master.yml@.*" \
+  --certificate-oidc-issuer "https://token.actions.githubusercontent.com"
+```
+For detailed verification across all runtimes, refer to **[docs/VERIFY.md](docs/VERIFY.md)**.
+
+---
+
 ## Architecture: OCI Atoms
 
 The project utilizes a modular architecture where language runtimes (PHP, Python, Node.js) are assembled from versioned, pre-compiled building blocks termed Atoms.
@@ -88,12 +125,27 @@ distroless-the-hard-way/
     ENGINE.md              # Technical manual for engine/engine.py
     PIPELINES.md           # CI/CD tiered pipeline flows & GHA workflows
     TESTING.md             # E2E Smoke Testing and local/CI validation
-    OPERATIONS.md          # Operations, deployments, and SLSA provenance
+    OPERATIONS.md          # Operations, deployments, and CA mounting
     SECURITY.md            # Security, hardening, and supply chain integrity
+    VERIFY.md              # Keyless Image Verification (Cosign)
+    IMAGE_REPORT.md        # Fleet status & real-time metadata report
     PIPELINE_STATUS.md     # Current Fleet Health & Verification Status
 ```
 
-**[Get Started with the Developer Onboarding Guide](docs/ONBOARDING_GUIDE.md) | [Explore the Core Architecture Design](docs/ARCHITECTURE.md)**
+### Technical System Specifications & Developer Guides (`docs/`)
+
+*   **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Technical System Specification (4-Layer Model, FHS)
+*   **[ONBOARDING_GUIDE.md](docs/ONBOARDING_GUIDE.md)** - Developer Quick Start & Local Compilation Guide
+*   **[ENGINE.md](docs/ENGINE.md)** - Technical manual for the build orchestrator (`engine/engine.py`)
+*   **[PIPELINES.md](docs/PIPELINES.md)** - CI/CD tiered pipeline flows & GitHub Actions workflows
+*   **[TESTING.md](docs/TESTING.md)** - E2E Smoke Testing and local/CI validation
+*   **[OPERATIONS.md](docs/OPERATIONS.md)** - Operations, deployments, and custom CA certificate mounting
+*   **[SECURITY.md](docs/SECURITY.md)** - Security hardening, scanner limitations, and supply chain integrity
+*   **[VERIFY.md](docs/VERIFY.md)** - Keyless Image Verification (Cosign)
+*   **[IMAGE_REPORT.md](docs/IMAGE_REPORT.md)** - Real-time fleet status & image metadata report
+*   **[PIPELINE_STATUS.md](docs/PIPELINE_STATUS.md)** - Current Fleet Health & Verification Status
+
+**[Get Started with the Developer Onboarding Guide](docs/ONBOARDING_GUIDE.md) | [Explore the Core Architecture Design](docs/ARCHITECTURE.md) | [Verify Image Signatures](docs/VERIFY.md)**
 
 ---
 

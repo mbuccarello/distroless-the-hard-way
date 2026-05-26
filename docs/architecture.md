@@ -89,6 +89,34 @@ Troubleshooting tools (Busybox) are strictly isolated into `:debug` tagged varia
 
 ---
 
+## 3. Sourcing Strategy: Source-Built vs. Binary Injection
+
+The project implements a hybrid sourcing strategy for the final language runtimes (L4). This division is a deliberate architectural and educational decision designed to teach core systems engineering principles without introducing prohibitive compiler maintenance overhead.
+
+### 3.1 Educational Goals & Sourcing Boundary
+The primary objective of the **Distroless The Hard Way** curriculum is to teach:
+- Constructing minimal filesystem structures from absolute scratch.
+- Dynamic library dependency mapping and dynamic link loader (`ld.so`) configuration.
+- Shared directory preserving strategies (e.g., FHS symlink preservation) in unified OCI layers.
+
+Bootstrapping massive compiler ecosystems from absolute source (such as compiling the V8 JavaScript compiler, the OpenJDK C++ virtual machine, or the .NET Core CLR toolchain) requires extreme resources, long compile times, and highly specific bootstrap compilers. Since this toolchain compilation overhead occurs inside a container and does not offer additional educational value regarding final OCI layer structure, the project establishes a pragmatic boundary between compiled runtimes and injected runtimes.
+
+### 3.2 Source-Built Runtimes (Python, PHP, Perl)
+These stacks are compiled directly from upstream source code tarballs using the ephemeral Fedora toolchain:
+- **Python**: Compiled from source to ensure proper binding with our CC foundation libraries (OpenSSL, SQLite, zlib) and to enable custom optimization flags.
+- **PHP**: Compiled from source due to tight integration requirements with modular dependencies (curl, xml, mbstring, pcre2) and custom module linkage paths.
+- **Perl**: Compiled from source due to strict system path bindings and localized dynamic library loading constraints.
+
+### 3.3 Binary Injection Runtimes (Java, Node.js, .NET)
+These stacks utilize clean, pre-compiled binary archives provided directly by upstream distributors (Microsoft, NodeUpstream, Adoptium):
+- **Node.js**: Upstream provides highly optimized standalone binary archives. Avoiding V8 source compilation reduces build times from several hours to seconds, focusing learning on dynamic library resolution via `ldd`.
+- **Java**: Leverages official, tested OpenJDK binaries to bypass the massive bootstrap compiler loop required to compile the HotSpot VM.
+- **.NET**: Injecting official Microsoft .NET Core runtimes bypasses the complex, platform-specific bootstrapping loop of the Roslyn compiler.
+
+This hybrid approach ensures high-assurance supply chain control while keeping compile times realistic for local development and CI/CD runs.
+
+---
+
 > For details on the build scripts and orchestration, see the **[Distroless Engine Documentation](ENGINE.md)**.
 > For details on the CI/CD workflows, see the **[Pipelines Documentation](PIPELINES.md)**.
 

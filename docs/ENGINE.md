@@ -1,68 +1,100 @@
 # The Distroless Engine
 
-The **Distroless Engine** (`engine/engine.py`) is the core orchestration script of this project. Instead of relying on manual `RUN apt-get install` commands or fragile bash scripts, the engine dynamically generates complex Docker Bake (HCL) manifests and Dockerfiles by analyzing primary intelligence sources.
+The **Distroless Engine** (`engine/engine.py`) is the core build orchestration component of the Distroless The Hard Way project. Rather than relying on static, hardcoded Dockerfiles or shell scripts, the engine dynamically generates container configurations, compilation parameters, and Docker Bake (HCL) blueprints by analyzing upstream package definitions and package databases.
 
 ---
 
-## 1. How it Works
+## 1. Engine Core Pipeline Architecture
 
-![Engine Orchestration](images/engine_orchestration.png)
+The engine automates the entire packaging life cycle through a sequential, metadata-driven pipeline:
 
-The engine bridges the gap between raw source code and distroless OCI images. It parses declarative configuration files (`stacks/*.yaml`) and maps them against Arch Linux `PKGBUILD` scripts to automatically resolve dependencies and extract optimized `./configure` compilation flags.
+```text
++-------------------+      +-------------------+      +--------------------+
+|  stacks/*.yaml    | ---> |  Arch PKGBUILD    | ---> |  Docker Bake HCL   |
+|  Stack Definition |      |  Metadata Parser  |      |  foundations/*.hcl |
++-------------------+      +-------------------+      +--------------------+
+                                    |
+                                    v
+                           +-------------------+
+                           |  Dockerfile atom  |
+                           |  cc-*.Dockerfile  |
+                           +-------------------+
+```
+
+### 1.1 Step 1: Stack Definition Parsing
+The engine reads declarative YAML files under `stacks/*.yaml` (e.g., `stacks/php.yaml`). These files define:
+- Pinned runtime versions and official source tarball URLs.
+- Dynamic dependency listings specifying foundational C/C++ libraries.
+- Specialized `./configure` or compilation flags for the language runtime.
+
+### 1.2 Step 2: Arch Linux Metadata Discovery
+For every C/C++ dependency (e.g., openssl, sqlite, zlib, libxml2, curl) defined in the stack, the engine utilizes `engine/discovery.py` to query the official Arch Linux package repository:
+- Fetches the raw upstream `PKGBUILD` file dynamically from the Arch Linux packaging GitLab.
+- Parses the build script to extract the exact upstream source code URL and optimal `./configure` flags used by Arch Linux maintainers.
+- Dynamically resolves transitive dependencies to construct a complete, validated build graph.
+
+### 1.3 Step 3: OCI Atom Caching (`/artifacts`)
+To prevent duplicate compilations and enforce modular build separation:
+- The engine generates independent builder targets in `foundations/*.hcl` for each dependency (Atoms).
+- Each Atom is compiled in an ephemeral environment. The build step targets a prefix directory (usually `/opt/distroless`).
+- Upon successful execution of `make install`, the compiled headers, binaries, and shared libraries are written to an intermediate `/artifacts/usr/` path.
+- These intermediate `/artifacts/` are stored as cached layers, allowing downstream layers to dynamically copy only the required files (Registry-First Orchestration).
+
+### 1.4 Step 4: Dynamic Dynamic Linker Scanner (`ldd`)
+During L4 runtime assembly:
+- All source-built runtime files are written to `/runtime-root`.
+- The engine embeds an automated post-build shell scanner that traverses all executables and shared libraries under `/runtime-root/usr/bin/` and `/runtime-root/usr/lib/`.
+- Executes `ldd` on each binary to resolve dynamic shared objects transitively.
+- Dynamically copies the resolved system-level libraries (e.g., `libcrypto.so`, `libssl.so`, `libffi.so`) from the CC layer to `/runtime-root/usr/lib64/` or `/runtime-root/usr/lib/`.
+- Runs `ldconfig -r /runtime-root` to update the ununified dynamic linker cache.
 
 ---
 
-## 2. Operating Modes
+## 2. Compiler Security Hardening & Linker Specifications
 
-The engine operates in two strictly separated modes to enforce the 4-layer architectural hierarchy:
+To enforce security and optimize performance, the engine dynamically injects specific compiler (`CFLAGS`, `CXXFLAGS`) and linker (`LDFLAGS`) parameters before building any Atom or runtime stack.
 
-### `--mode foundation`
-This mode targets the bottom layers of the stack (`L1` to `L3`). 
-It analyzes the foundational dependencies required by all language runtimes (such as `zlib`, `openssl`, `libxcrypt`) and outputs a unified manifest: `foundations/foundations.hcl`. This manifest instructs Docker Buildx on how to compile these C/C++ libraries into a stable `cc` base image.
+### 2.1 CFLAGS / CXXFLAGS Hardening Specifications
 
-**Command:**
+The engine exports the following flags globally for all source builds:
+```bash
+export CFLAGS="$CFLAGS -g0 -O1 -fstack-protector-strong -D_FORTIFY_SOURCE=2"
+export CXXFLAGS="$CXXFLAGS -g0 -O1 -fstack-protector-strong -D_FORTIFY_SOURCE=2"
+```
+
+#### Engineering Rationale:
+*   **`-fstack-protector-strong` (Stack Smashing Protection):**
+    Instructs the compiler to insert defensive stack canary guards before local buffers. If a stack buffer overflow occurs (stack smashing), the canary value is overwritten, triggering an immediate execution halt (`SIGABRT`) before the hijacked return pointer can execute malicious payload shellcode.
+*   **`-D_FORTIFY_SOURCE=2` (Buffer Bounds Checking):**
+    Enforces compile-time and runtime check wrappers for standard glibc string and memory operations (e.g., `memcpy`, `strcpy`, `memset`). If a buffer overflow or integer mismatch is detected during runtime execution, the process is safely terminated.
+*   **`-g0` (Size Optimization):**
+    Discards all debugging symbols and DWARF sections from the compiled binaries. This dramatically minimizes the final binary size, reducing OCI layer footprint and making binary reverse-engineering more complex.
+*   **`-O1` (Base Compiler Optimization):**
+    Enables basic dead-code elimination and optimization passes. This compiler pass is strictly required for the dynamic checks in `-D_FORTIFY_SOURCE` to compile and execute effectively.
+
+### 2.2 LDFLAGS Linkage Guard Specification
+
+The engine exports the following linker parameters:
+```bash
+export LDFLAGS="-L/opt/distroless/lib -L/opt/distroless/lib64 -Wl,-rpath,/usr/lib"
+```
+
+#### Engineering Rationale:
+*   **`-Wl,-rpath,/usr/lib` (Runpath Pinning):**
+    Pins `/usr/lib` (which is symlinked to `/usr/lib64` on 64-bit systems) as the primary dynamic library search path (`DT_RUNPATH`) inside the ELF binary header. This guarantees that when the runtime binary is executed, the dynamic linker will load high-assurance, source-built dependencies from our cc foundation layer, completely ignoring and isolating host system library search paths or library search path poisoning (`LD_LIBRARY_PATH` injection).
+
+---
+
+## 3. Operational CLI Examples
+
+### 3.1 Regenerating Foundations (L1 - L3)
+To regenerate the base HCL specifications (`foundations/foundations.hcl`) and core Dockerfiles (`cc.Dockerfile`, `base.Dockerfile`):
 ```bash
 python3 engine/engine.py --mode foundation
 ```
 
-### `--mode runtime`
-This mode targets the final language stack (`L4`). 
-It reads a specific YAML configuration file and generates an "Apko-style" declarative assembly manifest (e.g., `foundations/php.hcl`). It leverages the pre-built `cc` layer and compiles/injects only the specific binaries needed for the language, yielding a pure, shell-less runtime image.
-
-**Command:**
+### 3.2 Regenerating Stackblueprints (L4)
+To regenerate stack assembly manifests (e.g., `foundations/php.hcl`) and dynamic dynamic-linking configurations:
 ```bash
 python3 engine/engine.py --mode runtime --stack stacks/php.yaml
 ```
-
----
-
-## 3. Configuration Stacks (`stacks/*.yaml`)
-
-Language runtimes are defined via simple YAML files. The engine parses these files to determine what needs to be built.
-
-**Example: `stacks/php.yaml`**
-```yaml
-stack: php
-version: 8.3
-packages:
-  - name: php
-    source_build: true
-    dependencies:
-      - curl
-      - openssl
-      - zlib
-      - libxcrypt
-```
-
-- `source_build: true`: Instructs the engine to download the source tarball, parse the Arch Linux `PKGBUILD`, and compile it from scratch inside the builder layer.
-- `dependencies`: Lists the required OCI Atoms (foundations). The engine automatically ensures these are built and linked securely.
-
----
-
-## 4. Arch Linux Intelligence
-
-A unique feature of the Distroless Engine is its integration with Arch Linux. The engine fetches raw `PKGBUILD` files from the Arch Linux package repository to extract:
-1. The exact upstream source URL for a given package version.
-2. The optimal, industry-standard `./configure` flags used by Arch Linux maintainers.
-
-This ensures our source-built packages are highly optimized and secure without requiring us to manually guess the compilation flags for complex libraries like `openssl` or `curl`.
