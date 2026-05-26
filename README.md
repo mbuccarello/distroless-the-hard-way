@@ -137,6 +137,7 @@ distroless-the-hard-way/
 *   **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Technical System Specification (4-Layer Model, FHS)
 *   **[ONBOARDING_GUIDE.md](docs/ONBOARDING_GUIDE.md)** - Developer Quick Start & Local Compilation Guide
 *   **[ENGINE.md](docs/ENGINE.md)** - Technical manual for the build orchestrator (`engine/engine.py`)
+*   **[SCRIPTS.md](docs/SCRIPTS.md)** - Developer Utility & Automation Reference Guide
 *   **[PIPELINES.md](docs/PIPELINES.md)** - CI/CD tiered pipeline flows & GitHub Actions workflows
 *   **[TESTING.md](docs/TESTING.md)** - E2E Smoke Testing and local/CI validation
 *   **[OPERATIONS.md](docs/OPERATIONS.md)** - Operations, deployments, and custom CA certificate mounting

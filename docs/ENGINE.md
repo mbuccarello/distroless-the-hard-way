@@ -8,45 +8,29 @@ The **Distroless Engine** (`engine/engine.py`) is the core build orchestration c
 
 The engine automates the entire packaging life cycle through a sequential, metadata-driven pipeline:
 
-```text
-+-------------------+      +-------------------+      +--------------------+
-|  stacks/*.yaml    | ---> |  Arch PKGBUILD    | ---> |  Docker Bake HCL   |
-|  Stack Definition |      |  Metadata Parser  |      |  foundations/*.hcl |
-+-------------------+      +-------------------+      +--------------------+
-                                    |
-                                    v
-                           +-------------------+
-                           |  Dockerfile atom  |
-                           |  cc-*.Dockerfile  |
-                           +-------------------+
-```
+![Engine Core Pipeline Architecture](images/engine_orchestration.png)
 
-### 1.1 Step 1: Stack Definition Parsing
-The engine reads declarative YAML files under `stacks/*.yaml` (e.g., `stacks/php.yaml`). These files define:
-- Pinned runtime versions and official source tarball URLs.
-- Dynamic dependency listings specifying foundational C/C++ libraries.
-- Specialized `./configure` or compilation flags for the language runtime.
+### 1.1 Phase 1: Input Specifications
+The orchestration begins by parsing two primary declarative configuration inputs:
+*   **Stack Definitions (`stacks/*.yaml`)**: Define stack-specific runtime parameters, locked language versions, compile-time flags, and high-level, direct library dependencies (e.g., `zlib`, `openssl`, `libxcrypt`, `curl`).
+*   **Central Matrix (`engine/config.yaml`)**: Decouples orchestrator logic from static values. It maps package names to upstream fallback tarball URLs, defines explicit dependency overrides, and houses the precise `./configure` flag catalogs and subdirectory targets for all foundational Atoms.
 
-### 1.2 Step 2: Arch Linux Metadata Discovery
-For every C/C++ dependency (e.g., openssl, sqlite, zlib, libxml2, curl) defined in the stack, the engine utilizes `engine/discovery.py` to query the official Arch Linux package repository:
-- Fetches the raw upstream `PKGBUILD` file dynamically from the Arch Linux packaging GitLab.
-- Parses the build script to extract the exact upstream source code URL and optimal `./configure` flags used by Arch Linux maintainers.
-- Dynamically resolves transitive dependencies to construct a complete, validated build graph.
+### 1.2 Phase 2: Dependency & Metadata Discovery
+Using the input parameters, the engine traverses the dependency boundaries to construct a complete build timeline:
+*   **Discovery Engine (`DiscoveryEngine` class in [engine/discovery.py](../engine/discovery.py))**: Queries the official Arch Linux package repository to fetch and parse raw `PKGBUILD` scripts. This dynamically extracts optimal maintainer configure parameters and maps potential transitive library dependencies.
+*   **DAG Resolver (`DAGResolver` class in [engine/engine.py](../engine/engine.py))**: Translates the raw metadata into a **Directed Acyclic Graph (DAG)**. It recursively resolves transitive package chains, filters out standard glibc/system packages, and executes a **depth-first search (DFS) topological sort**. By tracking active recursion stacks, the resolver validates the graph against circular loops (cycle detection) and outputs a linearized sequence guaranteeing that every dependency is listed and compiled prior to the packages that depend on it.
 
-### 1.3 Step 3: OCI Atom Caching (`/artifacts`)
-To prevent duplicate compilations and enforce modular build separation:
-- The engine generates independent builder targets in `foundations/*.hcl` for each dependency (Atoms).
-- Each Atom is compiled in an ephemeral environment. The build step targets a prefix directory (usually `/opt/distroless`).
-- Upon successful execution of `make install`, the compiled headers, binaries, and shared libraries are written to an intermediate `/artifacts/usr/` path.
-- These intermediate `/artifacts/` are stored as cached layers, allowing downstream layers to dynamically copy only the required files (Registry-First Orchestration).
+### 1.3 Phase 3: Manifest & Target Generation
+Once the topological build order is linearized:
+*   **HCL Generator (`HCLGenerator` class in [engine/engine.py](../engine/engine.py))**: Evaluates the resolved dependency sequence and dynamically formats the compilation parameters:
+    *   **Docker Bake HCL (`foundations/*.hcl`)**: Generates targeted Bake blueprints mapping core compiler contexts, Atom cache boundaries, and layer inheritance for each package.
+    *   **Dockerfile Templates (`foundations/*.Dockerfile`)**: Dynamically compiles the CC base layer (`cc-*.Dockerfile`) and L4 final assembly templates (`runtime.Dockerfile`) to specify exact stage parameters.
 
-### 1.4 Step 4: Dynamic Dynamic Linker Scanner (`ldd`)
-During L4 runtime assembly:
-- All source-built runtime files are written to `/runtime-root`.
-- The engine embeds an automated post-build shell scanner that traverses all executables and shared libraries under `/runtime-root/usr/bin/` and `/runtime-root/usr/lib/`.
-- Executes `ldd` on each binary to resolve dynamic shared objects transitively.
-- Dynamically copies the resolved system-level libraries (e.g., `libcrypto.so`, `libssl.so`, `libffi.so`) from the CC layer to `/runtime-root/usr/lib64/` or `/runtime-root/usr/lib/`.
-- Runs `ldconfig -r /runtime-root` to update the ununified dynamic linker cache.
+### 1.4 Phase 4: Cache & ABI Compliance Assembly
+During image compilation, the generated manifests execute in an isolated assembly pipeline:
+*   **OCI Atom Builder Stage (`/artifacts/usr`)**: Compiles each Atom in an ephemeral container using the global security-hardened compiler flags. Successful compilation writes binary objects and dynamic headers directly to a modular `/artifacts/usr` layer cache.
+*   **Runtime Setup Stage (`/runtime-root`)**: Copy-extracts all pre-compiled Atoms and language source archives into a unified, isolated `/runtime-root` directory structure.
+*   **dynamic Linker Scan (`ldd` & `ldconfig`)**: Executes a dynamic post-build scanner that traverses all `/runtime-root` executables. It runs `ldd` on each dynamic file, transitively copies all required dynamic libraries (e.g., `libssl.so`) from the CC base layer, and runs `ldconfig -r /runtime-root` to generate a secure, unified dynamic linker lookup table.
 
 ---
 
@@ -85,16 +69,72 @@ export LDFLAGS="-L/opt/distroless/lib -L/opt/distroless/lib64 -Wl,-rpath,/usr/li
 
 ---
 
-## 3. Operational CLI Examples
+## 3. Central Matrix Configuration Schema (config.yaml)
 
-### 3.1 Regenerating Foundations (L1 - L3)
+To achieve a clean separation of concerns, all static package details, source fallback archives, custom compilation parameters, and dependency overrides are decoupled from the Python code and defined in the central configuration matrix: `engine/config.yaml`.
+
+The schema defines three main sections:
+*   **`sources`**: Maps package names to their official upstream source archive URLs. These are used as deterministic fallbacks if the dynamic Arch Linux metadata discovery fails or is disabled.
+*   **`dependencies`**: Declares package dependency overrides that are injected into the DAGResolver graph. This ensures that transitive dependencies that are dynamically compiled (e.g., linking `openssl` for the `curl` library) are correctly loaded into the build process even if they are not explicitly declared in standard Arch Linux packages.
+*   **`packages`**: Defines custom compilation options and layout overrides for specific packages:
+    *   `config`: Custom compiler flags passed directly to `./configure`, `./Configure`, or `cmake`.
+    *   `subdir`: Declares the subdirectory in the extracted source archive where the build script is located (e.g., `source` for ICU or `src` for Kerberos v5).
+
+### 3.1 Script Consumption Pattern
+During the initialization of `MetadataManager`, `engine/engine.py` dynamically loads this YAML configuration relative to the script's directory:
+```python
+script_dir = os.path.dirname(os.path.abspath(__file__))
+config_path = os.path.join(script_dir, "config.yaml")
+with open(config_path, "r") as f:
+    config = yaml.safe_load(f)
+```
+These attributes (`self.hardcoded_sources`, `self.dependency_overrides`, and `self.package_metadata`) are used directly during graph resolution and HCL generator phases.
+
+---
+
+## 4. Package Configure Hardening Catalog
+
+To minimize build footprint, optimize dynamic linking, and maintain a highly secure container posture, each source-compiled Atom uses custom configure flags. The table below documents the exact systems-engineering rationales behind the compiler parameters declared in `engine/config.yaml`:
+
+| Package | Compile-Time Configuration Parameter | Technical & Security Engineering Rationale |
+| :--- | :--- | :--- |
+| **zlib** | `--shared` | Compiles as a shared object library (`.so`), which is strictly required for downstream dynamic linkage by other Atoms and language runtimes. |
+| **openssl** | `shared zlib` | `shared`: Generates shared library objects instead of static archives. <br>`zlib`: Links against our zlib Atom dynamically to enable native gzip/deflate compression within TLS connections. |
+| **ncurses** | `--with-shared --enable-widec --enable-pc-files --with-termlib` | `--with-shared`: Generates shared library files. <br>`--enable-widec`: Compiles with UTF-8 wide-character support for Unicode terminal screen rendering. <br>`--enable-pc-files`: Outputs pkg-config definitions for discovery by downstream library builds. <br>`--with-termlib`: Splits low-level terminal capability checks into a dedicated termlib library. |
+| **readline** | `--with-curses` | Links readline command line history and input rendering dynamically against our ncurses Atom. |
+| **libxcrypt** | `--disable-werror --enable-hashes=all --enable-obsolete-api=no` | `--disable-werror`: Prevents compilation warnings from halting builder execution. <br>`--enable-hashes=all`: Enables modern secure hashing algorithms (bcrypt, sha512, yescrypt). <br>`--enable-obsolete-api=no`: Disables ancient and insecure legacy crypt interfaces, reducing the attack surface. |
+| **icu** | `--enable-static --enable-shared --disable-tests --disable-samples --disable-extras --disable-icuio --disable-layoutex --disable-tools` | `--enable-static --enable-shared`: Compiles both library forms. <br>`--disable-tests --disable-samples --disable-extras --disable-icuio --disable-layoutex --disable-tools`: Disables non-essential tools, helper APIs, and sample code, severely reducing the final container image layer footprint. |
+| **nghttp2** | `--enable-lib-only` | Compiles only the C library shared objects, excluding CLI tool binaries to maintain a zero-executable distroless footprint. |
+| **krb5** | `--with-crypto-impl=openssl --with-system-verto=no --disable-rpath` | `--with-crypto-impl=openssl`: Outsources cryptographic and TLS needs to our high-assurance openssl Atom. <br>`--with-system-verto=no`: Disables vertical execution loop layers. <br>`--disable-rpath`: Prevents the binary from embedding hardcoded path parameters from the builder's environment. |
+| **libxml2** | `--without-python --without-icu` | `--without-python`: Excludes Python bindings and helper modules inside the OCI Atom layer. <br>`--without-icu`: Disables massive Unicode lookup tables, optimizing size and linkage times. |
+| **curl** | `--with-openssl=/opt/distroless --with-zlib=/opt/distroless --with-nghttp2=/opt/distroless --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt --without-libpsl` | `--with-openssl/zlib/nghttp2=/opt/distroless`: Configures curl to dynamically link against our custom built Atoms compiled in `/opt/distroless`. <br>`--with-ca-bundle=/etc/ssl/certs/ca-certificates.crt`: Pins the standard CA certificate path. <br>`--without-libpsl`: Bypasses the Public Suffix List check to avoid build-time dynamic resolution failures. |
+| **pcre2** | `--enable-jit --enable-unicode` | `--enable-jit`: Enables JIT compilation for PCRE regex matching, speeding up PHP/Python execution. <br>`--enable-unicode`: Compiles with full Unicode/UTF-8 regex standard checks. |
+| **oniguruma** | `--enable-shared` | Compiles as a shared object library (`.so`) needed by PHP multibyte string (`mbstring`) processing modules. |
+
+---
+
+## 5. Operational CLI Examples
+
+### 5.1 Regenerating Foundations (L1 - L3)
 To regenerate the base HCL specifications (`foundations/foundations.hcl`) and core Dockerfiles (`cc.Dockerfile`, `base.Dockerfile`):
 ```bash
 python3 engine/engine.py --mode foundation
 ```
 
-### 3.2 Regenerating Stackblueprints (L4)
+### 5.2 Regenerating Stack Blueprints (L4)
 To regenerate stack assembly manifests (e.g., `foundations/php.hcl`) and dynamic dynamic-linking configurations:
 ```bash
 python3 engine/engine.py --mode runtime --stack stacks/php.yaml
 ```
+
+---
+
+## 6. Build Engine CLI Parameter Reference
+
+The Build Engine (`engine/engine.py`) exposes the following command-line interface arguments for orchestrating the build matrix:
+
+| Argument | Type | Required | Default | Technical Specification & Behavior |
+| :--- | :--- | :--- | :--- | :--- |
+| `--mode` | `string` | **Yes** | `None` | Restricts the execution scope. Accepted values:<br>- `foundation`: Resolves core CC layer dependencies (`zlib`, `openssl`, `libxcrypt`) and outputs foundational targets.<br>- `runtime`: Compiles stack-specific blueprints and dynamic dependencies. |
+| `--stack` | `filepath` | Only for `runtime` | `None` | Path to the target stack definition YAML file (e.g., `stacks/php.yaml`). Contains the stack name, runtime configuration, and required dependencies. |
+| `--force-build`| `flag` | No | `False` | Overrides the registry-caching check. When set, forces the engine to mark all Atom dependencies as missing locally, forcing a full source compilation cycle in the Docker Bake HCL output. |

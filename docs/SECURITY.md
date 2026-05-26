@@ -45,7 +45,7 @@ We compile all foundational dependencies (e.g., zlib, OpenSSL, libxml2, curl, SQ
 ### 2.2 Stack-Based Vulnerability Auditing (OSV.dev API)
 To ensure high-assurance auditing, we bypass filesystem-based scanner heuristics and leverage the exact build specifications.
 
-The validation pipeline utilizes the custom tool **[scripts/scan-sbom.py](file:///Users/michele.buccarello/distroless-the-hard-way/scripts/scan-sbom.py)** to execute the following steps:
+The validation pipeline utilizes the custom tool **[scripts/scan-sbom.py](../scripts/scan-sbom.py)** to execute the following steps:
 1. Parses the language stack definition files (`stacks/*.yaml`), which serve as the single source of truth for all source-compiled libraries.
 2. Extracts the exact package names and pinned upstream versions (e.g., `openssl 3.4.0`, `zlib 1.3.1`).
 3. Queries Google's **OSV.dev** (Open Source Vulnerability) database API (`https://api.osv.dev/v1/query`) via direct, automated HTTPS requests.

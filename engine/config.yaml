@@ -1,0 +1,130 @@
+# ==============================================================================
+# DISTROLESS BUILD ENGINE - CENTRAL CONFIGURATION MATRIX (config.yaml)
+# ==============================================================================
+# This file serves as the central configuration schema for all source-built OCI Atoms.
+# Modify this file to add libraries, update versions, or adjust compile flags.
+# ==============================================================================
+
+# Upstream Source Tarballs
+# ------------------------------------------------------------------------------
+# Maps package names to their official upstream source code archive URLs.
+# These URLs are used if the dynamic Arch Linux metadata check is bypassed or
+# fails to retrieve a working source download link.
+sources:
+  zlib: "https://github.com/madler/zlib/archive/refs/tags/v1.3.1.tar.gz"
+  openssl: "https://github.com/openssl/openssl/releases/download/openssl-3.4.0/openssl-3.4.0.tar.gz"
+  ncurses: "https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.5.tar.gz"
+  readline: "https://ftp.gnu.org/pub/gnu/readline/readline-8.2.tar.gz"
+  sqlite: "https://www.sqlite.org/2024/sqlite-autoconf-3470000.tar.gz"
+  libxcrypt: "https://github.com/besser82/libxcrypt/releases/download/v4.4.36/libxcrypt-4.4.36.tar.xz"
+  libffi: "https://github.com/libffi/libffi/releases/download/v3.4.6/libffi-3.4.6.tar.gz"
+  expat: "https://github.com/libexpat/libexpat/releases/download/R_2_6_4/expat-2.6.4.tar.xz"
+  bzip2: "https://sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz"
+  xz: "https://github.com/tukaani-project/xz/releases/download/v5.6.3/xz-5.6.3.tar.xz"
+  gdbm: "https://ftp.gnu.org/pub/gnu/gdbm/gdbm-1.24.tar.gz"
+  icu: "https://github.com/unicode-org/icu/releases/download/release-75-1/icu4c-75_1-src.tgz"
+  brotli: "https://github.com/google/brotli/archive/refs/tags/v1.1.0.tar.gz"
+  c-ares: "https://github.com/c-ares/c-ares/releases/download/v1.34.2/c-ares-1.34.2.tar.gz"
+  nghttp2: "https://github.com/nghttp2/nghttp2/releases/download/v1.64.0/nghttp2-1.64.0.tar.gz"
+  krb5: "https://web.mit.edu/kerberos/dist/krb5/1.21/krb5-1.21.3.tar.gz"
+  libxml2: "https://download.gnome.org/sources/libxml2/2.12/libxml2-2.12.9.tar.xz"
+  oniguruma: "https://github.com/kkos/oniguruma/releases/download/v6.9.9/onig-6.9.9.tar.gz"
+  curl: "https://github.com/curl/curl/releases/download/curl-8_11_0/curl-8.11.0.tar.gz"
+  pcre2: "https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.44/pcre2-10.44.tar.gz"
+
+# Dependency Overrides
+# ------------------------------------------------------------------------------
+# Declares extra required packages that must be injected into the dependency
+# graph. Use this to force critical layers (e.g. openssl for curl) when they
+# are dynamically compiled but are not declared as hard packages in Arch metadata.
+dependencies:
+  curl:
+    - openssl
+
+# Package Compilation Configurations
+# ------------------------------------------------------------------------------
+# Defines custom compilation parameters for specific Atoms:
+# - config: Custom arguments passed directly to ./configure or cmake.
+# - subdir: The subdirectory inside the extracted source archive where the build
+#           scripts are located (omitted if at root).
+packages:
+  # zlib: Core lossless data-compression library.
+  # --shared: Compiles as a shared object library (.so) which is required for
+  # dynamic linking by downstream runtimes and libraries.
+  zlib:
+    config: "--shared"
+
+  # openssl: High-assurance cryptography and TLS engine.
+  # shared: Compiles shared library (.so) objects rather than static archives.
+  # zlib: Dynamically links our zlib Atom to enable built-in gzip/deflate
+  # compression support within the TLS protocol.
+  openssl:
+    config: "shared zlib"
+
+  # ncurses: Shared-library terminal control and character cell handling.
+  # --with-shared: Generates shared library objects (.so) instead of static libraries.
+  # --enable-widec: Enables UTF-8 wide-character support for Unicode terminal displays.
+  # --enable-pc-files: Generates pkg-config files to let downstream builds locate headers.
+  # --with-termlib: Compiles and splits terminfo helper APIs into a separate terminal library.
+  ncurses:
+    config: "--with-shared --enable-widec --enable-pc-files --with-termlib"
+
+  # readline: Terminal command line text input, editing, and history management.
+  # --with-curses: Compiles with terminal screen rendering linked against our ncurses library.
+  readline:
+    config: "--with-curses"
+
+  # libxcrypt: Modern cryptographic hashing for user passwords.
+  # --disable-werror: Prevents compilation warnings from breaking builder execution.
+  # --enable-hashes=all: Bundles modern hashing standards (e.g., bcrypt, sha512, yescrypt).
+  # --enable-obsolete-api=no: Disables ancient obsolete crypt interfaces to minimize security surface.
+  libxcrypt:
+    config: "--disable-werror --enable-hashes=all --enable-obsolete-api=no"
+
+  # icu: International Components for Unicode database.
+  # --enable-static/--enable-shared: Compiles dynamic objects and static archives.
+  # --disable-tests/--disable-samples: Skips generating test binaries/examples to minimize space.
+  # --disable-extras/--disable-icuio/--disable-layoutex/--disable-tools: Disables non-essential helper
+  # tools and layout extensions to minimize final intermediate Atom layer size.
+  icu:
+    config: "--enable-static --enable-shared --disable-tests --disable-samples --disable-extras --disable-icuio --disable-layoutex --disable-tools"
+    subdir: "source"
+
+  # nghttp2: HTTP/2 frame and protocol parser.
+  # --enable-lib-only: Compiles only the shared C library objects, excluding CLI tool binaries
+  # (e.g., nghttp) to keep a zero-executable distroless L3 footprint.
+  nghttp2:
+    config: "--enable-lib-only"
+
+  # krb5: Kerberos network authentication protocol.
+  # --with-crypto-impl=openssl: Links krb5 crypto requirements to our high-assurance openssl Atom.
+  # --with-system-verto=no: Disables vertical execution loops.
+  # --disable-rpath: Prevents compilation from embedding hardcoded lookup paths in the builder filesystem.
+  krb5:
+    config: "--with-crypto-impl=openssl --with-system-verto=no --disable-rpath"
+    subdir: "src"
+
+  # libxml2: XML parsing and processing engine.
+  # --without-python: Disables generating python extension modules inside the L3 Atoms.
+  # --without-icu: Excludes heavy ICU Unicode checks to keep a minimal compilation footprint.
+  libxml2:
+    config: "--without-python --without-icu"
+
+  # curl: Multi-protocol data transfer library.
+  # --with-openssl/--with-zlib/--with-nghttp2=/opt/distroless: Links curl compilation dynamically
+  # against our high-assurance OCI Atom prefixes.
+  # --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt: Maps standard CA cert lookup paths.
+  # --without-libpsl: Excludes public suffix list domain checks to avoid build-time dependency errors.
+  curl:
+    config: "--with-openssl=/opt/distroless --with-zlib=/opt/distroless --with-nghttp2=/opt/distroless --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt --without-libpsl"
+
+  # pcre2: Perl-compatible regular expressions engine.
+  # --enable-jit: Enables Just-In-Time compiler compilation for accelerated pattern matching in Python/PHP.
+  # --enable-unicode: Enables full 8-bit, 16-bit, and 32-bit regular expression Unicode checks.
+  pcre2:
+    config: "--enable-jit --enable-unicode"
+
+  # oniguruma: Regular expression processing engine.
+  # --enable-shared: Compiles the dynamic shared library (.so) required for PHP multi-byte string handling.
+  oniguruma:
+    config: "--enable-shared"

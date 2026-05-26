@@ -35,3 +35,4 @@ When generating or modifying the Distroless Engine or Bake definitions, you must
     - **No Filler Content:** Documentation must be concise and focus on implementation details. Avoid repetitive summaries or marketing-style buzzwords.
 - **Architectural Traceability:** Every change to the core logic must be reflected in the project `README.md` and relevant technical docs, ensuring the "source of truth" is always updated to the latest state.
 - **Graphical Diagrams (Mermaid):** Technical flows must be visualized using Mermaid syntax and rendered to static assets.
+- **Relative Repository Pathing:** Technical documentation must never utilize absolute local file URIs (e.g., `file:///Users/...` or `file:///absolute/path/...`). All internal file references and links within the codebase and markdown manuals must be defined using standard relative paths (e.g., `../engine/discovery.py`) to guarantee rendering portability and compatibility when pushed to GitHub.

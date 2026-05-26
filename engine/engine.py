@@ -15,28 +15,16 @@ class MetadataManager:
     def __init__(self, cache_dir):
         self.cache_dir = cache_dir
         self.discovery = DiscoveryEngine(cache_dir)
-        self.hardcoded_sources = {
-            "zlib": "https://github.com/madler/zlib/archive/refs/tags/v1.3.1.tar.gz",
-            "openssl": "https://github.com/openssl/openssl/releases/download/openssl-3.4.0/openssl-3.4.0.tar.gz",
-            "ncurses": "https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.5.tar.gz",
-            "readline": "https://ftp.gnu.org/pub/gnu/readline/readline-8.2.tar.gz",
-            "sqlite": "https://www.sqlite.org/2024/sqlite-autoconf-3470000.tar.gz",
-            "libxcrypt": "https://github.com/besser82/libxcrypt/releases/download/v4.4.36/libxcrypt-4.4.36.tar.xz",
-            "libffi": "https://github.com/libffi/libffi/releases/download/v3.4.6/libffi-3.4.6.tar.gz",
-            "expat": "https://github.com/libexpat/libexpat/releases/download/R_2_6_4/expat-2.6.4.tar.xz",
-            "bzip2": "https://sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz",
-            "xz": "https://github.com/tukaani-project/xz/releases/download/v5.6.3/xz-5.6.3.tar.xz",
-            "gdbm": "https://ftp.gnu.org/pub/gnu/gdbm/gdbm-1.24.tar.gz",
-            "icu": "https://github.com/unicode-org/icu/releases/download/release-75-1/icu4c-75_1-src.tgz",
-            "brotli": "https://github.com/google/brotli/archive/refs/tags/v1.1.0.tar.gz",
-            "c-ares": "https://github.com/c-ares/c-ares/releases/download/v1.34.2/c-ares-1.34.2.tar.gz",
-            "nghttp2": "https://github.com/nghttp2/nghttp2/releases/download/v1.64.0/nghttp2-1.64.0.tar.gz",
-            "krb5": "https://web.mit.edu/kerberos/dist/krb5/1.21/krb5-1.21.3.tar.gz",
-            "libxml2": "https://download.gnome.org/sources/libxml2/2.12/libxml2-2.12.9.tar.xz",
-            "oniguruma": "https://github.com/kkos/oniguruma/releases/download/v6.9.9/onig-6.9.9.tar.gz",
-            "curl": "https://github.com/curl/curl/releases/download/curl-8_11_0/curl-8.11.0.tar.gz",
-            "pcre2": "https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.44/pcre2-10.44.tar.gz"
-        }
+        
+        # Load central matrix from config.yaml dynamically
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        config_path = os.path.join(script_dir, "config.yaml")
+        with open(config_path, "r") as f:
+            config = yaml.safe_load(f)
+            
+        self.hardcoded_sources = config.get("sources", {})
+        self.dependency_overrides = config.get("dependencies", {})
+        self.package_metadata = config.get("packages", {})
 
     def get_metadata(self, pkgname):
         res = {
@@ -53,10 +41,11 @@ class MetadataManager:
             if res["url"] == "SKIP" and meta["sources"]:
                 res["url"] = meta["sources"][0]
         
-        # Hardcoded overrides for dependencies
-        if pkgname == "curl":
-            if "openssl" not in res["depends"]:
-                res["depends"].append("openssl")
+        # Dependency overrides from config
+        if pkgname in self.dependency_overrides:
+            for dep in self.dependency_overrides[pkgname]:
+                if dep not in res["depends"]:
+                    res["depends"].append(dep)
         
         return res
 
@@ -103,7 +92,8 @@ class DAGResolver:
         return {node: self.graph[node] for node in sorted_nodes}
 
 class HCLGenerator:
-    def __init__(self, registry=None, platform="linux/amd64"):
+    def __init__(self, metadata_manager, registry=None, platform="linux/amd64"):
+        self.metadata_manager = metadata_manager
         self.registry = registry or os.environ.get("REGISTRY", "ghcr.io/mbuccarello")
         self.platform = platform
 
@@ -159,22 +149,11 @@ class HCLGenerator:
                 hcl += f'    LIB_NAME = "{pkg}"\n'
                 hcl += f'    LIB_URL = "{meta["url"]}"\n'
                 
-                lib_config = ""
-                if pkg == "zlib": lib_config = "--shared"
-                if pkg == "openssl": lib_config = "shared zlib"
-                if pkg == "ncurses": lib_config = "--with-shared --enable-widec --enable-pc-files --with-termlib"
-                if pkg == "readline": lib_config = "--with-curses"
-                if pkg == "libxcrypt": lib_config = "--disable-werror --enable-hashes=all --enable-obsolete-api=no"
-                if pkg == "icu": lib_config = "--enable-static --enable-shared --disable-tests --disable-samples --disable-extras --disable-icuio --disable-layoutex --disable-tools"
-                if pkg == "brotli": lib_config = "" # CMake usually, but let's see
-                if pkg == "c-ares": lib_config = ""
-                if pkg == "nghttp2": lib_config = "--enable-lib-only"
-                if pkg == "krb5": lib_config = "--with-crypto-impl=openssl"
+                pkg_config = self.metadata_manager.package_metadata.get(pkg, {})
+                lib_config = pkg_config.get("config", "")
                 if lib_config: hcl += f'    LIB_CONFIG = "{lib_config}"\n'
                 
-                lib_subdir = ""
-                if pkg == "icu": lib_subdir = "source"
-                if pkg == "krb5": lib_subdir = "src"
+                lib_subdir = pkg_config.get("subdir", "")
                 if lib_subdir: hcl += f'    LIB_SUBDIR = "{lib_subdir}"\n'
                 
                 hcl += '  }\n'
@@ -225,24 +204,11 @@ class HCLGenerator:
             hcl += f'    LIB_NAME = "{pkg}"\n'
             hcl += f'    LIB_URL = "{meta["url"]}"\n'
             
-            lib_config = ""
-            if pkg == "zlib": lib_config = "--shared"
-            if pkg == "openssl": lib_config = "shared zlib"
-            if pkg == "ncurses": lib_config = "--with-shared --enable-widec --enable-pc-files --with-termlib"
-            if pkg == "readline": lib_config = "--with-curses"
-            if pkg == "libxcrypt": lib_config = "--disable-werror --enable-hashes=all --enable-obsolete-api=no"
-            if pkg == "icu": lib_config = "--enable-static --enable-shared --disable-tests --disable-samples --disable-extras --disable-icuio --disable-layoutex --disable-tools"
-            if pkg == "nghttp2": lib_config = "--enable-lib-only"
-            if pkg == "krb5": lib_config = "--with-crypto-impl=openssl --with-system-verto=no --disable-rpath"
-            if pkg == "libxml2": lib_config = "--without-python --without-icu"
-            if pkg == "curl": lib_config = "--with-openssl=/opt/distroless --with-zlib=/opt/distroless --with-nghttp2=/opt/distroless --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt --without-libpsl"
-            if pkg == "pcre2": lib_config = "--enable-jit --enable-unicode"
-            if pkg == "oniguruma": lib_config = "--enable-shared"
+            pkg_config = self.metadata_manager.package_metadata.get(pkg, {})
+            lib_config = pkg_config.get("config", "")
             if lib_config: hcl += f'    LIB_CONFIG = "{lib_config}"\n'
 
-            lib_subdir = ""
-            if pkg == "icu": lib_subdir = "source"
-            if pkg == "krb5": lib_subdir = "src"
+            lib_subdir = pkg_config.get("subdir", "")
             if lib_subdir: hcl += f'    LIB_SUBDIR = "{lib_subdir}"\n'
 
             hcl += '  }\n'
@@ -469,11 +435,11 @@ def main():
     if args.force_build:
         os.environ["FORCE_BUILD"] = "true"
 
-    generator = HCLGenerator()
+    manager = MetadataManager(".cache")
+    generator = HCLGenerator(manager)
     
     if args.mode == "foundation":
         print("🚀 Resolving core dependencies for foundation CC...")
-        manager = MetadataManager(".cache")
         resolver = DAGResolver(manager)
         # Core libraries for CC foundation
         resolver.resolve(["zlib", "openssl", "libxcrypt"])
@@ -499,7 +465,6 @@ def main():
             stack_config = yaml.safe_load(f)
         
         print(f"🚀 Resolving dependencies for {stack_config['name']}...")
-        manager = MetadataManager(".cache")
         resolver = DAGResolver(manager)
         deps = stack_config.get('dependencies', [])
         initial_deps = [d['name'] for d in deps]

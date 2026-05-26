@@ -6,7 +6,7 @@ This guide documents the End-to-End (E2E) testing framework, explaining how lang
 
 ## 1. The Smoke Test Design (`app/`)
 
-Every language runtime assembled via this framework is verified against a corresponding smoke test script in the **[app/](file:///Users/michele.buccarello/distroless-the-hard-way/app)** folder. These tests go beyond simple "Hello World" scripts; they are designed to assert that critical core capabilities and compiled shared libraries (from our C/C++ CC layer) load and function correctly.
+Every language runtime assembled via this framework is verified against a corresponding smoke test script in the **[app/](../app)** folder. These tests go beyond simple "Hello World" scripts; they are designed to assert that critical core capabilities and compiled shared libraries (from our C/C++ CC layer) load and function correctly.
 
 | Test File | Target Runtime | Verified Capabilities |
 | :--- | :--- | :--- |

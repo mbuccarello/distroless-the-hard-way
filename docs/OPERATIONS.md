@@ -24,7 +24,7 @@ Security patches are applied systematically:
 
 ### 2.1 E2E Verification Framework
 The project implements a strict, automated end-to-end testing pipeline:
-- **Test Workflow**: [`.github/workflows/distroless-e2e.yml`](file:///Users/michele.buccarello/distroless-the-hard-way/.github/workflows/distroless-e2e.yml) validates every generated image.
+- **Test Workflow**: [`.github/workflows/distroless-e2e.yml`](../.github/workflows/distroless-e2e.yml) validates every generated image.
 - **Test Matrix**: Each language stack defines a verification application (e.g., `test.py`, `test.js`, `test.java`) in `app/`.
 - **Validation Logic**: Tests verify basic binary execution, successful loading of dynamic shared libraries (ABI compatibility checks), and HTTPS connectivity against the root trust store (SSL verification).
 
@@ -84,3 +84,28 @@ To inject a custom CA into a Java distroless environment:
      -v $(pwd)/cacerts:/etc/pki/ca-trust/extracted/java/cacerts:ro \
      ghcr.io/mbuccarello/java-distroless:latest -jar app.jar
    ```
+
+---
+
+## 5. Operational Maintenance: Package Upgrades and New Atoms
+
+The Distroless Orchestrator separates concerns by externalizing build configurations from the Python logic. All package definitions, source URLs, dependency overrides, and custom compilation arguments are stored in the central matrix: `engine/config.yaml`.
+
+### 5.1 Upgrading a Foundational Package
+When a package (e.g., `openssl` or `libxcrypt`) requires a security update or patch bump, follow these steps:
+1. Locate the package in the `sources` mapping of `engine/config.yaml`.
+2. Update the source archive URL to the target version release.
+3. If the upgrade requires adjusting compilation arguments (e.g., handling deprecated features or new security flags), locate the corresponding package in the `packages` list and update its `config` arguments.
+4. Regenerate all build definitions by running:
+   ```bash
+   python3 engine/engine.py --mode foundation
+   python3 engine/engine.py --mode runtime --stack stacks/<stack_name>.yaml
+   ```
+5. Commit the changes and push them. The CI pipeline will automatically run a cascading build of all downstream images to apply the security update.
+
+### 5.2 Introducing a Custom Compilation Flag
+To add a compiler feature or hardening flag (e.g., adjusting `./configure` options for size or security optimization):
+1. Locate the package in the `packages` mapping of `engine/config.yaml`.
+2. Add or modify the arguments under `config`.
+3. Document the systems-engineering rationale for the new compiler flag directly in `engine/config.yaml` as comments, and mirror the explanation in `docs/ENGINE.md` under the "Package Configure Hardening Catalog".
+4. Re-run `engine/engine.py` to regenerate the HCL configuration targets.
