@@ -36,3 +36,11 @@ When generating or modifying the Distroless Engine or Bake definitions, you must
 - **Architectural Traceability:** Every change to the core logic must be reflected in the project `README.md` and relevant technical docs, ensuring the "source of truth" is always updated to the latest state.
 - **Graphical Diagrams (Mermaid):** Technical flows must be visualized using Mermaid syntax and rendered to static assets.
 - **Relative Repository Pathing:** Technical documentation must never utilize absolute local file URIs (e.g., `file:///Users/...` or `file:///absolute/path/...`). All internal file references and links within the codebase and markdown manuals must be defined using standard relative paths (e.g., `../engine/discovery.py`) to guarantee rendering portability and compatibility when pushed to GitHub.
+
+## 5. Verification Protocol & Execution Safeguards
+- **Mandatory Verification Execution:** Before concluding any structural changes to the Distroless Engine (`engine/engine.py`), foundations, or stack metadata, you must execute the automated test and assembly pipeline (`/scripts/assemble.sh` or standard compilation sequences) to verify 100% regression safety and binary correctness.
+- **Static Security Scanning:** You must execute security SBOM scanning validation (`scripts/scan-sbom.py`) or equivalent image report sweeps to ensure the software supply chain has zero untracked dependencies or newly introduced CVE vulnerabilities.
+
+## 6. State & Artifact Synchronization Rules
+- **Task Verification Traceability:** In repositories utilizing planning and execution models, you must dynamically maintain the `task.md` checklist in the workspace, marking items as `[/]` (in-progress) or `[x]` (completed).
+- **Post-Implementation Documentation:** Every resolved instruction set must compile a clear system log inside `walkthrough.md` documenting exact code changes, test validations, and execution findings.

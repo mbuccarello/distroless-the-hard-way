@@ -119,4 +119,3 @@ This hybrid approach ensures high-assurance supply chain control while keeping c
 
 > For details on the build scripts and orchestration, see the **[Distroless Engine Documentation](ENGINE.md)**.
 > For details on the CI/CD workflows, see the **[Pipelines Documentation](PIPELINES.md)**.
-
