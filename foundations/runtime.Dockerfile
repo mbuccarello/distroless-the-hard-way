@@ -45,246 +45,6 @@ RUN set -ex && if [ -n "$LIB_URL" ] && [ "$LIB_URL" != "SKIP" ]; then \
     find . -maxdepth 2 -type f \( -iname "license*" -o -iname "copying*" -o -iname "mit-license*" \) -exec cp -v {} /artifacts/usr/share/doc/$LIB_NAME/ \; -quit; \
     fi && mkdir -p /artifacts/usr
 
-FROM builder AS bzip2
-ARG LIB_NAME=bzip2
-ARG LIB_URL
-ARG LIB_CONFIG
-ARG LIB_SUBDIR=.
-WORKDIR /build
-RUN set -ex && if [ -n "$LIB_URL" ] && [ "$LIB_URL" != "SKIP" ]; then \
-    curl -L "$LIB_URL" -o source.tar.gz && mkdir src && tar -xf source.tar.gz -C src --strip-components=1 && cd src/$LIB_SUBDIR && \
-    mkdir -p /opt/distroless && \
-    export CPPFLAGS="-I/opt/distroless/include" && \
-    export CFLAGS="$CFLAGS -g0 -O1 -fstack-protector-strong -D_FORTIFY_SOURCE=2" && \
-    export CXXFLAGS="$CXXFLAGS -g0 -O1 -fstack-protector-strong -D_FORTIFY_SOURCE=2" && \
-    if [ "$LIB_NAME" = "icu" ]; then export CC=clang; export CXX=clang++; export CXXFLAGS="$CXXFLAGS -fno-var-tracking-assignments -g0"; fi && \
-    export LDFLAGS="-L/opt/distroless/lib -L/opt/distroless/lib64 -Wl,-rpath,/usr/lib" && \
-    export PKG_CONFIG_PATH="/opt/distroless/lib/pkgconfig:/opt/distroless/lib64/pkgconfig" && \
-    echo '--- DEBUG: Contents of /opt/distroless ---' && ls -R /opt/distroless || true && \
-    echo '--- DEBUG: Available pkg-config packages ---' && pkg-config --list-all || true && \
-    if [ -f ./configure ]; then ./configure --prefix=/usr $LIB_CONFIG; elif [ -f ./Configure ]; then ./Configure --prefix=/usr $LIB_CONFIG; elif [ -f ./CMakeLists.txt ]; then cmake -DCMAKE_INSTALL_PREFIX=/usr $LIB_CONFIG .; fi && \
-    if [ "$LIB_NAME" = "icu" ]; then make -j1 && make DESTDIR=/artifacts install; elif [ "$LIB_NAME" = "bzip2" ]; then make -j2 PREFIX=/usr && make DESTDIR=/artifacts PREFIX=/usr install; else make -j2 && make DESTDIR=/artifacts install; fi && \
-    mkdir -p /artifacts/usr/share/doc/$LIB_NAME && \
-    find . -maxdepth 2 -type f \( -iname "license*" -o -iname "copying*" -o -iname "mit-license*" \) -exec cp -v {} /artifacts/usr/share/doc/$LIB_NAME/ \; -quit; \
-    fi && mkdir -p /artifacts/usr
-
-FROM builder AS libpng
-ARG LIB_NAME=libpng
-ARG LIB_URL
-ARG LIB_CONFIG
-ARG LIB_SUBDIR=.
-COPY --from=zlib /artifacts/usr /opt/distroless
-WORKDIR /build
-RUN set -ex && if [ -n "$LIB_URL" ] && [ "$LIB_URL" != "SKIP" ]; then \
-    curl -L "$LIB_URL" -o source.tar.gz && mkdir src && tar -xf source.tar.gz -C src --strip-components=1 && cd src/$LIB_SUBDIR && \
-    mkdir -p /opt/distroless && \
-    export CPPFLAGS="-I/opt/distroless/include" && \
-    export CFLAGS="$CFLAGS -g0 -O1 -fstack-protector-strong -D_FORTIFY_SOURCE=2" && \
-    export CXXFLAGS="$CXXFLAGS -g0 -O1 -fstack-protector-strong -D_FORTIFY_SOURCE=2" && \
-    if [ "$LIB_NAME" = "icu" ]; then export CC=clang; export CXX=clang++; export CXXFLAGS="$CXXFLAGS -fno-var-tracking-assignments -g0"; fi && \
-    export LDFLAGS="-L/opt/distroless/lib -L/opt/distroless/lib64 -Wl,-rpath,/usr/lib" && \
-    export PKG_CONFIG_PATH="/opt/distroless/lib/pkgconfig:/opt/distroless/lib64/pkgconfig" && \
-    echo '--- DEBUG: Contents of /opt/distroless ---' && ls -R /opt/distroless || true && \
-    echo '--- DEBUG: Available pkg-config packages ---' && pkg-config --list-all || true && \
-    if [ -f ./configure ]; then ./configure --prefix=/usr $LIB_CONFIG; elif [ -f ./Configure ]; then ./Configure --prefix=/usr $LIB_CONFIG; elif [ -f ./CMakeLists.txt ]; then cmake -DCMAKE_INSTALL_PREFIX=/usr $LIB_CONFIG .; fi && \
-    if [ "$LIB_NAME" = "icu" ]; then make -j1 && make DESTDIR=/artifacts install; elif [ "$LIB_NAME" = "bzip2" ]; then make -j2 PREFIX=/usr && make DESTDIR=/artifacts PREFIX=/usr install; else make -j2 && make DESTDIR=/artifacts install; fi && \
-    mkdir -p /artifacts/usr/share/doc/$LIB_NAME && \
-    find . -maxdepth 2 -type f \( -iname "license*" -o -iname "copying*" -o -iname "mit-license*" \) -exec cp -v {} /artifacts/usr/share/doc/$LIB_NAME/ \; -quit; \
-    fi && mkdir -p /artifacts/usr
-
-FROM builder AS freetype2
-ARG LIB_NAME=freetype2
-ARG LIB_URL
-ARG LIB_CONFIG
-ARG LIB_SUBDIR=.
-COPY --from=brotli /artifacts/usr /opt/distroless
-COPY --from=bzip2 /artifacts/usr /opt/distroless
-COPY --from=libpng /artifacts/usr /opt/distroless
-COPY --from=zlib /artifacts/usr /opt/distroless
-WORKDIR /build
-RUN set -ex && if [ -n "$LIB_URL" ] && [ "$LIB_URL" != "SKIP" ]; then \
-    curl -L "$LIB_URL" -o source.tar.gz && mkdir src && tar -xf source.tar.gz -C src --strip-components=1 && cd src/$LIB_SUBDIR && \
-    mkdir -p /opt/distroless && \
-    export CPPFLAGS="-I/opt/distroless/include" && \
-    export CFLAGS="$CFLAGS -g0 -O1 -fstack-protector-strong -D_FORTIFY_SOURCE=2" && \
-    export CXXFLAGS="$CXXFLAGS -g0 -O1 -fstack-protector-strong -D_FORTIFY_SOURCE=2" && \
-    if [ "$LIB_NAME" = "icu" ]; then export CC=clang; export CXX=clang++; export CXXFLAGS="$CXXFLAGS -fno-var-tracking-assignments -g0"; fi && \
-    export LDFLAGS="-L/opt/distroless/lib -L/opt/distroless/lib64 -Wl,-rpath,/usr/lib" && \
-    export PKG_CONFIG_PATH="/opt/distroless/lib/pkgconfig:/opt/distroless/lib64/pkgconfig" && \
-    echo '--- DEBUG: Contents of /opt/distroless ---' && ls -R /opt/distroless || true && \
-    echo '--- DEBUG: Available pkg-config packages ---' && pkg-config --list-all || true && \
-    if [ -f ./configure ]; then ./configure --prefix=/usr $LIB_CONFIG; elif [ -f ./Configure ]; then ./Configure --prefix=/usr $LIB_CONFIG; elif [ -f ./CMakeLists.txt ]; then cmake -DCMAKE_INSTALL_PREFIX=/usr $LIB_CONFIG .; fi && \
-    if [ "$LIB_NAME" = "icu" ]; then make -j1 && make DESTDIR=/artifacts install; elif [ "$LIB_NAME" = "bzip2" ]; then make -j2 PREFIX=/usr && make DESTDIR=/artifacts PREFIX=/usr install; else make -j2 && make DESTDIR=/artifacts install; fi && \
-    mkdir -p /artifacts/usr/share/doc/$LIB_NAME && \
-    find . -maxdepth 2 -type f \( -iname "license*" -o -iname "copying*" -o -iname "mit-license*" \) -exec cp -v {} /artifacts/usr/share/doc/$LIB_NAME/ \; -quit; \
-    fi && mkdir -p /artifacts/usr
-
-FROM builder AS libjpeg-turbo
-ARG LIB_NAME=libjpeg-turbo
-ARG LIB_URL
-ARG LIB_CONFIG
-ARG LIB_SUBDIR=.
-WORKDIR /build
-RUN set -ex && if [ -n "$LIB_URL" ] && [ "$LIB_URL" != "SKIP" ]; then \
-    curl -L "$LIB_URL" -o source.tar.gz && mkdir src && tar -xf source.tar.gz -C src --strip-components=1 && cd src/$LIB_SUBDIR && \
-    mkdir -p /opt/distroless && \
-    export CPPFLAGS="-I/opt/distroless/include" && \
-    export CFLAGS="$CFLAGS -g0 -O1 -fstack-protector-strong -D_FORTIFY_SOURCE=2" && \
-    export CXXFLAGS="$CXXFLAGS -g0 -O1 -fstack-protector-strong -D_FORTIFY_SOURCE=2" && \
-    if [ "$LIB_NAME" = "icu" ]; then export CC=clang; export CXX=clang++; export CXXFLAGS="$CXXFLAGS -fno-var-tracking-assignments -g0"; fi && \
-    export LDFLAGS="-L/opt/distroless/lib -L/opt/distroless/lib64 -Wl,-rpath,/usr/lib" && \
-    export PKG_CONFIG_PATH="/opt/distroless/lib/pkgconfig:/opt/distroless/lib64/pkgconfig" && \
-    echo '--- DEBUG: Contents of /opt/distroless ---' && ls -R /opt/distroless || true && \
-    echo '--- DEBUG: Available pkg-config packages ---' && pkg-config --list-all || true && \
-    if [ -f ./configure ]; then ./configure --prefix=/usr $LIB_CONFIG; elif [ -f ./Configure ]; then ./Configure --prefix=/usr $LIB_CONFIG; elif [ -f ./CMakeLists.txt ]; then cmake -DCMAKE_INSTALL_PREFIX=/usr $LIB_CONFIG .; fi && \
-    if [ "$LIB_NAME" = "icu" ]; then make -j1 && make DESTDIR=/artifacts install; elif [ "$LIB_NAME" = "bzip2" ]; then make -j2 PREFIX=/usr && make DESTDIR=/artifacts PREFIX=/usr install; else make -j2 && make DESTDIR=/artifacts install; fi && \
-    mkdir -p /artifacts/usr/share/doc/$LIB_NAME && \
-    find . -maxdepth 2 -type f \( -iname "license*" -o -iname "copying*" -o -iname "mit-license*" \) -exec cp -v {} /artifacts/usr/share/doc/$LIB_NAME/ \; -quit; \
-    fi && mkdir -p /artifacts/usr
-
-FROM builder AS lcms2
-ARG LIB_NAME=lcms2
-ARG LIB_URL
-ARG LIB_CONFIG
-ARG LIB_SUBDIR=.
-COPY --from=libjpeg-turbo /artifacts/usr /opt/distroless
-WORKDIR /build
-RUN set -ex && if [ -n "$LIB_URL" ] && [ "$LIB_URL" != "SKIP" ]; then \
-    curl -L "$LIB_URL" -o source.tar.gz && mkdir src && tar -xf source.tar.gz -C src --strip-components=1 && cd src/$LIB_SUBDIR && \
-    mkdir -p /opt/distroless && \
-    export CPPFLAGS="-I/opt/distroless/include" && \
-    export CFLAGS="$CFLAGS -g0 -O1 -fstack-protector-strong -D_FORTIFY_SOURCE=2" && \
-    export CXXFLAGS="$CXXFLAGS -g0 -O1 -fstack-protector-strong -D_FORTIFY_SOURCE=2" && \
-    if [ "$LIB_NAME" = "icu" ]; then export CC=clang; export CXX=clang++; export CXXFLAGS="$CXXFLAGS -fno-var-tracking-assignments -g0"; fi && \
-    export LDFLAGS="-L/opt/distroless/lib -L/opt/distroless/lib64 -Wl,-rpath,/usr/lib" && \
-    export PKG_CONFIG_PATH="/opt/distroless/lib/pkgconfig:/opt/distroless/lib64/pkgconfig" && \
-    echo '--- DEBUG: Contents of /opt/distroless ---' && ls -R /opt/distroless || true && \
-    echo '--- DEBUG: Available pkg-config packages ---' && pkg-config --list-all || true && \
-    if [ -f ./configure ]; then ./configure --prefix=/usr $LIB_CONFIG; elif [ -f ./Configure ]; then ./Configure --prefix=/usr $LIB_CONFIG; elif [ -f ./CMakeLists.txt ]; then cmake -DCMAKE_INSTALL_PREFIX=/usr $LIB_CONFIG .; fi && \
-    if [ "$LIB_NAME" = "icu" ]; then make -j1 && make DESTDIR=/artifacts install; elif [ "$LIB_NAME" = "bzip2" ]; then make -j2 PREFIX=/usr && make DESTDIR=/artifacts PREFIX=/usr install; else make -j2 && make DESTDIR=/artifacts install; fi && \
-    mkdir -p /artifacts/usr/share/doc/$LIB_NAME && \
-    find . -maxdepth 2 -type f \( -iname "license*" -o -iname "copying*" -o -iname "mit-license*" \) -exec cp -v {} /artifacts/usr/share/doc/$LIB_NAME/ \; -quit; \
-    fi && mkdir -p /artifacts/usr
-
-FROM builder AS libx11
-ARG LIB_NAME=libx11
-ARG LIB_URL
-ARG LIB_CONFIG
-ARG LIB_SUBDIR=.
-WORKDIR /build
-RUN set -ex && if [ -n "$LIB_URL" ] && [ "$LIB_URL" != "SKIP" ]; then \
-    curl -L "$LIB_URL" -o source.tar.gz && mkdir src && tar -xf source.tar.gz -C src --strip-components=1 && cd src/$LIB_SUBDIR && \
-    mkdir -p /opt/distroless && \
-    export CPPFLAGS="-I/opt/distroless/include" && \
-    export CFLAGS="$CFLAGS -g0 -O1 -fstack-protector-strong -D_FORTIFY_SOURCE=2" && \
-    export CXXFLAGS="$CXXFLAGS -g0 -O1 -fstack-protector-strong -D_FORTIFY_SOURCE=2" && \
-    if [ "$LIB_NAME" = "icu" ]; then export CC=clang; export CXX=clang++; export CXXFLAGS="$CXXFLAGS -fno-var-tracking-assignments -g0"; fi && \
-    export LDFLAGS="-L/opt/distroless/lib -L/opt/distroless/lib64 -Wl,-rpath,/usr/lib" && \
-    export PKG_CONFIG_PATH="/opt/distroless/lib/pkgconfig:/opt/distroless/lib64/pkgconfig" && \
-    echo '--- DEBUG: Contents of /opt/distroless ---' && ls -R /opt/distroless || true && \
-    echo '--- DEBUG: Available pkg-config packages ---' && pkg-config --list-all || true && \
-    if [ -f ./configure ]; then ./configure --prefix=/usr $LIB_CONFIG; elif [ -f ./Configure ]; then ./Configure --prefix=/usr $LIB_CONFIG; elif [ -f ./CMakeLists.txt ]; then cmake -DCMAKE_INSTALL_PREFIX=/usr $LIB_CONFIG .; fi && \
-    if [ "$LIB_NAME" = "icu" ]; then make -j1 && make DESTDIR=/artifacts install; elif [ "$LIB_NAME" = "bzip2" ]; then make -j2 PREFIX=/usr && make DESTDIR=/artifacts PREFIX=/usr install; else make -j2 && make DESTDIR=/artifacts install; fi && \
-    mkdir -p /artifacts/usr/share/doc/$LIB_NAME && \
-    find . -maxdepth 2 -type f \( -iname "license*" -o -iname "copying*" -o -iname "mit-license*" \) -exec cp -v {} /artifacts/usr/share/doc/$LIB_NAME/ \; -quit; \
-    fi && mkdir -p /artifacts/usr
-
-FROM builder AS libxext
-ARG LIB_NAME=libxext
-ARG LIB_URL
-ARG LIB_CONFIG
-ARG LIB_SUBDIR=.
-COPY --from=libx11 /artifacts/usr /opt/distroless
-WORKDIR /build
-RUN set -ex && if [ -n "$LIB_URL" ] && [ "$LIB_URL" != "SKIP" ]; then \
-    curl -L "$LIB_URL" -o source.tar.gz && mkdir src && tar -xf source.tar.gz -C src --strip-components=1 && cd src/$LIB_SUBDIR && \
-    mkdir -p /opt/distroless && \
-    export CPPFLAGS="-I/opt/distroless/include" && \
-    export CFLAGS="$CFLAGS -g0 -O1 -fstack-protector-strong -D_FORTIFY_SOURCE=2" && \
-    export CXXFLAGS="$CXXFLAGS -g0 -O1 -fstack-protector-strong -D_FORTIFY_SOURCE=2" && \
-    if [ "$LIB_NAME" = "icu" ]; then export CC=clang; export CXX=clang++; export CXXFLAGS="$CXXFLAGS -fno-var-tracking-assignments -g0"; fi && \
-    export LDFLAGS="-L/opt/distroless/lib -L/opt/distroless/lib64 -Wl,-rpath,/usr/lib" && \
-    export PKG_CONFIG_PATH="/opt/distroless/lib/pkgconfig:/opt/distroless/lib64/pkgconfig" && \
-    echo '--- DEBUG: Contents of /opt/distroless ---' && ls -R /opt/distroless || true && \
-    echo '--- DEBUG: Available pkg-config packages ---' && pkg-config --list-all || true && \
-    if [ -f ./configure ]; then ./configure --prefix=/usr $LIB_CONFIG; elif [ -f ./Configure ]; then ./Configure --prefix=/usr $LIB_CONFIG; elif [ -f ./CMakeLists.txt ]; then cmake -DCMAKE_INSTALL_PREFIX=/usr $LIB_CONFIG .; fi && \
-    if [ "$LIB_NAME" = "icu" ]; then make -j1 && make DESTDIR=/artifacts install; elif [ "$LIB_NAME" = "bzip2" ]; then make -j2 PREFIX=/usr && make DESTDIR=/artifacts PREFIX=/usr install; else make -j2 && make DESTDIR=/artifacts install; fi && \
-    mkdir -p /artifacts/usr/share/doc/$LIB_NAME && \
-    find . -maxdepth 2 -type f \( -iname "license*" -o -iname "copying*" -o -iname "mit-license*" \) -exec cp -v {} /artifacts/usr/share/doc/$LIB_NAME/ \; -quit; \
-    fi && mkdir -p /artifacts/usr
-
-FROM builder AS libxrender
-ARG LIB_NAME=libxrender
-ARG LIB_URL
-ARG LIB_CONFIG
-ARG LIB_SUBDIR=.
-COPY --from=libx11 /artifacts/usr /opt/distroless
-WORKDIR /build
-RUN set -ex && if [ -n "$LIB_URL" ] && [ "$LIB_URL" != "SKIP" ]; then \
-    curl -L "$LIB_URL" -o source.tar.gz && mkdir src && tar -xf source.tar.gz -C src --strip-components=1 && cd src/$LIB_SUBDIR && \
-    mkdir -p /opt/distroless && \
-    export CPPFLAGS="-I/opt/distroless/include" && \
-    export CFLAGS="$CFLAGS -g0 -O1 -fstack-protector-strong -D_FORTIFY_SOURCE=2" && \
-    export CXXFLAGS="$CXXFLAGS -g0 -O1 -fstack-protector-strong -D_FORTIFY_SOURCE=2" && \
-    if [ "$LIB_NAME" = "icu" ]; then export CC=clang; export CXX=clang++; export CXXFLAGS="$CXXFLAGS -fno-var-tracking-assignments -g0"; fi && \
-    export LDFLAGS="-L/opt/distroless/lib -L/opt/distroless/lib64 -Wl,-rpath,/usr/lib" && \
-    export PKG_CONFIG_PATH="/opt/distroless/lib/pkgconfig:/opt/distroless/lib64/pkgconfig" && \
-    echo '--- DEBUG: Contents of /opt/distroless ---' && ls -R /opt/distroless || true && \
-    echo '--- DEBUG: Available pkg-config packages ---' && pkg-config --list-all || true && \
-    if [ -f ./configure ]; then ./configure --prefix=/usr $LIB_CONFIG; elif [ -f ./Configure ]; then ./Configure --prefix=/usr $LIB_CONFIG; elif [ -f ./CMakeLists.txt ]; then cmake -DCMAKE_INSTALL_PREFIX=/usr $LIB_CONFIG .; fi && \
-    if [ "$LIB_NAME" = "icu" ]; then make -j1 && make DESTDIR=/artifacts install; elif [ "$LIB_NAME" = "bzip2" ]; then make -j2 PREFIX=/usr && make DESTDIR=/artifacts PREFIX=/usr install; else make -j2 && make DESTDIR=/artifacts install; fi && \
-    mkdir -p /artifacts/usr/share/doc/$LIB_NAME && \
-    find . -maxdepth 2 -type f \( -iname "license*" -o -iname "copying*" -o -iname "mit-license*" \) -exec cp -v {} /artifacts/usr/share/doc/$LIB_NAME/ \; -quit; \
-    fi && mkdir -p /artifacts/usr
-
-FROM builder AS libxtst
-ARG LIB_NAME=libxtst
-ARG LIB_URL
-ARG LIB_CONFIG
-ARG LIB_SUBDIR=.
-COPY --from=libxext /artifacts/usr /opt/distroless
-COPY --from=libx11 /artifacts/usr /opt/distroless
-WORKDIR /build
-RUN set -ex && if [ -n "$LIB_URL" ] && [ "$LIB_URL" != "SKIP" ]; then \
-    curl -L "$LIB_URL" -o source.tar.gz && mkdir src && tar -xf source.tar.gz -C src --strip-components=1 && cd src/$LIB_SUBDIR && \
-    mkdir -p /opt/distroless && \
-    export CPPFLAGS="-I/opt/distroless/include" && \
-    export CFLAGS="$CFLAGS -g0 -O1 -fstack-protector-strong -D_FORTIFY_SOURCE=2" && \
-    export CXXFLAGS="$CXXFLAGS -g0 -O1 -fstack-protector-strong -D_FORTIFY_SOURCE=2" && \
-    if [ "$LIB_NAME" = "icu" ]; then export CC=clang; export CXX=clang++; export CXXFLAGS="$CXXFLAGS -fno-var-tracking-assignments -g0"; fi && \
-    export LDFLAGS="-L/opt/distroless/lib -L/opt/distroless/lib64 -Wl,-rpath,/usr/lib" && \
-    export PKG_CONFIG_PATH="/opt/distroless/lib/pkgconfig:/opt/distroless/lib64/pkgconfig" && \
-    echo '--- DEBUG: Contents of /opt/distroless ---' && ls -R /opt/distroless || true && \
-    echo '--- DEBUG: Available pkg-config packages ---' && pkg-config --list-all || true && \
-    if [ -f ./configure ]; then ./configure --prefix=/usr $LIB_CONFIG; elif [ -f ./Configure ]; then ./Configure --prefix=/usr $LIB_CONFIG; elif [ -f ./CMakeLists.txt ]; then cmake -DCMAKE_INSTALL_PREFIX=/usr $LIB_CONFIG .; fi && \
-    if [ "$LIB_NAME" = "icu" ]; then make -j1 && make DESTDIR=/artifacts install; elif [ "$LIB_NAME" = "bzip2" ]; then make -j2 PREFIX=/usr && make DESTDIR=/artifacts PREFIX=/usr install; else make -j2 && make DESTDIR=/artifacts install; fi && \
-    mkdir -p /artifacts/usr/share/doc/$LIB_NAME && \
-    find . -maxdepth 2 -type f \( -iname "license*" -o -iname "copying*" -o -iname "mit-license*" \) -exec cp -v {} /artifacts/usr/share/doc/$LIB_NAME/ \; -quit; \
-    fi && mkdir -p /artifacts/usr
-
-FROM builder AS alsa-lib
-ARG LIB_NAME=alsa-lib
-ARG LIB_URL
-ARG LIB_CONFIG
-ARG LIB_SUBDIR=.
-WORKDIR /build
-RUN set -ex && if [ -n "$LIB_URL" ] && [ "$LIB_URL" != "SKIP" ]; then \
-    curl -L "$LIB_URL" -o source.tar.gz && mkdir src && tar -xf source.tar.gz -C src --strip-components=1 && cd src/$LIB_SUBDIR && \
-    mkdir -p /opt/distroless && \
-    export CPPFLAGS="-I/opt/distroless/include" && \
-    export CFLAGS="$CFLAGS -g0 -O1 -fstack-protector-strong -D_FORTIFY_SOURCE=2" && \
-    export CXXFLAGS="$CXXFLAGS -g0 -O1 -fstack-protector-strong -D_FORTIFY_SOURCE=2" && \
-    if [ "$LIB_NAME" = "icu" ]; then export CC=clang; export CXX=clang++; export CXXFLAGS="$CXXFLAGS -fno-var-tracking-assignments -g0"; fi && \
-    export LDFLAGS="-L/opt/distroless/lib -L/opt/distroless/lib64 -Wl,-rpath,/usr/lib" && \
-    export PKG_CONFIG_PATH="/opt/distroless/lib/pkgconfig:/opt/distroless/lib64/pkgconfig" && \
-    echo '--- DEBUG: Contents of /opt/distroless ---' && ls -R /opt/distroless || true && \
-    echo '--- DEBUG: Available pkg-config packages ---' && pkg-config --list-all || true && \
-    if [ -f ./configure ]; then ./configure --prefix=/usr $LIB_CONFIG; elif [ -f ./Configure ]; then ./Configure --prefix=/usr $LIB_CONFIG; elif [ -f ./CMakeLists.txt ]; then cmake -DCMAKE_INSTALL_PREFIX=/usr $LIB_CONFIG .; fi && \
-    if [ "$LIB_NAME" = "icu" ]; then make -j1 && make DESTDIR=/artifacts install; elif [ "$LIB_NAME" = "bzip2" ]; then make -j2 PREFIX=/usr && make DESTDIR=/artifacts PREFIX=/usr install; else make -j2 && make DESTDIR=/artifacts install; fi && \
-    mkdir -p /artifacts/usr/share/doc/$LIB_NAME && \
-    find . -maxdepth 2 -type f \( -iname "license*" -o -iname "copying*" -o -iname "mit-license*" \) -exec cp -v {} /artifacts/usr/share/doc/$LIB_NAME/ \; -quit; \
-    fi && mkdir -p /artifacts/usr
-
 FROM builder AS openssl
 ARG LIB_NAME=openssl
 ARG LIB_URL
@@ -292,6 +52,66 @@ ARG LIB_CONFIG
 ARG LIB_SUBDIR=.
 COPY --from=brotli /artifacts/usr /opt/distroless
 COPY --from=zlib /artifacts/usr /opt/distroless
+WORKDIR /build
+RUN set -ex && if [ -n "$LIB_URL" ] && [ "$LIB_URL" != "SKIP" ]; then \
+    curl -L "$LIB_URL" -o source.tar.gz && mkdir src && tar -xf source.tar.gz -C src --strip-components=1 && cd src/$LIB_SUBDIR && \
+    mkdir -p /opt/distroless && \
+    export CPPFLAGS="-I/opt/distroless/include" && \
+    export CFLAGS="$CFLAGS -g0 -O1 -fstack-protector-strong -D_FORTIFY_SOURCE=2" && \
+    export CXXFLAGS="$CXXFLAGS -g0 -O1 -fstack-protector-strong -D_FORTIFY_SOURCE=2" && \
+    if [ "$LIB_NAME" = "icu" ]; then export CC=clang; export CXX=clang++; export CXXFLAGS="$CXXFLAGS -fno-var-tracking-assignments -g0"; fi && \
+    export LDFLAGS="-L/opt/distroless/lib -L/opt/distroless/lib64 -Wl,-rpath,/usr/lib" && \
+    export PKG_CONFIG_PATH="/opt/distroless/lib/pkgconfig:/opt/distroless/lib64/pkgconfig" && \
+    echo '--- DEBUG: Contents of /opt/distroless ---' && ls -R /opt/distroless || true && \
+    echo '--- DEBUG: Available pkg-config packages ---' && pkg-config --list-all || true && \
+    if [ -f ./configure ]; then ./configure --prefix=/usr $LIB_CONFIG; elif [ -f ./Configure ]; then ./Configure --prefix=/usr $LIB_CONFIG; elif [ -f ./CMakeLists.txt ]; then cmake -DCMAKE_INSTALL_PREFIX=/usr $LIB_CONFIG .; fi && \
+    if [ "$LIB_NAME" = "icu" ]; then make -j1 && make DESTDIR=/artifacts install; elif [ "$LIB_NAME" = "bzip2" ]; then make -j2 PREFIX=/usr && make DESTDIR=/artifacts PREFIX=/usr install; else make -j2 && make DESTDIR=/artifacts install; fi && \
+    mkdir -p /artifacts/usr/share/doc/$LIB_NAME && \
+    find . -maxdepth 2 -type f \( -iname "license*" -o -iname "copying*" -o -iname "mit-license*" \) -exec cp -v {} /artifacts/usr/share/doc/$LIB_NAME/ \; -quit; \
+    fi && mkdir -p /artifacts/usr
+
+FROM builder AS icu
+ARG LIB_NAME=icu
+ARG LIB_URL
+ARG LIB_CONFIG
+ARG LIB_SUBDIR=.
+WORKDIR /build
+RUN set -ex && if [ -n "$LIB_URL" ] && [ "$LIB_URL" != "SKIP" ]; then \
+    dnf install -y libicu-devel && \
+    mkdir -p /artifacts/usr/lib64 /artifacts/usr/include && \
+    cp -rv /usr/lib64/libicu* /artifacts/usr/lib64/ && \
+    cp -rv /usr/include/unicode /artifacts/usr/include/ && \
+    echo "ICU installed via dnf"; \
+    fi && mkdir -p /artifacts/usr
+
+FROM builder AS c-ares
+ARG LIB_NAME=c-ares
+ARG LIB_URL
+ARG LIB_CONFIG
+ARG LIB_SUBDIR=.
+WORKDIR /build
+RUN set -ex && if [ -n "$LIB_URL" ] && [ "$LIB_URL" != "SKIP" ]; then \
+    curl -L "$LIB_URL" -o source.tar.gz && mkdir src && tar -xf source.tar.gz -C src --strip-components=1 && cd src/$LIB_SUBDIR && \
+    mkdir -p /opt/distroless && \
+    export CPPFLAGS="-I/opt/distroless/include" && \
+    export CFLAGS="$CFLAGS -g0 -O1 -fstack-protector-strong -D_FORTIFY_SOURCE=2" && \
+    export CXXFLAGS="$CXXFLAGS -g0 -O1 -fstack-protector-strong -D_FORTIFY_SOURCE=2" && \
+    if [ "$LIB_NAME" = "icu" ]; then export CC=clang; export CXX=clang++; export CXXFLAGS="$CXXFLAGS -fno-var-tracking-assignments -g0"; fi && \
+    export LDFLAGS="-L/opt/distroless/lib -L/opt/distroless/lib64 -Wl,-rpath,/usr/lib" && \
+    export PKG_CONFIG_PATH="/opt/distroless/lib/pkgconfig:/opt/distroless/lib64/pkgconfig" && \
+    echo '--- DEBUG: Contents of /opt/distroless ---' && ls -R /opt/distroless || true && \
+    echo '--- DEBUG: Available pkg-config packages ---' && pkg-config --list-all || true && \
+    if [ -f ./configure ]; then ./configure --prefix=/usr $LIB_CONFIG; elif [ -f ./Configure ]; then ./Configure --prefix=/usr $LIB_CONFIG; elif [ -f ./CMakeLists.txt ]; then cmake -DCMAKE_INSTALL_PREFIX=/usr $LIB_CONFIG .; fi && \
+    if [ "$LIB_NAME" = "icu" ]; then make -j1 && make DESTDIR=/artifacts install; elif [ "$LIB_NAME" = "bzip2" ]; then make -j2 PREFIX=/usr && make DESTDIR=/artifacts PREFIX=/usr install; else make -j2 && make DESTDIR=/artifacts install; fi && \
+    mkdir -p /artifacts/usr/share/doc/$LIB_NAME && \
+    find . -maxdepth 2 -type f \( -iname "license*" -o -iname "copying*" -o -iname "mit-license*" \) -exec cp -v {} /artifacts/usr/share/doc/$LIB_NAME/ \; -quit; \
+    fi && mkdir -p /artifacts/usr
+
+FROM builder AS nghttp2
+ARG LIB_NAME=nghttp2
+ARG LIB_URL
+ARG LIB_CONFIG
+ARG LIB_SUBDIR=.
 WORKDIR /build
 RUN set -ex && if [ -n "$LIB_URL" ] && [ "$LIB_URL" != "SKIP" ]; then \
     curl -L "$LIB_URL" -o source.tar.gz && mkdir src && tar -xf source.tar.gz -C src --strip-components=1 && cd src/$LIB_SUBDIR && \
@@ -338,20 +158,13 @@ USER root
 RUN mkdir -p /runtime-root/usr /runtime-root/etc /runtime-root/var /opt/distroless
 COPY --from=zlib /artifacts/usr /opt/distroless
 COPY --from=brotli /artifacts/usr /opt/distroless
-COPY --from=bzip2 /artifacts/usr /opt/distroless
-COPY --from=libpng /artifacts/usr /opt/distroless
-COPY --from=freetype2 /artifacts/usr /opt/distroless
-COPY --from=libjpeg-turbo /artifacts/usr /opt/distroless
-COPY --from=lcms2 /artifacts/usr /opt/distroless
-COPY --from=libx11 /artifacts/usr /opt/distroless
-COPY --from=libxext /artifacts/usr /opt/distroless
-COPY --from=libxrender /artifacts/usr /opt/distroless
-COPY --from=libxtst /artifacts/usr /opt/distroless
-COPY --from=alsa-lib /artifacts/usr /opt/distroless
 COPY --from=openssl /artifacts/usr /opt/distroless
+COPY --from=icu /artifacts/usr /opt/distroless
+COPY --from=c-ares /artifacts/usr /opt/distroless
+COPY --from=nghttp2 /artifacts/usr /opt/distroless
 COPY --from=libxcrypt /artifacts/usr /opt/distroless
 RUN if [ -d /opt/distroless ] && [ "$(ls -A /opt/distroless)" ]; then cp -rv /opt/distroless/* /runtime-root/usr/; fi
-ARG RUNTIME_NAME=java
+ARG RUNTIME_NAME=nodejs
 ARG RUNTIME_URL
 RUN set -ex && mkdir -p /tmp/extract && \
     if [ "$RUNTIME_URL" = "DNF" ]; then \
@@ -373,9 +186,8 @@ RUN set -ex && mkdir -p /tmp/extract && \
         mkdir -p /runtime-root/usr/share/dotnet && cp -rv /tmp/extract/* /runtime-root/usr/share/dotnet/ && \
         mkdir -p /runtime-root/usr/bin && ln -sf /usr/share/dotnet/dotnet /runtime-root/usr/bin/dotnet; \
       else \
-        BIN_DIR=$(find /tmp/extract -name bin -type d | head -n 1) && \
-        if [ -n "$BIN_DIR" ]; then \
-          SRC_DIR=$(dirname "$BIN_DIR"); \
+        SRC_DIR=$(find /tmp/extract -mindepth 1 -maxdepth 1 -type d | head -n 1) && \
+        if [ -n "$SRC_DIR" ]; then \
           cp -rv "$SRC_DIR"/* /runtime-root/usr/; \
         else \
           cp -rv /tmp/extract/* /runtime-root/usr/; \
@@ -414,7 +226,7 @@ USER root
 ARG RUNTIME_NAME
 ARG RUNTIME_VER
 LABEL distroless.stack="${RUNTIME_NAME}"
-ENV CACHE_BYPASS="1779820802.026845"
+ENV CACHE_BYPASS="1789127865.713582"
 COPY --from=runtime-setup /runtime-root/usr/ /usr/
 COPY --from=runtime-setup /runtime-root/etc/ /etc/
 USER 65532:65532
