@@ -84,29 +84,10 @@ def generate_report():
         version = get_stack_version(img["stack"])
         
         metadata = inspect_image(engine, img["tag"]) if engine else {"built": False, "size": "N/A", "layers": "N/A", "user": "N/A", "entrypoint": "N/A", "env": "N/A"}
-        
-        # fallback to reference sizes if the images aren't present locally for report compiling
+
+        # honest fallback when the image isn't present locally: no fabricated numbers
         if not metadata["built"]:
-            if img["name"] == "static":
-                metadata = {"built": False, "size": "~1.5 MB", "layers": 1, "user": "root", "entrypoint": "None", "env": "None"}
-            elif img["name"] == "base":
-                metadata = {"built": False, "size": "~12.4 MB", "layers": 2, "user": "root", "entrypoint": "None", "env": "None"}
-            elif img["name"] == "cc":
-                metadata = {"built": False, "size": "~35.8 MB", "layers": 3, "user": "nonroot (65532)", "entrypoint": "None", "env": "None"}
-            elif img["name"] == "python":
-                metadata = {"built": False, "size": "~45.2 MB", "layers": 4, "user": "nonroot (65532)", "entrypoint": "python3", "env": "PYTHONPATH=/opt/distroless"}
-            elif img["name"] == "php":
-                metadata = {"built": False, "size": "~38.1 MB", "layers": 4, "user": "nonroot (65532)", "entrypoint": "php", "env": "None"}
-            elif img["name"] == "perl":
-                metadata = {"built": False, "size": "~28.6 MB", "layers": 4, "user": "nonroot (65532)", "entrypoint": "perl", "env": "None"}
-            elif img["name"] == "nodejs":
-                metadata = {"built": False, "size": "~52.3 MB", "layers": 4, "user": "nonroot (65532)", "entrypoint": "node", "env": "None"}
-            elif img["name"] == "java":
-                metadata = {"built": False, "size": "~182.1 MB", "layers": 4, "user": "nonroot (65532)", "entrypoint": "java", "env": "None"}
-            elif img["name"] == "dotnet":
-                metadata = {"built": False, "size": "~112.5 MB", "layers": 4, "user": "nonroot (65532)", "entrypoint": "dotnet", "env": "None"}
-            else:
-                metadata = {"built": False, "size": "~2.1 MB", "layers": 1, "user": "nonroot (65532)", "entrypoint": "None", "env": "None"}
+            metadata = {"built": False, "size": "Unavailable (not built locally)", "layers": "N/A", "user": "N/A", "entrypoint": "N/A", "env": "N/A"}
 
         report_data.append({
             "name": img["name"].upper(),
@@ -116,7 +97,7 @@ def generate_report():
             "layers": metadata["layers"],
             "user": metadata["user"],
             "entrypoint": metadata["entrypoint"],
-            "built": "Local OCI" if engine and inspect_image(engine, img["tag"])["built"] else "Registry (GHCR)"
+            "built": "Local OCI" if metadata["built"] else "Unavailable"
         })
     
     os.makedirs("docs", exist_ok=True)

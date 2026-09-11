@@ -9,7 +9,7 @@ This document defines the Day-2 operations, version maintenance policy, verifica
 ### 1.1 Version Selection Policy
 The project prioritizes stability and long-term support (LTS) for runtimes and core libraries:
 - **Core Libraries**: Track the latest stable releases provided by the official Arch Linux package databases.
-- **Runtimes**: Focus on active LTS families (e.g., Python 3.14, Node.js 22, .NET 8).
+- **Runtimes**: Focus on active LTS families (e.g., Python 3.13, Node.js 20, .NET 8).
 - **Pinning**: All versions are pinned in `stacks/*.yaml` to ensure absolute build reproducibility.
 
 ### 1.2 Patching Process

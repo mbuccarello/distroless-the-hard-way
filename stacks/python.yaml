@@ -1,6 +1,6 @@
 name: python
-version: "3.14"
-description: "Sovereign Python 3.14 Distroless Image (Arch Linux based)"
+version: "3.13"
+description: "Sovereign Python 3.13 Distroless Image (Arch Linux based)"
 
 dependencies:
   - name: zlib

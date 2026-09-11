@@ -12,7 +12,7 @@ Distroless The Hard Way is a technical framework for constructing minimal, secur
 Our distroless images contain no shell, package manager, or dynamic utilities. You can execute them directly, or use them as a secure foundation in multi-stage builds.
 
 ### 1. Run a container directly
-Execute our source-compiled, minimal Python 3.14 distroless image:
+Execute our minimal Python 3.13 distroless image:
 ```bash
 docker run --rm ghcr.io/mbuccarello/python-distroless:latest -c "print('Hello from source-built distroless!')"
 ```
@@ -112,12 +112,12 @@ Below is a catalog of the foundational OCI Atoms pre-compiled from upstream sour
 
 | Runtime | Base Layer | Sourcing | Status |
 | :--- | :--- | :--- | :--- |
-| **Python** | `cc` | Source-Built (3.14) | ✅ Active |
-| **Node.js** | `cc` | Binary Injection (LTS) | ✅ Active |
-| **Java** | `cc` | Binary Injection (21 LTS) | ✅ Active |
-| **.NET** | `cc` | Binary Injection (8 LTS) | ✅ Active |
-| **Go** | `static` | Static Compilation | ✅ Active |
-| **PHP / Perl**| `cc` | Source-Built | ✅ Active |
+| **Python** | `cc` | Binary Injection (3.13) | Active |
+| **Node.js** | `cc` | Binary Injection (LTS) | Active |
+| **Java** | `cc` | Binary Injection (21 LTS) | Active |
+| **.NET** | `cc` | Binary Injection (8 LTS) | Active |
+| **Go** | `static` | Static Compilation | Active |
+| **PHP / Perl**| `cc` | Source-Built | Active |
 
 ---
 
@@ -179,7 +179,6 @@ distroless-the-hard-way/
     SECURITY.md            # Security, hardening, and supply chain integrity
     VERIFY.md              # Keyless Image Verification (Cosign)
     IMAGE_REPORT.md        # Fleet status & real-time metadata report
-    PIPELINE_STATUS.md     # Current Fleet Health & Verification Status
 ```
 
 ### Technical System Specifications & Developer Guides (`docs/`)
