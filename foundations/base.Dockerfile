@@ -12,7 +12,6 @@ COPY --from=builder /usr/bin/busybox /usr/bin/busybox
 RUN ["/usr/bin/busybox", "mkdir", "-p", "/usr/lib", "/usr/lib64", "/usr/bin", "/usr/sbin", "/bin", "/etc/ld.so.conf.d"]
 RUN ["/usr/bin/busybox", "ln", "-s", "/usr/lib", "/lib"]
 RUN ["/usr/bin/busybox", "ln", "-s", "/usr/lib64", "/lib64"]
-RUN ["/usr/bin/busybox", "--install", "-s", "/usr/bin"]
 RUN ["/usr/bin/busybox", "ln", "-s", "/usr/bin/busybox", "/bin/sh"]
 
 ENV PATH=/usr/bin:/usr/sbin:/bin:/sbin
@@ -28,11 +27,14 @@ COPY --from=builder /usr/lib64/libutil.so.1 /usr/lib64/
 COPY --from=builder /usr/lib64/ld-linux-x86-64.so.2 /usr/lib64/
 COPY --from=builder /usr/sbin/ldconfig /usr/sbin/ldconfig
 
-# Configure the dynamic linker
+# Configure the dynamic linker (last step requiring a shell)
 RUN echo "/usr/lib" > /etc/ld.so.conf && \
     echo "/usr/lib64" >> /etc/ld.so.conf && \
     echo "include /etc/ld.so.conf.d/*.conf" >> /etc/ld.so.conf && \
     ldconfig
+
+# Tear down the Busybox bootstrap toolchain: production images ship no shell or utilities
+RUN ["/usr/bin/busybox", "rm", "-f", "/bin/sh", "/usr/bin/busybox"]
 
 LABEL distroless.layer="base"
 USER 65532:65532
