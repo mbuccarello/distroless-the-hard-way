@@ -1,0 +1,26 @@
+flowchart TD
+    classDef default fill:#1f2428,stroke:#444c56,stroke-width:2px,color:#c9d1d9
+    classDef danger fill:#da3633,stroke:#f85149,stroke-width:2px,color:#ffffff
+    classDef warning fill:#9e6a03,stroke:#d29922,stroke-width:2px,color:#ffffff
+    classDef success fill:#238636,stroke:#2ea043,stroke-width:2px,color:#ffffff
+    classDef blue fill:#1f6feb,stroke:#388bfd,stroke-width:2px,color:#ffffff
+
+    Target[Container Image Analysis] --> M1[Package-Manager Metadata SCA]:::blue
+    Target --> M2[Binary Heuristic Fingerprinting]:::blue
+    Target --> M3[Deterministic SBOM + OpenVEX Attestations]:::success
+
+    M1 --> M1_Res{Package Manager DB Found?}
+    M1_Res -->|Yes| M1_OK[Accurate for OS packages]:::warning
+    M1_Res -->|No| M1_Fail["FALSE NEGATIVES: Zero CVEs reported for custom C/C++ libraries"]:::danger
+
+    M2 --> M2_Res{Pattern Matching in .rodata / ELF}
+    M2_Res -->|Stripped / LTO| M2_FN["FALSE NEGATIVES: Signatures stripped by compiler"]:::danger
+    M2_Res -->|Nominal Version Match| M2_BP{Upstream Vendor Backported Fix?}
+    M2_BP -->|Yes| M2_FP["FALSE POSITIVES: Alerts on CVEs already patched in code"]:::danger
+    M2_BP -->|No| M2_OK[Accurate nominal detection]:::warning
+
+    M3 --> M3_SBOM[Build-Time Pinned SBOM]
+    M3_SBOM --> M3_OSV[Direct Advisory Query via OSV.dev]
+    M3 --> M3_VEX[Cryptographically Signed OpenVEX / CSAF Feed]
+    M3_VEX --> M3_Suppr["Suppresses False Positives with Formal Justifications (not_affected)"]:::success
+    M3_OSV --> M3_Truth["Deterministic Truth: Accurate Gating in CI/CD"]:::success
