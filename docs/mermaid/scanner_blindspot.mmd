@@ -1,0 +1,26 @@
+flowchart TB
+    classDef default fill:#1f2428,stroke:#444c56,stroke-width:2px,color:#c9d1d9
+    classDef success fill:#238636,stroke:#2ea043,stroke-width:2px,color:#ffffff
+    classDef danger fill:#da3633,stroke:#f85149,stroke-width:2px,color:#ffffff
+    classDef warning fill:#9e6a03,stroke:#d29922,stroke-width:2px,color:#ffffff
+    classDef highlight fill:#1f6feb,stroke:#388bfd,stroke-width:2px,color:#ffffff
+
+    subgraph StandardOS["Standard OS Container (Ubuntu / Alpine / Debian)"]
+        direction TB
+        A1["1. Container Filesystem"] --> A2["2. Package DB (/var/lib/dpkg)"]
+        A2 --> A3["3. Scanner Queries Metadata"]:::highlight
+        A3 --> A4["4. Extracts: openssl 1.1.1t"]
+        A4 --> A5["5. Queries OS Security Tracker"]
+        A5 --> A6["True Vulnerabilities Detected\n(Accurate Report)"]:::warning
+    end
+
+    subgraph DistrolessRaw["Source-Compiled / Distroless Container"]
+        direction TB
+        B1["1. Container Filesystem"] --> B2["Compiled Binary:\n/usr/lib/libssl.so.3"]
+        B1 --> B3["Package DB:\nMissing or Empty"]
+        B3 --> B4["2. Scanner Queries Metadata"]:::highlight
+        B4 --> B5["Zero Packages Cataloged"]
+        B5 --> B6["Report: 0 CVEs (Green Badge)\nFalse Sense of Security"]:::danger
+        B2 -.->|"Silently Missed"| B6
+        B6 -.-> B7["Vulnerable Binary Runs in Production"]:::danger
+    end

@@ -1,0 +1,20 @@
+flowchart LR
+    classDef default fill:#1f2428,stroke:#444c56,stroke-width:2px,color:#c9d1d9
+    classDef step fill:#1f6feb,stroke:#388bfd,stroke-width:2px,color:#ffffff
+    classDef verify fill:#238636,stroke:#2ea043,stroke-width:2px,color:#ffffff
+
+    subgraph BuildPhase["Phase 1: Deterministic Build Pipeline"]
+        direction TB
+        S1["Single Source of Truth: stacks/*.yaml\nPinned versions & SHA256 checksums"]:::step
+        S1 --> S2["Ephemeral Source Compilation\nIsolated C/C++ libraries and runtimes"]:::step
+        S2 --> S3["Syft CycloneDX SBOM Generation\nComplete inventory independent of OS DB"]:::step
+    end
+
+    subgraph AuditPhase["Phase 2: Security & Provenance Gating"]
+        direction TB
+        S4["scripts/scan-sbom.py (OSV.dev API)\nDeterministic CVE query (0 false negatives)"]:::verify
+        S4 --> S5["Sigstore / Cosign Keyless Signing\nCryptographic image binding via OIDC"]:::verify
+        S5 --> S6["SLSA Level 3 Attestations\nVerifiable supply chain provenance"]:::verify
+    end
+
+    BuildPhase --> AuditPhase
