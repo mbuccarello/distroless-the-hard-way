@@ -14,8 +14,9 @@ IMAGES_TO_CHECK = [
     {"name": "perl", "tag": "ghcr.io/mbuccarello/perl-distroless:latest", "stack": "perl.yaml"},
     {"name": "nodejs", "tag": "ghcr.io/mbuccarello/nodejs-distroless:latest", "stack": "nodejs.yaml"},
     {"name": "java", "tag": "ghcr.io/mbuccarello/java-distroless:latest", "stack": "java.yaml"},
-    {"name": "dotnet", "tag": "ghcr.io/mbuccarello/dotnet-distroless:latest", "stack": "dotnet.yaml"},
-    {"name": "go", "tag": "ghcr.io/mbuccarello/go-distroless:latest", "stack": "static.yaml"}
+    {"name": "dotnet", "tag": "ghcr.io/mbuccarello/dotnet-distroless:latest", "stack": "dotnet.yaml"}
+    # Note: Go has no separately published image — see docs/VERIFY.md.
+    # Go binaries are layered directly onto "static" by the consumer.
 ]
 
 def check_docker_available():

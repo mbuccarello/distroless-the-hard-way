@@ -1,6 +1,6 @@
 # Archived Prototype: V1 Python Orchestrator
 
-**⚠️ WARNING: This directory contains the deprecated V1 prototype.**
+**WARNING: This directory contains the deprecated V1 prototype.**
 
 This `poc/` directory is an isolated archive of the original Python-based orchestrator used to test the earliest concepts of "Distroless The Hard Way" (formerly Sovereign Distroless). 
 
@@ -9,7 +9,7 @@ For the live, production-grade GitHub Actions compilation architecture, please r
 
 ---
 
-## 🚀 Usage Guide (Archived)
+## Usage Guide (Archived)
 
 The repository previously contained a Python-based orchestrator (`build.py`) which coordinated ephemeral Docker containers acting strictly as compiler sandboxes. It remains here strictly for historical reference.
 

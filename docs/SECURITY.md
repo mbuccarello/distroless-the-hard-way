@@ -40,6 +40,8 @@ Traditional OCI container image vulnerability scanners (such as **Trivy**, **Gry
 We compile all foundational dependencies (e.g., zlib, OpenSSL, libxml2, curl, SQLite) from upstream source tarballs and copy the resulting binaries and shared libraries directly into `/usr/lib` and `/usr/lib64`. Because there is no host OS package database, standard scanners fail to identify the package inventory and report a **false sense of security** by defaulting to zero findings.
 *(Red Hat Hummingbird resolved this limitation by collaborating directly with vulnerability database vendors to catalog custom RPM-based layers; a pure source-compiled architecture requires a different approach).*
 
+For an in-depth technical analysis covering metadata scanner failure modes, binary heuristic limits, backporting false positives, and OpenVEX attestations, refer to the dedicated guide: **[The Container Vulnerability Scanning Paradox](SCANNER_PARADOX.md)**.
+
 ---
 
 ### 2.2 Stack-Based Vulnerability Auditing (OSV.dev API)
@@ -51,7 +53,7 @@ The validation pipeline utilizes the custom tool **[scripts/scan-sbom.py](../scr
 3. Queries Google's **OSV.dev** (Open Source Vulnerability) database API (`https://api.osv.dev/v1/query`) via direct, automated HTTPS requests.
 4. Generates a deterministic security report detailing all active CVEs with zero false negatives.
 
-This ensures precise, robust security gating that can be integrated directly into the CI/CD workflow.
+**Current status**: `scripts/scan-sbom.py` is a standalone, manually-invoked audit tool — it is not currently wired into any GitHub Actions workflow. Likewise, the Grype image scan that *is* part of [`.github/workflows/distroless-bake-master.yml`](../.github/workflows/distroless-bake-master.yml) runs with `fail-build: false`, so a critical finding is logged to the job output but does not block a release. Neither tool's findings are currently persisted (no Code Scanning upload, no attestation attached to the image). Turning either into an actual CI gate is open work — see the "Zero-Trust Mandate" section of the root [`SECURITY.md`](../SECURITY.md) if you want to help close this gap.
 
 ---
 
