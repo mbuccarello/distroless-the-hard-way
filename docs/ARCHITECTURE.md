@@ -39,12 +39,16 @@ Every image adheres to the following layout before the language runtime is injec
 /
 ├── etc/
 │   ├── ld.so.conf              # Dynamic Linker Configuration
-│   ├── os-release              # OS Metadata
+│   ├── ld.so.conf.d/           # Extra linker config drop-in directory (empty by default)
 │   ├── passwd                  # root(0), nonroot(65532)
 │   ├── group
-│   └── ssl/
-│       └── certs/
-│           └── ca-certificates.crt # Root Trust Store
+│   ├── ssl/
+│   │   └── certs/
+│   │       └── ca-certificates.crt # Root Trust Store (from Fedora's ca-certificates package)
+│   └── pki/
+│       └── tls/
+│           └── certs/
+│               └── ca-bundle.crt   # Same trust store, RPM-convention path
 ├── home/
 │   └── nonroot/                # Owned by UID 65532
 ├── lib -> usr/lib              # Legacy Library Symlink
@@ -74,6 +78,7 @@ Every image adheres to the following layout before the language runtime is injec
 - **Zero OS Extraction**: No reliance on host OS package managers.
 - **Rpath Pinning**: Binaries are compiled with `-Wl,-rpath,/usr/lib` to ensure they only load high-assurance libraries.
 - **Shell-Free Production**: Standard images contain zero executables (`no sh`, `no ls`).
+- **TLS Trust Store**: The root CA bundle is sourced from Fedora's own `ca-certificates` package during the `builder` stage (not a separately-pinned download) and copied into `static` at both the Debian-convention path (`/etc/ssl/certs/ca-certificates.crt`) and the RPM-convention path (`/etc/pki/tls/certs/ca-bundle.crt`). `base` sets `SSL_CERT_FILE`/`SSL_CERT_DIR` so OpenSSL-linked runtimes find it, since this project's own OpenSSL build (`--prefix=/usr`, no explicit `--openssldir`) otherwise defaults to searching `/usr/ssl/certs`.
 
 ### 2.2 Compliance & Attestation
 - **License Harvesting**: Automated extraction of licenses into `/usr/share/doc/`.
@@ -97,14 +102,14 @@ The primary objective of the **Distroless The Hard Way** curriculum is to teach:
 
 Bootstrapping massive compiler ecosystems from absolute source (such as compiling the V8 JavaScript compiler, the OpenJDK C++ virtual machine, or the .NET Core CLR toolchain) requires extreme resources, long compile times, and highly specific bootstrap compilers. Since this toolchain compilation overhead occurs inside a container and does not offer additional educational value regarding final OCI layer structure, the project establishes a pragmatic boundary between compiled runtimes and injected runtimes.
 
-### 3.2 Source-Built Runtimes (Python, PHP, Perl)
+### 3.2 Source-Built Runtimes (PHP, Perl)
 These stacks are compiled directly from upstream source code tarballs using the ephemeral Fedora toolchain:
-- **Python**: Compiled from source to ensure proper binding with our CC foundation libraries (OpenSSL, SQLite, zlib) and to enable custom optimization flags.
 - **PHP**: Compiled from source due to tight integration requirements with modular dependencies (curl, xml, mbstring, pcre2) and custom module linkage paths.
 - **Perl**: Compiled from source due to strict system path bindings and localized dynamic library loading constraints.
 
-### 3.3 Binary Injection Runtimes (Java, Node.js, .NET)
-These stacks utilize clean, pre-compiled binary archives provided directly by upstream distributors (Microsoft, NodeUpstream, Adoptium):
+### 3.3 Binary Injection Runtimes (Python, Java, Node.js, .NET)
+These stacks utilize clean, pre-compiled binary archives provided directly by upstream distributors or trusted community build projects (python-build-standalone, Node.js Foundation, Adoptium, Microsoft):
+- **Python**: Injects a pre-built CPython release from the community **python-build-standalone** project (see `stacks/python.yaml`, `type: binary_injection`). This bypasses CPython's own multi-stage bootstrap build (which itself requires an existing Python interpreter to run parts of its build tooling) and keeps the learning focus on dynamic library resolution against the `cc` foundation, matching the rationale used for Node.js/Java/.NET below.
 - **Node.js**: Upstream provides highly optimized standalone binary archives. Avoiding V8 source compilation reduces build times from several hours to seconds, focusing learning on dynamic library resolution via `ldd`.
 - **Java**: Leverages official, tested OpenJDK binaries to bypass the massive bootstrap compiler loop required to compile the HotSpot VM.
 - **.NET**: Injecting official Microsoft .NET Core runtimes bypasses the complex, platform-specific bootstrapping loop of the Roslyn compiler.
