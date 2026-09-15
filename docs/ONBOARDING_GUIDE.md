@@ -50,7 +50,7 @@ python3 engine/engine.py --mode runtime --stack stacks/python.yaml
 ### Step 4: Build the Final Runtime Image
 Finally, build the Python distroless image:
 ```bash
-docker buildx bake --load -f foundations/python.hcl python
+docker buildx bake --load -f foundations/python.hcl runtime
 ```
 
 You now have a fully operational, zero-trust, source-compiled Distroless Python image!

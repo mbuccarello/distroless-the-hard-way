@@ -135,8 +135,8 @@ Below is a catalog of the foundational OCI Atoms pre-compiled from upstream sour
 
 The project utilizes a **Tiered Pipeline Hierarchy** powered by specialized Docker Bake manifests.
 
-*   **Foundation Build**: `python3 engine/engine.py --mode foundation && docker buildx bake -f foundations/foundations.hcl cc`
-*   **Runtime Assembly**: `python3 engine/engine.py --mode runtime --stack stacks/python.yaml && docker buildx bake -f foundations/python.hcl python`
+*   **Foundation Build**: `python3 engine/engine.py --mode foundation && docker buildx bake --load -f foundations/foundations.hcl cc`
+*   **Runtime Assembly**: `python3 engine/engine.py --mode runtime --stack stacks/python.yaml && docker buildx bake --load -f foundations/python.hcl runtime`
 *   **GitHub Actions**: Specialized workflows handle the sequential build, compilation, and validation chain:
     *   **Core Foundation Tier**:
         *   [Foundation: Static (L1)](.github/workflows/distroless-foundation-static.yml) - Assembles the initial minimal `/` rootfs layout skeleton.
@@ -177,6 +177,7 @@ distroless-the-hard-way/
     TESTING.md             # E2E Smoke Testing and local/CI validation
     OPERATIONS.md          # Operations, deployments, and CA mounting
     SECURITY.md            # Security, hardening, and supply chain integrity
+    SCANNER_PARADOX.md     # Container scanning paradox, binary detection & OpenVEX
     VERIFY.md              # Keyless Image Verification (Cosign)
     IMAGE_REPORT.md        # Fleet status & real-time metadata report
 ```
@@ -192,6 +193,7 @@ distroless-the-hard-way/
 *   **[TESTING.md](docs/TESTING.md)** - E2E Smoke Testing and local/CI validation
 *   **[OPERATIONS.md](docs/OPERATIONS.md)** - Operations, deployments, and custom CA certificate mounting
 *   **[SECURITY.md](docs/SECURITY.md)** - Security hardening, scanner limitations, and supply chain integrity
+*   **[SCANNER_PARADOX.md](docs/SCANNER_PARADOX.md)** - Deep dive on container vulnerability scanning limits, binary heuristics, and OpenVEX
 *   **[VERIFY.md](docs/VERIFY.md)** - Keyless Image Verification (Cosign)
 *   **[IMAGE_REPORT.md](docs/IMAGE_REPORT.md)** - Real-time fleet status & image metadata report
 

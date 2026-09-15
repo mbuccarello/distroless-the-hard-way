@@ -32,7 +32,7 @@ Cosign validates the image signature by confirming that:
 ## Quick Verification Commands
 
 ### 1. Runtime Images (L4)
-Final runtime application images (Python, PHP, Perl, Node.js, Go) are compiled via the main fleet build workflow `distroless-bake-master.yml`.
+Final runtime application images (Python, PHP, Perl, Node.js) are compiled via the main fleet build workflow `distroless-bake-master.yml`. Go has no separate published runtime image — see the note at the end of this section.
 
 #### Python
 ```bash
@@ -62,12 +62,7 @@ cosign verify ghcr.io/mbuccarello/nodejs-distroless:latest \
   --certificate-oidc-issuer "https://token.actions.githubusercontent.com"
 ```
 
-#### Go
-```bash
-cosign verify ghcr.io/mbuccarello/go-distroless:latest \
-  --certificate-identity-regexp "https://github.com/mbuccarello/distroless-the-hard-way/.github/workflows/distroless-bake-master.yml@.*" \
-  --certificate-oidc-issuer "https://token.actions.githubusercontent.com"
-```
+> **Note on Go**: unlike the other runtimes, Go has no separately published `go-distroless` image. Statically-linked Go binaries are copied directly onto the verified `static:latest` foundation image by the consumer (see the multi-stage Dockerfile pattern in the root `README.md`), so verifying `static:latest` below covers the Go use case as well.
 
 ---
 

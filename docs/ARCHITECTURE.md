@@ -32,7 +32,7 @@ While modeled after Google's Distroless images (e.g., `gcr.io/distroless/static`
 2. **Modular `cc` Layer (OCI Atoms)**: Unlike Google's monolithic `cc` image containing a fixed set of libraries (e.g., `libstdc++`, `libgcc`), we compile independent OCI Atoms. The engine composes a tailored `cc` stage per-runtime (e.g., `cc-php`), embedding only the dynamically linked dependencies actually required by that specific language stack.
 3. **Pure Language Runtimes**: Similar to `gcr.io/distroless/python3`, our final runtime stages inject only the strictly necessary, source-compiled binaries (linked via RPATH), maintaining 100% distroless purity without any OS package manager remnants.
 
-### 📂 Canonical Filesystem Layout (`cc` layer)
+### Canonical Filesystem Layout (`cc` layer)
 Every image adheres to the following layout before the language runtime is injected:
 
 ```text
@@ -50,24 +50,20 @@ Every image adheres to the following layout before the language runtime is injec
 ├── lib -> usr/lib              # Legacy Library Symlink
 ├── lib64 -> usr/lib64          # 64-bit ABI Symlink (Fedora compat)
 ├── tmp/                        # Permissions: 1777 (Sticky)
-├── usr/
-│   ├── bin/
-│   │   └── busybox             # Only in :debug variants
-│   ├── lib/                    # Standard Library Path
-│   │   └── (32-bit/Universal)
-│   ├── lib64/                  # Primary 64-bit Library Path
-│   │   ├── ld-linux-x86-64.so.2 # Glibc Dynamic Linker
-│   │   ├── libc.so.6           # Glibc Core
-│   │   ├── libcrypto.so.3      # OpenSSL
-│   │   ├── libssl.so.3         # OpenSSL
-│   │   ├── libstdc++.so.6      # GCC Runtime
-│   │   └── libz.so.1           # Zlib
-│   └── share/
-│       └── zoneinfo/           # Timezone Database
-└── var/
-    └── lib/
-        └── apt/
-            └── lists/          # Empty (Distroless spec)
+└── usr/
+    ├── bin/
+    │   └── busybox             # Only in :debug variants
+    ├── lib/                    # Standard Library Path
+    │   └── (32-bit/Universal)
+    ├── lib64/                  # Primary 64-bit Library Path
+    │   ├── ld-linux-x86-64.so.2 # Glibc Dynamic Linker
+    │   ├── libc.so.6           # Glibc Core
+    │   ├── libcrypto.so.3      # OpenSSL
+    │   ├── libssl.so.3         # OpenSSL
+    │   ├── libstdc++.so.6      # GCC Runtime
+    │   └── libz.so.1           # Zlib
+    └── share/
+        └── zoneinfo/           # Timezone Database
 ```
 
 ---
