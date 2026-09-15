@@ -15,6 +15,11 @@ RUN ["/usr/bin/busybox", "ln", "-s", "/usr/lib64", "/lib64"]
 RUN ["/usr/bin/busybox", "ln", "-s", "/usr/bin/busybox", "/bin/sh"]
 
 ENV PATH=/usr/bin:/usr/sbin:/bin:/sbin
+# Point OpenSSL and OpenSSL-linked runtimes (PHP, Perl, Python) at the trust
+# store from static (§builder.Dockerfile), overriding OpenSSL's own compiled-in
+# default of /usr/ssl/certs (a side effect of --prefix=/usr with no --openssldir).
+ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+ENV SSL_CERT_DIR=/etc/ssl/certs
 
 # Inject essential glibc shared objects from the builder
 COPY --from=builder /usr/lib64/libc.so.6 /usr/lib64/

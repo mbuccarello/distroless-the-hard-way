@@ -4,13 +4,18 @@ FROM fedora:40 as builder
 
 # Install base tools
 # Install base tools with retries
-RUN for i in {1..5}; do dnf install -y @development-tools cmake curl git busybox perl python3 xz tar bison flex gettext texinfo clang pkgconf-pkg-config && break || sleep 5; done && dnf clean all
+RUN for i in {1..5}; do dnf install -y @development-tools cmake curl git busybox perl python3 xz tar bison flex gettext texinfo clang pkgconf-pkg-config ca-certificates && break || sleep 5; done && dnf clean all
 
 # Ensure Busybox is in path
 RUN if [ -f /usr/sbin/busybox ]; then ln -s /usr/sbin/busybox /usr/bin/busybox; fi
 
 # Create standard Distroless RootFS structure (to be used by base image)
-RUN mkdir -p /rootfs/etc/ssl/certs /rootfs/etc/pki/tls/certs /rootfs/usr/lib /rootfs/usr/share/zoneinfo /rootfs/tmp /rootfs/home/nonroot /rootfs/var/lib/apt/lists /rootfs/etc/ld.so.conf.d
+RUN mkdir -p /rootfs/etc/ssl/certs /rootfs/etc/pki/tls/certs /rootfs/usr/lib /rootfs/usr/share/zoneinfo /rootfs/tmp /rootfs/home/nonroot /rootfs/etc/ld.so.conf.d
+
+# Populate the root CA trust store from Fedora's own ca-certificates package
+# (already-trusted source; avoids introducing a new pinned external download)
+RUN cp /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem /rootfs/etc/ssl/certs/ca-certificates.crt && \
+    cp /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem /rootfs/etc/pki/tls/certs/ca-bundle.crt
 
 # Add essential users/groups
 RUN echo "root:x:0:0:root:/root:/bin/sh" > /rootfs/etc/passwd && \
