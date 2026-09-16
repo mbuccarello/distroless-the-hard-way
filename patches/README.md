@@ -41,6 +41,8 @@ Where to find the authoritative advisory and the source repository to diff again
 | `curl` | [github.com/curl/curl](https://github.com/curl/curl) | [curl.se/docs/vulnerabilities.html](https://curl.se/docs/vulnerabilities.html) | One of the best-maintained lists here — a version-by-version vulnerability table plus a dedicated page per CVE (`curl.se/docs/CVE-YYYY-NNNNN.html`). |
 | `pcre2` | [github.com/PCRE2Project/pcre2](https://github.com/PCRE2Project/pcre2) | [github.com/PCRE2Project/pcre2/security](https://github.com/PCRE2Project/pcre2/security) | Security policy at [pcre2project.github.io/pcre2/project/security](https://pcre2project.github.io/pcre2/project/security/). |
 
+Every Atom also has its own step-by-step guide at `patches/<name>/README.md` (e.g. [`patches/openssl/README.md`](openssl/README.md)) with copy-pasteable commands for that specific package: fetching the exact pinned tarball, generating the patch from an upstream commit or by hand, its `LIB_SUBDIR`/`config` quirks if any, and how to test it locally before committing.
+
 ## Layout
 
 ```
