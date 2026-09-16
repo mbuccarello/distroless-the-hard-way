@@ -13,10 +13,16 @@ The project prioritizes stability and long-term support (LTS) for runtimes and c
 - **Pinning**: All versions are pinned in `stacks/*.yaml` to ensure absolute build reproducibility.
 
 ### 1.2 Patching Process
-Security patches are applied systematically:
-1. **Upstream Detection**: The engine checks for new releases of foundational packages.
-2. **Cascading Rebuilds**: Any update to a foundation layer (e.g., `openssl` or `glibc`) automatically triggers a full compilation cascade of all downstream OCI images and dependent stacks.
-3. **Verification**: Re-compiled images must successfully pass the end-to-end (E2E) verification test suite before deployment.
+There are two distinct ways a security fix reaches the fleet, depending on whether upstream has already released a fixed version.
+
+**Version bump (preferred, used for nearly all fixes)**: this project does not backport — it always compiles the latest pinned upstream release. When a fixed release exists:
+1. Update the source URL/version in `engine/config.yaml` (`sources:`) and/or the pin in the relevant `stacks/*.yaml`.
+2. Regenerate with `engine.py --mode foundation` (or `--mode runtime --stack ...`).
+3. Rebuild: `Foundation: Static (L1)` → `Foundation: Base (L2)` → `Foundation: CC (L3)` cascade automatically via `workflow_run` triggers once the first is pushed/dispatched; `Distroless Full Fleet Build` does **not** auto-cascade from a foundation rebuild and must be triggered manually (or waits for its weekly schedule). `Distroless E2E Fleet Verification` then runs automatically via `workflow_run` once the fleet build finishes.
+
+**Source patch (only when no upstream release exists yet)**: see [`patches/README.md`](../patches/README.md) for the directory convention, patch format, and the scanner-detection tradeoff this approach reintroduces (a patched-but-unbumped binary reads as vulnerable to any scanner that fingerprints it by version string).
+
+**Not currently automated**: there is no polling mechanism that checks upstream for new releases — bumping a version is a manual decision, not a triggered one. `scripts/scan-sbom.py` can be run manually to check the currently pinned versions against OSV.dev.
 
 ---
 

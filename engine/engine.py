@@ -102,6 +102,13 @@ class HCLGenerator:
         hcl += f'variable "ATOMS_REGISTRY" {{\n  default = "{self.registry}/atoms"\n}}\n\n'
         return hcl
 
+    def _patch_dir(self, name):
+        """Return the relative patches/<name> dir if it holds any *.patch file, else None."""
+        patch_dir = os.path.join("patches", name)
+        if os.path.isdir(patch_dir) and any(f.endswith(".patch") for f in sorted(os.listdir(patch_dir))):
+            return patch_dir
+        return None
+
     def check_atom_exists(self, pkg, version):
         """Check if an atom already exists in the registry."""
         import subprocess
@@ -291,6 +298,9 @@ class HCLGenerator:
             df += f"ARG LIB_NAME={pkg}\nARG LIB_URL\nARG LIB_CONFIG\nARG LIB_SUBDIR=.\n"
             for dep in meta['depends']:
                 if dep in graph: df += f"COPY --from={dep} /artifacts/usr /opt/distroless\n"
+            patch_dir = self._patch_dir(pkg)
+            if patch_dir:
+                df += f"COPY {patch_dir}/ /tmp/patches/{pkg}/\n"
             df += "WORKDIR /build\nRUN set -ex && if [ -n \"$LIB_URL\" ] && [ \"$LIB_URL\" != \"SKIP\" ]; then \\\n"
             if pkg == "icu":
                 df += "    dnf install -y libicu-devel && \\\n"
@@ -300,6 +310,8 @@ class HCLGenerator:
                 df += "    echo \"ICU installed via dnf\"; \\\n"
             else:
                 df += "    curl -L \"$LIB_URL\" -o source.tar.gz && mkdir src && tar -xf source.tar.gz -C src --strip-components=1 && cd src/$LIB_SUBDIR && \\\n"
+                if patch_dir:
+                    df += f"    for p in /tmp/patches/{pkg}/*.patch; do echo \"Applying patch: $p\" && patch -p1 < \"$p\"; done && \\\n"
                 df += "    mkdir -p /opt/distroless && \\\n"
                 df += "    export CPPFLAGS=\"-I/opt/distroless/include\" && \\\n"
                 df += "    export CFLAGS=\"$CFLAGS -g0 -O1 -fstack-protector-strong -D_FORTIFY_SOURCE=2\" && \\\n"
@@ -358,8 +370,14 @@ class HCLGenerator:
             # Source build for runtime
             source_url = runtime.get("source_url", "")
             build_flags = " ".join(runtime.get("build_flags", []))
+            runtime_name = runtime.get("name", "")
+            runtime_patch_dir = self._patch_dir(runtime_name)
+            if runtime_patch_dir:
+                df += f"COPY {runtime_patch_dir}/ /tmp/patches/{runtime_name}/\n"
             df += f"ENV CACHE_BYPASS_SETUP=\"{time.time()}\"\n"
             df += f"RUN set -ex && curl -L \"{source_url}\" -o source.tar.gz && mkdir src && tar -xf source.tar.gz -C src --strip-components=1 && cd src && \\\n"
+            if runtime_patch_dir:
+                df += f"    for p in /tmp/patches/{runtime_name}/*.patch; do echo \"Applying patch: $p\" && patch -p1 < \"$p\"; done && \\\n"
             df += "    export CPPFLAGS=\"-I/opt/distroless/include -I/opt/distroless/include/libxml2\" && \\\n"
             df += "    export LDFLAGS=\"-L/opt/distroless/lib -L/opt/distroless/lib64 -Wl,-rpath,/usr/lib\" && \\\n"
             df += "    export PKG_CONFIG_PATH=\"/opt/distroless/lib/pkgconfig:/opt/distroless/lib64/pkgconfig\" && \\\n"

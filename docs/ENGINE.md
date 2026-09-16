@@ -90,6 +90,9 @@ with open(config_path, "r") as f:
 ```
 These attributes (`self.hardcoded_sources`, `self.dependency_overrides`, and `self.package_metadata`) are used directly during graph resolution and HCL generator phases.
 
+### 3.2 Source Patch Injection (`patches/`)
+Independent of `config.yaml`, `generate_runtime_dockerfile()` checks `patches/<name>/` (via the `_patch_dir()` helper) for every Atom and every source-built runtime it emits a build stage for. If that directory exists and contains at least one `*.patch` file, the generator inserts a `COPY patches/<name>/ /tmp/patches/<name>/` instruction into that stage, and a `patch -p1 < "$p"` loop immediately after the source tarball is extracted and before `./configure`/`make` runs. Packages with no matching directory get no extra instructions — the mechanism is opt-in per package, not a fixed step in every build. See [`patches/README.md`](../patches/README.md) for the authoring convention and when to use this versus bumping the pinned version.
+
 ---
 
 ## 4. Package Configure Hardening Catalog
