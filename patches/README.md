@@ -2,6 +2,45 @@
 
 This directory holds patches applied to upstream source tarballs before compilation. Use it only when no upstream release yet contains a fix — if a fixed release already exists, bump the pinned version in `engine/config.yaml` / `stacks/*.yaml` instead (see `docs/OPERATIONS.md` §1.2); that path always takes priority over patching.
 
+## How to know a patch is needed
+
+Same method for all 20 Atoms — there is no per-library monitoring step:
+
+1. **Run `scripts/scan-sbom.py`** against the stack definitions. It reads the exact pinned name/version of every Atom directly from `stacks/*.yaml` and queries [OSV.dev](https://osv.dev) for each one — this is the project's own existing tool, already wired for this exact question:
+   ```bash
+   python3 scripts/scan-sbom.py stacks/
+   ```
+2. Or query [OSV.dev](https://osv.dev) or the [GitHub Advisory Database](https://github.com/advisories) directly by package name for a quicker manual check on a single Atom.
+
+Both aggregate most of the per-project advisory sources in the table below, so they're the right first step even though the table exists — use the table once you already know *which* CVE you're chasing and need the actual fix (a specific commit, a specific patch file) rather than just a yes/no answer.
+
+## Per-Atom security sources
+
+Where to find the authoritative advisory and the source repository to diff against, for every Atom currently in `engine/config.yaml`. Maturity of upstream security process varies a lot across this list — some projects (OpenSSL, curl, SQLite, MIT krb5) publish a dedicated advisory page with one entry per CVE; most of the smaller C libraries have no such page and are only tracked through the generic trackers (GitHub Advisory Database, NVD, OSV) or, for GNU tools, the Savannah bug tracker.
+
+| Atom | Source repo (diff against this) | Security advisories | Notes |
+| :--- | :--- | :--- | :--- |
+| `zlib` | [github.com/madler/zlib](https://github.com/madler/zlib) | No dedicated page — [OSV.dev](https://osv.dev/list?ecosystem=&q=zlib), [GitHub Advisory DB](https://github.com/advisories?query=zlib) | |
+| `openssl` | [github.com/openssl/openssl](https://github.com/openssl/openssl) | [openssl-library.org/news/vulnerabilities](https://openssl-library.org/news/vulnerabilities/) | Best-maintained advisory page in this list — one entry per CVE with affected/fixed versions. |
+| `ncurses` | [git.savannah.gnu.org/git/ncurses.git](https://git.savannah.gnu.org/git/ncurses.git) | No dedicated page — [Savannah bug tracker](https://savannah.gnu.org/bugs/?group=ncurses), OSV.dev | |
+| `readline` | [git.savannah.gnu.org/git/readline.git](https://git.savannah.gnu.org/git/readline.git) | No dedicated page — Savannah bug tracker, OSV.dev | |
+| `sqlite` | [sqlite.org](https://www.sqlite.org/src) (read-only GitHub mirror: [sqlite/sqlite](https://github.com/sqlite/sqlite)) | [sqlite.org/cves.html](https://www.sqlite.org/cves.html) | Dedicated, actively maintained page. |
+| `libxcrypt` | [github.com/besser82/libxcrypt](https://github.com/besser82/libxcrypt) | No dedicated page — GitHub Advisory DB, OSV.dev, project's own `NEWS` file | |
+| `libffi` | [github.com/libffi/libffi](https://github.com/libffi/libffi) | No dedicated page — GitHub Advisory DB, OSV.dev | |
+| `expat` | [github.com/libexpat/libexpat](https://github.com/libexpat/libexpat) | [libexpat.github.io/doc](https://libexpat.github.io/doc/xml-security/) | Publishes an individual page per CVE (`libexpat.github.io/doc/cve-YYYY-NNNNN/`). |
+| `bzip2` | [sourceware.org/git/bzip2.git](https://sourceware.org/git/?p=bzip2.git) | No dedicated page — GitHub Advisory DB, OSV.dev | |
+| `xz` | [github.com/tukaani-project/xz](https://github.com/tukaani-project/xz) | No dedicated page — GitHub Advisory DB, OSV.dev, distro trackers | This is the package behind the [CVE-2024-3094 backdoor](https://www.cisa.gov/news-events/alerts/2024/03/29/reported-supply-chain-compromise-affecting-xz-utils-data-compression-library-cve-2024-3094) — verify tarball checksums with extra care before pinning a new version here. |
+| `gdbm` | [git.savannah.gnu.org/git/gdbm.git](https://git.savannah.gnu.org/git/gdbm.git) | No dedicated page — Savannah bug tracker, OSV.dev | |
+| `icu` | [github.com/unicode-org/icu](https://github.com/unicode-org/icu) | No dedicated page — GitHub Advisory DB, OSV.dev | Installed via `dnf install libicu-devel` in this project (see the `icu` special case in `engine.py`), not compiled from the tarball — a `patches/icu/` directory would currently be ignored, since there's no `./configure && make` step for this Atom to patch before. |
+| `brotli` | [github.com/google/brotli](https://github.com/google/brotli) | [github.com/google/brotli/security/advisories](https://github.com/google/brotli/security/advisories) | |
+| `c-ares` | [github.com/c-ares/c-ares](https://github.com/c-ares/c-ares) | [github.com/c-ares/c-ares/security/advisories](https://github.com/c-ares/c-ares/security/advisories) | |
+| `nghttp2` | [github.com/nghttp2/nghttp2](https://github.com/nghttp2/nghttp2) | [github.com/nghttp2/nghttp2/security/advisories](https://github.com/nghttp2/nghttp2/security/advisories) | Security process documented at [nghttp2.org/documentation/security.html](https://nghttp2.org/documentation/security.html). |
+| `krb5` | [github.com/krb5/krb5](https://github.com/krb5/krb5) (mirror; release tarballs are canonical from `web.mit.edu/kerberos`) | [web.mit.edu/kerberos/advisories](https://web.mit.edu/kerberos/advisories/) | Dedicated `MITKRB5-SA-YYYY-NNN` advisories, well maintained. |
+| `libxml2` | [gitlab.gnome.org/GNOME/libxml2](https://gitlab.gnome.org/GNOME/libxml2) | No single dedicated page — GNOME/GitLab issue tracker, [GitHub Advisory DB](https://github.com/advisories?query=libxml2) | |
+| `oniguruma` | [github.com/kkos/oniguruma](https://github.com/kkos/oniguruma) | No dedicated page — GitHub Advisory DB, OSV.dev | |
+| `curl` | [github.com/curl/curl](https://github.com/curl/curl) | [curl.se/docs/vulnerabilities.html](https://curl.se/docs/vulnerabilities.html) | One of the best-maintained lists here — a version-by-version vulnerability table plus a dedicated page per CVE (`curl.se/docs/CVE-YYYY-NNNNN.html`). |
+| `pcre2` | [github.com/PCRE2Project/pcre2](https://github.com/PCRE2Project/pcre2) | [github.com/PCRE2Project/pcre2/security](https://github.com/PCRE2Project/pcre2/security) | Security policy at [pcre2project.github.io/pcre2/project/security](https://pcre2project.github.io/pcre2/project/security/). |
+
 ## Layout
 
 ```
