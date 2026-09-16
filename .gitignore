@@ -25,3 +25,8 @@ lib_list.txt
 
 # Cache directories
 .cache/
+
+# Claude Code local config and guidelines
+CLAUDE.md
+claude.md
+.claude/

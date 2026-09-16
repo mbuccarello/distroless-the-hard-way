@@ -51,7 +51,7 @@ The project utilizes a modular architecture where language runtimes (PHP, Python
 ### Core Principles
 
 1.  **Source Control**: All binaries and libraries are compiled from upstream source code to ensure total control over the software supply chain.
-2.  **Persistent Atoms**: Dependencies are managed as versioned OCI images in GHCR for high-assurance assembly, replacing transient build layers with reusable artifacts.
+2.  **Persistent Atoms**: Dependencies are managed as versioned OCI images in GHCR, replacing transient build layers with reusable, independently-verifiable artifacts.
 3.  **Registry-First Orchestration**: The build engine prioritizes pulling pre-compiled Atoms from the registry, accelerating assembly while maintaining granular provenance.
 4.  **Dynamic Metadata Discovery**: A specialized discovery engine extracts dependency graphs and configuration parameters directly from Arch Linux metadata.
 

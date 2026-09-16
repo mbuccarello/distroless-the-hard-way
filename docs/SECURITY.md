@@ -1,4 +1,4 @@
-# Distroless Security: High-Assurance Supply Chain
+# Distroless Security: Supply Chain Integrity
 
 This document defines the security architecture, compliance standards, and integrity verification processes of the **Distroless The Hard Way** project.
 
@@ -45,7 +45,7 @@ For an in-depth technical analysis covering metadata scanner failure modes, bina
 ---
 
 ### 2.2 Stack-Based Vulnerability Auditing (OSV.dev API)
-To ensure high-assurance auditing, we bypass filesystem-based scanner heuristics and leverage the exact build specifications.
+This bypasses filesystem-based scanner heuristics entirely, auditing the exact build specifications instead.
 
 The validation pipeline utilizes the custom tool **[scripts/scan-sbom.py](../scripts/scan-sbom.py)** to execute the following steps:
 1. Parses the language stack definition files (`stacks/*.yaml`), which serve as the single source of truth for all source-compiled libraries.

@@ -1,6 +1,6 @@
 # The Container Vulnerability Scanning Paradox: Technical Analysis of Custom Binaries, Minimalist Images, and Detection Limits
 
-This document provides a comprehensive technical analysis of vulnerability scanning (CVE detection) within distroless, minimalist, and source-compiled container images. It explains the mechanics of traditional scanners, the architectural causes of false negatives and false positives, the impact of security patch backporting, and how modern standards such as OpenVEX and build-time SBOM auditing resolve these limitations.
+This document analyzes vulnerability scanning (CVE detection) within distroless, minimalist, and source-compiled container images. It explains the mechanics of traditional scanners, the architectural causes of false negatives and false positives, the impact of security patch backporting, and how modern standards such as OpenVEX and build-time SBOM auditing resolve these limitations.
 
 ---
 
@@ -207,11 +207,11 @@ Rather than analyzing static binary files at rest, reachability analysis evaluat
 
 ---
 
-## 7. The Distroless The Hard Way Approach: Deterministic High-Assurance Auditing
+## 7. The Distroless The Hard Way Approach: Deterministic Auditing
 
 The **Distroless The Hard Way** project compiles its foundational shared libraries and selects runtimes directly from upstream source tarballs, deliberately omitting OS package managers. To eliminate both the false negatives of traditional metadata scanners and the false positives of binary heuristics, the project implements a deterministic audit model.
 
-![Deterministic High-Assurance Auditing Flow](images/deterministic_audit_flow.png)
+![Deterministic Auditing Flow](images/deterministic_audit_flow.png)
 
 ### 7.1 Single Source of Truth Build Specifications
 All foundational packages are declared in version-controlled YAML files (`stacks/*.yaml` and `foundations/`). Each component includes:

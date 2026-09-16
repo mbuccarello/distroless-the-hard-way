@@ -1,6 +1,6 @@
 # Distroless Architecture: Technical Specification
 
-This document defines the high-assurance architecture of the **Distroless The Hard Way** project. It combines the technical hierarchy, the dependency orchestration engine, and the core supply chain principles into a single unified reference.
+This document defines the architecture of the **Distroless The Hard Way** project: the layer hierarchy, the dependency orchestration engine, and the supply chain principles that produce it.
 
 ---
 
@@ -22,12 +22,12 @@ The architecture enforces a strictly linear cascading hierarchy modeled after Go
 ### 1.1 The "Bootstrapping" Problem and the Ephemeral Builder (L0)
 You might wonder: *If we compile everything from source, why do we need a Fedora base image for L0?* 
 This solves the classic "bootstrapping" problem. To compile C/C++ software, you need an existing C compiler (`gcc`), linker, kernel headers, and build tools (`make`, `cmake`). Compiling a compiler from absolute scratch requires an existing host compiler. 
-We utilize `fedora:40` strictly as our **ephemeral host toolchain**. It provides the robust `gcc` and `glibc` development headers needed to compile our custom OCI Atoms. Crucially:
+We utilize `fedora:40` strictly as our **ephemeral host toolchain**. It provides the `gcc` and `glibc` development headers needed to compile the project's OCI Atoms. Crucially:
 - **Zero Leakage**: The final production layers (L1-L4) inherit from `scratch` (via `static`), not from `fedora:40`. The `builder` image is entirely discarded after the compilation phase.
 - **Controlled Extraction**: The only components explicitly extracted from the `builder` into our `base` (L2) are the essential `glibc` shared objects (e.g., `libc.so.6`, `ld-linux.so`) needed to run dynamically linked binaries. This guarantees a pure distroless environment with zero Fedora package manager or shell remnants in production.
 
 ### FHS Unification & Distroless Alignment (vs Google Distroless)
-While modeled after Google's Distroless images (e.g., `gcr.io/distroless/static`, `base`, `cc`), our architecture introduces a fundamentally more robust and modular approach:
+While modeled after Google's Distroless images (e.g., `gcr.io/distroless/static`, `base`, `cc`), this architecture differs in three ways:
 1. **FHS Symlink Preservation**: Like standard minimal container filesystems, we strictly enforce FHS root symlinks (`/lib -> /usr/lib`, `/lib64 -> /usr/lib64`). Crucially, these are declared once in the `base` image and never overwritten by subsequent layer copies (such as `cc`), preventing Buildkit filesystem degradation and directory replacement errors.
 2. **Modular `cc` Layer (OCI Atoms)**: Unlike Google's monolithic `cc` image containing a fixed set of libraries (e.g., `libstdc++`, `libgcc`), we compile independent OCI Atoms. The engine composes a tailored `cc` stage per-runtime (e.g., `cc-php`), embedding only the dynamically linked dependencies actually required by that specific language stack.
 3. **Pure Language Runtimes**: Similar to `gcr.io/distroless/python3`, our final runtime stages inject only the strictly necessary, source-compiled binaries (linked via RPATH), maintaining 100% distroless purity without any OS package manager remnants.
@@ -76,7 +76,7 @@ Every image adheres to the following layout before the language runtime is injec
 
 ### 2.1 Zero-Trust Principles
 - **Zero OS Extraction**: No reliance on host OS package managers.
-- **Rpath Pinning**: Binaries are compiled with `-Wl,-rpath,/usr/lib` to ensure they only load high-assurance libraries.
+- **Rpath Pinning**: Binaries are compiled with `-Wl,-rpath,/usr/lib` to ensure they only load libraries from this project's own `cc` foundation, not from any host system path.
 - **Shell-Free Production**: Standard images contain zero executables (`no sh`, `no ls`).
 - **TLS Trust Store**: The root CA bundle is sourced from Fedora's own `ca-certificates` package during the `builder` stage (not a separately-pinned download) and copied into `static` at both the Debian-convention path (`/etc/ssl/certs/ca-certificates.crt`) and the RPM-convention path (`/etc/pki/tls/certs/ca-bundle.crt`). `base` sets `SSL_CERT_FILE`/`SSL_CERT_DIR` so OpenSSL-linked runtimes find it, since this project's own OpenSSL build (`--prefix=/usr`, no explicit `--openssldir`) otherwise defaults to searching `/usr/ssl/certs`.
 
@@ -114,7 +114,7 @@ These stacks utilize clean, pre-compiled binary archives provided directly by up
 - **Java**: Leverages official, tested OpenJDK binaries to bypass the massive bootstrap compiler loop required to compile the HotSpot VM.
 - **.NET**: Injecting official Microsoft .NET Core runtimes bypasses the complex, platform-specific bootstrapping loop of the Roslyn compiler.
 
-This hybrid approach ensures high-assurance supply chain control while keeping compile times realistic for local development and CI/CD runs.
+This hybrid approach keeps every dependency traceable to a pinned upstream source or release artifact, while keeping compile times realistic for local development and CI/CD runs.
 
 ---
 

@@ -16,7 +16,7 @@ A bash utility harness executed during intermediate Atom layers to compile packa
     *   Executes the command and redirects output in real-time to `/tmp/diag/build.log`.
     *   On failure, dumps the system environment and prints the last 200 lines of `config.log` or `config.sh` for diagnostic profiling.
     *   Audits `/rootfs` (or the destination path) to ensure compilation artifacts were successfully installed.
-    *   Runs a binary audit (`ldd`) and dynamic lookup check (`readelf -d`) to verify that the RPATH includes standard high-assurance target directories.
+    *   Runs a binary audit (`ldd`) and dynamic lookup check (`readelf -d`) to verify that the RPATH includes the expected `/usr/lib` and `/usr/lib64` target directories.
 
 ---
 
