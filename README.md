@@ -128,6 +128,7 @@ Below is a catalog of the foundational OCI Atoms pre-compiled from upstream sour
 - **License Extraction**: Automated harvest of license files to ensure open-source compliance.
 - **Keyless Signing**: Full Sigstore/Cosign integration for non-falsifiable image verification.
 - **SLSA Level 3**: Cryptographic provenance for every layer in the hierarchy.
+- **Backport Patching**: Security fixes can be applied to any of the 20 C library Atoms ahead of an upstream release — see [patches/README.md](patches/README.md) and the per-library guide in `patches/<name>/README.md`.
 
 ---
 
@@ -167,6 +168,8 @@ distroless-the-hard-way/
     runtime.Dockerfile     # L4: Final Assembly Template Stage
     *.hcl                  # Target Docker Bake HCL configs (e.g., php.hcl)
  patches/                   # Build-time source patches for dependency compilation
+    README.md              # Patch workflow, per-Atom security sources & tradeoffs
+    <atom>/README.md       # Step-by-step patch guide, one per Atom (e.g. openssl/README.md)
  poc/                       # Proof-of-Concept, initial roadmap, and legacy designs
  stacks/                    # YAML-based language stack definitions (e.g., php.yaml)
  docs/                      # Technical System Specifications & Developer Guides
@@ -196,6 +199,11 @@ distroless-the-hard-way/
 *   **[SCANNER_PARADOX.md](docs/SCANNER_PARADOX.md)** - Deep dive on container vulnerability scanning limits, binary heuristics, and OpenVEX
 *   **[VERIFY.md](docs/VERIFY.md)** - Keyless Image Verification (Cosign)
 *   **[IMAGE_REPORT.md](docs/IMAGE_REPORT.md)** - Real-time fleet status & image metadata report
+
+### Security Patch Management (`patches/`)
+
+*   **[patches/README.md](patches/README.md)** - How to check whether a CVE needs patching, the per-Atom security advisory sources, and the scanner-detection tradeoff backporting reintroduces
+*   Each Atom also has its own copy-pasteable guide at `patches/<name>/README.md` (e.g. [patches/openssl/README.md](patches/openssl/README.md))
 
 **[Get Started with the Developer Onboarding Guide](docs/ONBOARDING_GUIDE.md) | [Explore the Core Architecture Design](docs/ARCHITECTURE.md) | [Verify Image Signatures](docs/VERIFY.md)**
 
