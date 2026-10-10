@@ -30,3 +30,6 @@ lib_list.txt
 CLAUDE.md
 claude.md
 .claude/
+
+# Local presentation drafts (not part of the published docs/)
+presentations/
